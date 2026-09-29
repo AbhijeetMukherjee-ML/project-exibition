@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --bg-main: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-subtle: #f1f5f9;
+  --bg-card: #ffffff;
+  --border-main: #e2e8f0;
+  --border-subtle: #cbd5e1;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --table-header: #f8fafc;
+  --input-bg: #ffffff;
+  --nav-bg: #ffffff;
+}
+
+html.dark {
+  color-scheme: dark;
+  --bg-main: #0b0f19;
+  --bg-surface: #0f172a;
+  --bg-subtle: #090d16;
+  --bg-card: #111827;
+  --border-main: #1f2937;
+  --border-subtle: #374151;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --table-header: #0e1626;
+  --input-bg: #090d16;
+  --nav-bg: #0f172a;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Helper Theme Classes */
+.theme-main-bg {
+  background-color: var(--bg-main);
+}
+.theme-surface {
+  background-color: var(--bg-surface);
+}
+.theme-subtle {
+  background-color: var(--bg-subtle);
+}
+.theme-card {
+  background-color: var(--bg-card);
+}
+.theme-border {
+  border-color: var(--border-main);
+}
+.theme-border-subtle {
+  border-color: var(--border-subtle);
+}
+.theme-text-primary {
+  color: var(--text-primary);
+}
+.theme-text-secondary {
+  color: var(--text-secondary);
+}
+.theme-text-muted {
+  color: var(--text-muted);
+}
+.theme-input {
+  background-color: var(--input-bg);
+  border-color: var(--border-main);
+  color: var(--text-primary);
+}
+.theme-table-header {
+  background-color: var(--table-header);
+  color: var(--text-muted);
+}
+
+/* Subtle custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 4px;
+}
