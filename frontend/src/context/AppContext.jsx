@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { INITIAL_STUDENTS, INITIAL_LOGS, INITIAL_FINES, CAMERAS } from '../data/initialData';
+import { INITIAL_STUDENTS, INITIAL_LOGS, INITIAL_FINES, CAMERAS, DEFAULT_TM_MODEL_URL, DEFAULT_TM_MAPPINGS } from '../data/initialData';
 import confetti from 'canvas-confetti';
 
 const AppContext = createContext();
@@ -11,10 +11,15 @@ export const AppProvider = ({ children }) => {
     return (saved && saved !== 'home') ? saved : 'database';
   });
 
-  // Students Database
+  // Students Database — merge in any new seed students (by ID) that aren't
+  // already saved, so newly-added residents appear without wiping localStorage.
   const [students, setStudents] = useState(() => {
     const saved = localStorage.getItem('aegis_students');
-    return saved ? JSON.parse(saved) : INITIAL_STUDENTS;
+    if (!saved) return INITIAL_STUDENTS;
+    const parsed = JSON.parse(saved);
+    const savedIds = new Set(parsed.map(s => s.id));
+    const missing = INITIAL_STUDENTS.filter(s => !savedIds.has(s.id));
+    return missing.length ? [...parsed, ...missing] : parsed;
   });
 
   // Entry/Exit Logs
@@ -76,6 +81,41 @@ export const AppProvider = ({ children }) => {
     return localStorage.getItem('aegis_theme') || 'dark';
   });
 
+  // ============ FACIAL RECOGNITION (Google Teachable Machine) ============
+  // Hosted TM model base URL, e.g. https://teachablemachine.withgoogle.com/models/XXXX/
+  const [tmModelURL, setTmModelURL] = useState(() => {
+    return localStorage.getItem('aegis_tm_model_url') || DEFAULT_TM_MODEL_URL;
+  });
+
+  // Maps a Teachable Machine class label -> student ID (since classes may be
+  // named generically like "Class 1"). Persisted so setup survives reloads.
+  const [classMappings, setClassMappings] = useState(() => {
+    const saved = localStorage.getItem('aegis_tm_mappings');
+    const base = saved ? JSON.parse(saved) : {};
+    // Seed default mappings for known classes; any saved overrides win.
+    return { ...DEFAULT_TM_MAPPINGS, ...base };
+  });
+
+  const setClassMapping = (className, studentId) => {
+    setClassMappings(prev => {
+      const next = { ...prev };
+      if (studentId) {
+        next[className] = studentId;
+      } else {
+        delete next[className];
+      }
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    localStorage.setItem('aegis_tm_model_url', tmModelURL);
+  }, [tmModelURL]);
+
+  useEffect(() => {
+    localStorage.setItem('aegis_tm_mappings', JSON.stringify(classMappings));
+  }, [classMappings]);
+
   const toggleTheme = () => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
@@ -95,6 +135,10 @@ export const AppProvider = ({ children }) => {
 
   const goToHome = () => {
     setCurrentView('home');
+  };
+
+  const goToClassroom = () => {
+    setCurrentView('classroom');
   };
 
   useEffect(() => {
@@ -254,6 +298,113 @@ export const AppProvider = ({ children }) => {
     return newLog;
   };
 
+  // ============ ATTENDANCE (marked by live facial recognition) ============
+  // Mark a student present when the Teachable Machine model recognizes them.
+  // Returns true when this is a NEW presence for today (so the caller can
+  // celebrate / log), false when the student was already marked present.
+  const markStudentPresent = (studentId, confidence = null, options = {}) => {
+    const { manual = false } = options;
+    const student = students.find(s => s.id === studentId);
+    if (!student) return false;
+
+    const today = new Date().toISOString().split('T')[0];
+    const alreadyPresentToday = student.present && student.presentDate === today;
+
+    setStudents(prev => prev.map(s => s.id === studentId
+      ? {
+          ...s,
+          present: true,
+          presentDate: today,
+          presentAt: new Date().toLocaleString(),
+          lastRecognitionConfidence: manual ? (confidence || "Manual") : confidence,
+          // Track every distinct day the student was marked present.
+          attendanceDates: (s.attendanceDates || []).includes(today)
+            ? s.attendanceDates
+            : [...(s.attendanceDates || []), today]
+        }
+      : s
+    ));
+
+    // Only create a log + toast the first time we see them today.
+    if (!alreadyPresentToday) {
+      const currentHour = new Date().getHours();
+      const isCurfew = currentHour >= 22;
+      const newLog = {
+        id: `LOG-${Math.floor(1000 + Math.random() * 9000)}`,
+        studentId: student.id,
+        studentName: student.name,
+        avatar: student.avatar,
+        room: student.room,
+        direction: "IN",
+        timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+        gate: manual ? "Manual Admin Entry" : "Attendance Point - Face AI",
+        method: manual ? "Manual Override (Admin)" : "AI Facial Recognition (Teachable Machine)",
+        status: isCurfew ? "Curfew Violation" : "Present - Attendance Marked",
+        curfewAlert: isCurfew,
+        remarks: manual
+          ? "Attendance marked manually by administrator"
+          : (isCurfew ? "Recognized past curfew threshold" : "Attendance auto-marked on face recognition"),
+        confidence: confidence || (manual ? "Manual" : "N/A")
+      };
+      setLogs(prev => [newLog, ...prev]);
+
+      // Also update live camera detection card so the CCTV view reflects it.
+      setCurrentDetection({
+        student,
+        confidence: confidence || (manual ? "Manual" : "N/A"),
+        timestamp: new Date().toLocaleTimeString(),
+        box: { top: 22, left: 32, width: 36, height: 48 },
+        status: isCurfew ? 'CURFEW_ALERT' : 'AUTHORIZED'
+      });
+
+      if (!manual) confetti({ particleCount: 55, spread: 70, origin: { y: 0.6 } });
+      showToast(
+        `✅ Present: ${student.name}`,
+        manual
+          ? `Manually marked present by admin (${student.id}).`
+          : `Face recognized (${confidence || 'match'}) — attendance marked for ${student.id}.`,
+        "success"
+      );
+    }
+
+    return !alreadyPresentToday;
+  };
+
+  // Manual override — mark a specific student absent again.
+  const markStudentAbsent = (studentId) => {
+    const student = students.find(s => s.id === studentId);
+    if (!student) return;
+    const today = new Date().toISOString().split('T')[0];
+    setStudents(prev => prev.map(s => s.id === studentId
+      ? {
+          ...s,
+          present: false,
+          presentDate: null,
+          presentAt: null,
+          lastRecognitionConfidence: null,
+          // Undo today's entry from the history so the count stays accurate.
+          attendanceDates: (s.attendanceDates || []).filter(d => d !== today)
+        }
+      : s
+    ));
+    showToast("Marked Absent", `${student.name} (${student.id}) set back to absent by admin.`, "info");
+  };
+
+  // Reset everyone to absent (handy between demo runs).
+  const resetAttendance = () => {
+    const today = new Date().toISOString().split('T')[0];
+    setStudents(prev => prev.map(s => ({
+      ...s,
+      present: false,
+      presentDate: null,
+      presentAt: null,
+      lastRecognitionConfidence: null,
+      // Clear only today's mark; past attendance history is preserved.
+      attendanceDates: (s.attendanceDates || []).filter(d => d !== today)
+    })));
+    showToast("Attendance Reset", "Today's attendance cleared. Past history preserved.", "info");
+  };
+
   // Simulate a live scan event (useful for exhibition demos)
   const triggerSimulatedScan = () => {
     if (students.length === 0) return;
@@ -367,6 +518,13 @@ export const AppProvider = ({ children }) => {
         deleteStudent,
         logs,
         addLog,
+        markStudentPresent,
+        markStudentAbsent,
+        resetAttendance,
+        tmModelURL,
+        setTmModelURL,
+        classMappings,
+        setClassMapping,
         fines,
         addFine,
         toggleFineStatus,
@@ -386,6 +544,7 @@ export const AppProvider = ({ children }) => {
         loginAsAdmin,
         loginAsStudent,
         goToHome,
+        goToClassroom,
         toasts,
         showToast,
         removeToast,

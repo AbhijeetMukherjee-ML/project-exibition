@@ -6,13 +6,16 @@ import DatabasePage from './components/pages/DatabasePage';
 import CameraFeedPage from './components/pages/CameraFeedPage';
 import LogsPage from './components/pages/LogsPage';
 import FinesDisciplinaryPage from './components/pages/FinesDisciplinaryPage';
+import FaceAttendancePage from './components/pages/FaceAttendancePage';
 import StudentDashboard from './components/pages/StudentDashboard';
+import ClassroomApp from './components/classroom/ClassroomApp';
 import ToastContainer from './components/common/ToastContainer';
-import { 
-  Database, 
-  Video, 
-  History, 
-  Scale
+import {
+  Database,
+  Video,
+  History,
+  Scale,
+  ScanFace
 } from 'lucide-react';
 
 export default function App() {
@@ -20,6 +23,7 @@ export default function App() {
 
   const pendingFinesCount = fines.filter(f => f.status !== "Served / Paid").length;
   const curfewAlertsCount = logs.filter(l => l.curfewAlert).length;
+  const presentCount = students.filter(s => s.present).length;
 
   const features = [
     {
@@ -27,6 +31,13 @@ export default function App() {
       label: 'Database',
       icon: Database,
       count: `${students.length}`,
+    },
+    {
+      id: 'attendance',
+      label: 'Face Attendance',
+      icon: ScanFace,
+      badge: presentCount > 0 ? `${presentCount} Present` : 'AI',
+      badgeColor: 'bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30'
     },
     {
       id: 'camera',
@@ -55,6 +66,8 @@ export default function App() {
     switch (activeTab) {
       case 'database':
         return <DatabasePage />;
+      case 'attendance':
+        return <FaceAttendancePage />;
       case 'camera':
         return <CameraFeedPage />;
       case 'logs':
@@ -73,6 +86,10 @@ export default function App() {
         <ToastContainer />
       </>
     );
+  }
+
+  if (currentView === 'classroom') {
+    return <ClassroomApp />;
   }
 
   return (

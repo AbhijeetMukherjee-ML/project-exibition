@@ -19,20 +19,22 @@ import {
   Moon,
   Smartphone,
   Sparkles,
-  Database
+  Database,
+  GraduationCap
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import LoginModal from '../modals/LoginModal';
 
 export default function HomePage() {
-  const { 
-    loginAsAdmin, 
-    loginAsStudent, 
-    students, 
-    logs, 
-    fines, 
-    theme, 
-    toggleTheme 
+  const {
+    loginAsAdmin,
+    loginAsStudent,
+    goToClassroom,
+    students,
+    logs,
+    fines,
+    theme,
+    toggleTheme
   } = useApp();
 
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -247,6 +249,15 @@ export default function HomePage() {
               >
                 <Users className="w-4 h-4 text-emerald-500" />
                 <span>Student Resident Portal</span>
+              </button>
+
+              <button
+                onClick={goToClassroom}
+                className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer"
+              >
+                <GraduationCap className="w-4 h-4" />
+                <span>Classroom Attendance</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
             </div>
 

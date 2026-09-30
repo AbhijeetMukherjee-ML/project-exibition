@@ -6,10 +6,14 @@ import {
   CheckCircle, 
   ArrowDownLeft, 
   ArrowUpRight, 
-  Home, 
-  ShieldCheck, 
+  Home,
+  ShieldCheck,
   Phone,
-  GraduationCap
+  GraduationCap,
+  UserCheck,
+  UserX,
+  Clock,
+  CalendarCheck
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import PaymentQRModal from '../modals/PaymentQRModal';
@@ -39,6 +43,13 @@ export default function StudentDashboard() {
   const servedFines = studentFines.filter(f => f.status === "Served / Paid");
   const pendingAmount = pendingFines.reduce((acc, f) => acc + f.amount, 0);
   const curfewAlertCount = studentLogs.filter(l => l.curfewAlert).length;
+
+  // Attendance (set by live facial recognition) — only counts today.
+  const today = new Date().toISOString().split('T')[0];
+  const isPresentToday = currentStudent.present && currentStudent.presentDate === today;
+  const attendanceDates = currentStudent.attendanceDates || [];
+  const daysPresent = attendanceDates.length;
+  const recentAttendance = [...attendanceDates].sort().reverse().slice(0, 5);
 
   return (
     <div className="flex flex-col lg:flex-row items-start gap-6 animate-in fade-in duration-200">
@@ -119,11 +130,102 @@ export default function StudentDashboard() {
           </div>
         </div>
 
+        {/* Today's Attendance (Facial Recognition) */}
+        <div
+          className={`p-4 rounded-xl border space-y-3 shadow-sm ${
+            isPresentToday
+              ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/60'
+              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 dark:text-slate-500">
+              Today's Attendance
+            </span>
+            <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500">{today}</span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div
+              className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                isPresentToday
+                  ? 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500'
+              }`}
+            >
+              {isPresentToday ? <UserCheck className="w-5 h-5" /> : <UserX className="w-5 h-5" />}
+            </div>
+            <div className="min-w-0">
+              <p className={`text-sm font-bold leading-tight ${
+                isPresentToday ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-300'
+              }`}>
+                {isPresentToday ? 'Present' : 'Not Marked Yet'}
+              </p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                {isPresentToday ? 'Verified via Face Recognition' : 'Awaiting biometric scan at gate'}
+              </p>
+            </div>
+          </div>
+
+          {isPresentToday && (
+            <div className={`pt-2.5 border-t space-y-1.5 text-[11px] ${
+              isPresentToday ? 'border-emerald-200/60 dark:border-emerald-800/40' : 'border-slate-100 dark:border-slate-800'
+            }`}>
+              <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
+                <span className="flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> Marked at
+                </span>
+                <span className="font-mono font-semibold text-slate-800 dark:text-slate-200">{currentStudent.presentAt}</span>
+              </div>
+              {currentStudent.lastRecognitionConfidence && (
+                <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
+                  <span className="flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> Match confidence
+                  </span>
+                  <span className="font-mono font-semibold text-emerald-600 dark:text-emerald-400">{currentStudent.lastRecognitionConfidence}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Attendance history */}
+          <div className={`pt-2.5 border-t space-y-2 ${
+            isPresentToday ? 'border-emerald-200/60 dark:border-emerald-800/40' : 'border-slate-100 dark:border-slate-800'
+          }`}>
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+                <CalendarCheck className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" /> Total Days Present
+              </span>
+              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">{daysPresent}</span>
+            </div>
+            {recentAttendance.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {recentAttendance.map((d) => (
+                  <span
+                    key={d}
+                    className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${
+                      d === today
+                        ? 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+                    }`}
+                  >
+                    {d === today ? 'Today' : d}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Quick KPI Stat Card on Left */}
         <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2.5 text-xs shadow-sm">
           <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 dark:text-slate-500 block">
             Account Summary
           </span>
+          <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
+            <span>Days Present:</span>
+            <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">{daysPresent}</span>
+          </div>
           <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
             <span>Gate Movements:</span>
             <span className="font-mono font-bold text-slate-900 dark:text-white">{studentLogs.length}</span>

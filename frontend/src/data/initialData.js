@@ -166,8 +166,65 @@ export const INITIAL_STUDENTS = [
     status: "Active",
     bloodGroup: "O+",
     joinedDate: "2024-08-12"
+  },
+  {
+    id: "STU-2026-009",
+    name: "Adarsh Tiwari",
+    avatar: "https://ui-avatars.com/api/?name=Adarsh+Tiwari&background=2563eb&color=fff&size=256&bold=true",
+    email: "adarsh.tiwari@hostel.edu",
+    phone: "+91 90000 10009",
+    department: "Computer Science & Engineering",
+    year: "2nd Year",
+    block: "Block A (Aryabhata)",
+    room: "A-201",
+    bed: "Bed 1",
+    guardianName: "Guardian - Tiwari",
+    guardianPhone: "+91 90000 20009",
+    guardianRelation: "Father",
+    address: "Campus Hostel, Block A",
+    faceEnrolled: true,
+    faceConfidence: "99.0%",
+    status: "Active",
+    bloodGroup: "O+",
+    joinedDate: "2024-08-12",
+    present: false,
+    presentDate: null,
+    presentAt: null
+  },
+  {
+    id: "STU-2026-010",
+    name: "Shubh",
+    avatar: "https://ui-avatars.com/api/?name=Shubh&background=059669&color=fff&size=256&bold=true",
+    email: "shubh@hostel.edu",
+    phone: "+91 90000 10010",
+    department: "Computer Science & Engineering",
+    year: "2nd Year",
+    block: "Block A (Aryabhata)",
+    room: "A-202",
+    bed: "Bed 2",
+    guardianName: "Guardian - Shubh",
+    guardianPhone: "+91 90000 20010",
+    guardianRelation: "Father",
+    address: "Campus Hostel, Block A",
+    faceEnrolled: true,
+    faceConfidence: "98.8%",
+    status: "Active",
+    bloodGroup: "B+",
+    joinedDate: "2024-08-12",
+    present: false,
+    presentDate: null,
+    presentAt: null
   }
 ];
+
+// Face-recognition defaults — the trained Teachable Machine model and its
+// class → student mapping, so recognition is plug-and-play on first load.
+export const DEFAULT_TM_MODEL_URL = "https://teachablemachine.withgoogle.com/models/Vxw4jMg7l/";
+
+export const DEFAULT_TM_MAPPINGS = {
+  "Adarsh Tiwari": "STU-2026-009",
+  "Shubh": "STU-2026-010"
+};
 
 export const INITIAL_LOGS = [
   {
