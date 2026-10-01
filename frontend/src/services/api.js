@@ -1,33 +1,18 @@
 // ============================================================
-// API SERVICE — SENTINEL BACKEND
+// API SERVICE — AEGIS BACKEND
 // ============================================================
-// Single source of truth for the backend base URL.
-// All fetch/Socket.IO calls MUST go through this file.
+// Base URL: http://localhost:4000  (VITE_API_URL env var)
 //
-// Backend base:  http://localhost:4000   (process.env.VITE_API_URL)
 // Endpoints:
-//   GET  /api/health
-//   GET  /api/cameras              → Camera[]
-//   POST /api/cameras              → Camera
-//   GET  /api/cameras/:id          → Camera
-//   PATCH /api/cameras/:id         → Camera
-//   DELETE /api/cameras/:id        → { message, camera }
-//
-//   GET  /api/persons              → Person[]
-//   POST /api/persons              → Person
-//   GET  /api/persons/:id          → Person
-//   PATCH /api/persons/:id         → Person
-//   DELETE /api/persons/:id        → { message, person }
-//
-//   GET  /api/detections           → { total, limit, skip, detections[] }
-//   POST /api/detections           → Detection
-//   GET  /api/detections/current   → { timestamp, windowSeconds, count, detections[] }
-//   GET  /api/detections/:id       → Detection
-//   PATCH /api/detections/:id      → Detection
-//   DELETE /api/detections/:id     → { message, detection }
+//   /api/health
+//   /api/cameras          Camera CRUD
+//   /api/persons          Person CRUD (AI face registry)
+//   /api/detections       YOLO detection feed
+//   /api/students         Student registry CRUD
+//   /api/attendance       Attendance records (hostel + classroom)
 //
 // Socket.IO events (server → client):
-//   detection:update  payload: Detection (populated with personId.name/externalId)
+//   detection:update  payload: Detection
 // ============================================================
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
@@ -45,7 +30,6 @@ async function request(method, path, body) {
   }
 
   const res = await fetch(`${BASE_URL}${path}`, options);
-
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
@@ -58,33 +42,27 @@ async function request(method, path, body) {
   return data;
 }
 
-const get    = (path)             => request('GET',    path);
-const post   = (path, body)       => request('POST',   path, body);
-const patch  = (path, body)       => request('PATCH',  path, body);
-const del    = (path)             => request('DELETE', path);
+const get    = (path)        => request('GET',    path);
+const post   = (path, body)  => request('POST',   path, body);
+const patch  = (path, body)  => request('PATCH',  path, body);
+const del    = (path)        => request('DELETE', path);
 
 // ─── health ─────────────────────────────────────────────────
 
 export const apiHealth = () => get('/api/health');
 
 // ─── cameras ────────────────────────────────────────────────
-// Response shapes follow the backend exactly:
-//   GET /api/cameras  → Camera[]  (plain array)
-//   Each Camera: { _id, name, cameraId, location, status, createdAt, updatedAt }
 
-export const apiGetCameras   = (status)    => get(`/api/cameras${status ? `?status=${status}` : ''}`);
-export const apiGetCamera    = (id)        => get(`/api/cameras/${id}`);
-export const apiCreateCamera = (data)      => post('/api/cameras', data);
-export const apiUpdateCamera = (id, data)  => patch(`/api/cameras/${id}`, data);
-export const apiDeleteCamera = (id)        => del(`/api/cameras/${id}`);
-export const apiStartCameraStream = ()     => post('/api/cameras/stream/start');
-export const apiStopCameraStream  = ()     => post('/api/cameras/stream/stop');
-export const apiGetCameraStreamStatus = () => get('/api/cameras/stream/status');
+export const apiGetCameras            = (status)   => get(`/api/cameras${status ? `?status=${status}` : ''}`);
+export const apiGetCamera             = (id)       => get(`/api/cameras/${id}`);
+export const apiCreateCamera          = (data)     => post('/api/cameras', data);
+export const apiUpdateCamera          = (id, data) => patch(`/api/cameras/${id}`, data);
+export const apiDeleteCamera          = (id)       => del(`/api/cameras/${id}`);
+export const apiStartCameraStream     = ()         => post('/api/cameras/stream/start');
+export const apiStopCameraStream      = ()         => post('/api/cameras/stream/stop');
+export const apiGetCameraStreamStatus = ()         => get('/api/cameras/stream/status');
 
 // ─── persons ────────────────────────────────────────────────
-// Response shapes follow the backend exactly:
-//   GET /api/persons  → Person[]  (plain array)
-//   Each Person: { _id, name, externalId, createdAt, updatedAt }
 
 export const apiGetPersons   = ()          => get('/api/persons');
 export const apiGetPerson    = (id)        => get(`/api/persons/${id}`);
@@ -93,19 +71,6 @@ export const apiUpdatePerson = (id, data)  => patch(`/api/persons/${id}`, data);
 export const apiDeletePerson = (id)        => del(`/api/persons/${id}`);
 
 // ─── detections ─────────────────────────────────────────────
-// Response shapes follow the backend exactly:
-//
-//   GET /api/detections → { total, limit, skip, detections[] }
-//   Query params: cameraId, trackId, identity, from, to, limit, skip
-//
-//   GET /api/detections/current → { timestamp, windowSeconds, count, detections[] }
-//   Query params: window (seconds, default 30), cameraId
-//
-//   Each Detection:
-//   { _id, cameraId, trackId, personId (populated: {_id,name,externalId}|null),
-//     identity, identityConfidence, detectionConfidence,
-//     boundingBox: { x, y, width, height },
-//     firstSeen, lastSeen, createdAt, updatedAt }
 
 export const apiGetCurrentDetections = (windowSeconds, cameraId) => {
   const params = new URLSearchParams();
@@ -133,16 +98,62 @@ export const apiCreateDetection = (data)      => post('/api/detections', data);
 export const apiUpdateDetection = (id, data)  => patch(`/api/detections/${id}`, data);
 export const apiDeleteDetection = (id)        => del(`/api/detections/${id}`);
 
-// ─── Socket.IO connection ────────────────────────────────────
-// The backend socket.js emits exactly one event:
-//   'detection:update'  →  Detection (populated)
-//
-// Usage:
-//   import { createSocket } from './services/api';
-//   const socket = createSocket();
-//   socket.on('detection:update', (detection) => { ... });
-//   // cleanup:
-//   socket.disconnect();
+// ─── students ────────────────────────────────────────────────
+// GET /api/students         → Student[]
+// POST /api/students        → Student
+// GET /api/students/:id     → Student
+// PATCH /api/students/:id   → Student
+// DELETE /api/students/:id  → { message, student }
+
+export const apiGetStudents   = (filter = {}) => {
+  const params = new URLSearchParams();
+  if (filter.status) params.set('status', filter.status);
+  if (filter.block)  params.set('block',  filter.block);
+  const qs = params.toString();
+  return get(`/api/students${qs ? `?${qs}` : ''}`);
+};
+
+export const apiGetStudent    = (id)        => get(`/api/students/${id}`);
+export const apiCreateStudent = (data)      => post('/api/students', data);
+export const apiUpdateStudent = (id, data)  => patch(`/api/students/${id}`, data);
+export const apiDeleteStudent = (id)        => del(`/api/students/${id}`);
+
+// ─── attendance ──────────────────────────────────────────────
+// GET  /api/attendance?studentId=&date=&type=&periodId=
+// POST /api/attendance/mark     → upsert one record
+// POST /api/attendance/bulk     → bulk upsert
+// GET  /api/attendance/student/:studentId → all records for student
+// DELETE /api/attendance?studentId=&date=&type=
+
+export const apiGetAttendance = (filter = {}) => {
+  const params = new URLSearchParams();
+  if (filter.studentId) params.set('studentId', filter.studentId);
+  if (filter.date)      params.set('date',      filter.date);
+  if (filter.type)      params.set('type',      filter.type);
+  if (filter.periodId)  params.set('periodId',  filter.periodId);
+  const qs = params.toString();
+  return get(`/api/attendance${qs ? `?${qs}` : ''}`);
+};
+
+export const apiGetStudentAttendance = (studentId) =>
+  get(`/api/attendance/student/${studentId}`);
+
+export const apiMarkAttendance = (record) => post('/api/attendance/mark', record);
+
+export const apiBulkMarkAttendance = (records) =>
+  post('/api/attendance/bulk', { records });
+
+export const apiResetAttendance = (filter = {}) => {
+  const params = new URLSearchParams();
+  if (filter.studentId) params.set('studentId', filter.studentId);
+  if (filter.date)      params.set('date',      filter.date);
+  if (filter.type)      params.set('type',      filter.type);
+  if (filter.periodId)  params.set('periodId',  filter.periodId);
+  const qs = params.toString();
+  return request('DELETE', `/api/attendance${qs ? `?${qs}` : ''}`);
+};
+
+// ─── Socket.IO ──────────────────────────────────────────────
 
 export const getSocketURL = () => BASE_URL;
 
@@ -151,25 +162,16 @@ export default {
   getSocketURL,
   apiHealth,
   // cameras
-  apiGetCameras,
-  apiGetCamera,
-  apiCreateCamera,
-  apiUpdateCamera,
-  apiDeleteCamera,
-  apiStartCameraStream,
-  apiStopCameraStream,
-  apiGetCameraStreamStatus,
+  apiGetCameras, apiGetCamera, apiCreateCamera, apiUpdateCamera, apiDeleteCamera,
+  apiStartCameraStream, apiStopCameraStream, apiGetCameraStreamStatus,
   // persons
-  apiGetPersons,
-  apiGetPerson,
-  apiCreatePerson,
-  apiUpdatePerson,
-  apiDeletePerson,
+  apiGetPersons, apiGetPerson, apiCreatePerson, apiUpdatePerson, apiDeletePerson,
   // detections
-  apiGetCurrentDetections,
-  apiGetDetections,
-  apiGetDetection,
-  apiCreateDetection,
-  apiUpdateDetection,
-  apiDeleteDetection,
+  apiGetCurrentDetections, apiGetDetections, apiGetDetection,
+  apiCreateDetection, apiUpdateDetection, apiDeleteDetection,
+  // students
+  apiGetStudents, apiGetStudent, apiCreateStudent, apiUpdateStudent, apiDeleteStudent,
+  // attendance
+  apiGetAttendance, apiGetStudentAttendance, apiMarkAttendance,
+  apiBulkMarkAttendance, apiResetAttendance,
 };

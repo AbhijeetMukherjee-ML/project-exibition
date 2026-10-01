@@ -4,6 +4,8 @@ import cors from "cors";
 import cameraRoutes from "./routes/cameraRoutes.js";
 import detectionRoutes from "./routes/detectionRoutes.js";
 import personRoutes from "./routes/personRoutes.js";
+import studentRoutes from "./routes/studentRoutes.js";
+import attendanceRoutes from "./routes/attendanceRoutes.js";
 import { notFoundHandler, errorHandler } from "./middleware/errorMiddleware.js";
 import { isDbConnected } from "./database.js";
 
@@ -19,7 +21,7 @@ app.use(
 
 app.use(express.json());
 
-// Existing health check endpoint
+// Health check
 app.get("/api/health", (req, res) => {
     res.json({
         status: "ok",
@@ -32,6 +34,8 @@ app.get("/api/health", (req, res) => {
 app.use("/api/cameras", cameraRoutes);
 app.use("/api/detections", detectionRoutes);
 app.use("/api/persons", personRoutes);
+app.use("/api/students", studentRoutes);
+app.use("/api/attendance", attendanceRoutes);
 
 // Fallback & Error handling
 app.use(notFoundHandler);

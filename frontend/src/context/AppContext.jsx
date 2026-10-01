@@ -1,14 +1,23 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import confetti from 'canvas-confetti';
 
 import {
-  INITIAL_STUDENTS,
   INITIAL_LOGS,
   INITIAL_FINES,
   CAMERAS,
   DEFAULT_TM_MODEL_URL,
   DEFAULT_TM_MAPPINGS
 } from '../data/initialData';
+
+import {
+  apiGetStudents,
+  apiCreateStudent,
+  apiUpdateStudent,
+  apiDeleteStudent,
+  apiGetAttendance,
+  apiMarkAttendance,
+  apiResetAttendance
+} from '../services/api';
 
 const AppContext = createContext();
 
@@ -18,7 +27,6 @@ const AppContext = createContext();
 
 const STORAGE_KEYS = {
   ACTIVE_TAB: 'aegis_active_tab',
-  STUDENTS: 'aegis_students',
   LOGS: 'aegis_logs',
   FINES: 'aegis_fines',
   CURRENT_VIEW: 'aegis_current_view',
@@ -46,7 +54,7 @@ const DEFAULT_ADMIN = {
    HELPER FUNCTIONS
 ========================================================= */
 
-const getToday = () => {
+export const getToday = () => {
   return new Date().toISOString().split('T')[0];
 };
 
@@ -84,170 +92,35 @@ export const AppProvider = ({ children }) => {
   ======================================================= */
 
   const [activeTab, setActiveTab] = useState(() => {
-    const saved = localStorage.getItem(
-      STORAGE_KEYS.ACTIVE_TAB
-    );
-
-    return saved && saved !== 'home'
-      ? saved
-      : 'database';
+    const saved = localStorage.getItem(STORAGE_KEYS.ACTIVE_TAB);
+    const validTabs = ['classroom', 'hostel', 'disciplinary', 'students'];
+    return saved && validTabs.includes(saved) ? saved : 'classroom';
   });
 
   // Always start on the landing page — never restore a saved portal session on boot.
   const [currentView, setCurrentView] = useState('home');
 
   const [userRole, setUserRole] = useState(() => {
-    return getStoredString(
-      STORAGE_KEYS.USER_ROLE,
-      'admin'
-    );
+    return getStoredString(STORAGE_KEYS.USER_ROLE, 'admin');
   });
 
   const [currentStudentId, setCurrentStudentId] = useState(() => {
-    return getStoredString(
-      STORAGE_KEYS.CURRENT_STUDENT_ID,
-      'STU-2026-001'
-    );
+    return getStoredString(STORAGE_KEYS.CURRENT_STUDENT_ID, 'STU-2026-001');
   });
+
+  /* Active Class / Period slot for Classroom (class1, class2, class3, class4) */
+  const [activeClassSlot, setActiveClassSlot] = useState('class1');
 
   /* =======================================================
      THEME
   ======================================================= */
 
   const [theme, setTheme] = useState(() => {
-    return getStoredString(
-      STORAGE_KEYS.THEME,
-      'dark'
-    );
+    return getStoredString(STORAGE_KEYS.THEME, 'dark');
   });
 
   const toggleTheme = () => {
-    setTheme(prev =>
-      prev === 'dark' ? 'light' : 'dark'
-    );
-  };
-
-  /* =======================================================
-     STUDENTS
-  ======================================================= */
-
-  const [students, setStudents] = useState(() => {
-    const saved = localStorage.getItem(
-      STORAGE_KEYS.STUDENTS
-    );
-
-    if (!saved) {
-      return INITIAL_STUDENTS;
-    }
-
-    try {
-      const parsed = JSON.parse(saved);
-
-      const savedIds = new Set(
-        parsed.map(student => student.id)
-      );
-
-      const missingStudents = INITIAL_STUDENTS.filter(
-        student => !savedIds.has(student.id)
-      );
-
-      return missingStudents.length > 0
-        ? [...parsed, ...missingStudents]
-        : parsed;
-    } catch {
-      return INITIAL_STUDENTS;
-    }
-  });
-
-  /* =======================================================
-     LOGS
-  ======================================================= */
-
-  const [logs, setLogs] = useState(() => {
-    return getStoredValue(
-      STORAGE_KEYS.LOGS,
-      INITIAL_LOGS
-    );
-  });
-
-  /* =======================================================
-     FINES
-  ======================================================= */
-
-  const [fines, setFines] = useState(() => {
-    return getStoredValue(
-      STORAGE_KEYS.FINES,
-      INITIAL_FINES
-    );
-  });
-
-  /* =======================================================
-     CAMERA SYSTEM
-  ======================================================= */
-
-  const [cameras] = useState(CAMERAS);
-
-  const [activeCameraId, setActiveCameraId] =
-    useState('CAM-01');
-
-  const [aiOverlayEnabled, setAiOverlayEnabled] =
-    useState(true);
-
-  const [nightVision, setNightVision] =
-    useState(false);
-
-  const [currentDetection, setCurrentDetection] =
-    useState({
-      student: INITIAL_STUDENTS[0],
-      confidence: '99.4%',
-      timestamp: new Date().toLocaleTimeString(),
-      box: {
-        top: 22,
-        left: 32,
-        width: 36,
-        height: 48
-      },
-      status: 'AUTHORIZED'
-    });
-
-  /* =======================================================
-     FACIAL RECOGNITION
-  ======================================================= */
-
-  const [tmModelURL, setTmModelURL] = useState(() => {
-    return getStoredString(
-      STORAGE_KEYS.TM_MODEL_URL,
-      DEFAULT_TM_MODEL_URL
-    );
-  });
-
-  const [classMappings, setClassMappings] = useState(() => {
-    const saved = getStoredValue(
-      STORAGE_KEYS.TM_MAPPINGS,
-      {}
-    );
-
-    return {
-      ...DEFAULT_TM_MAPPINGS,
-      ...saved
-    };
-  });
-
-  const setClassMapping = (
-    className,
-    studentId
-  ) => {
-    setClassMappings(prev => {
-      const next = { ...prev };
-
-      if (studentId) {
-        next[className] = studentId;
-      } else {
-        delete next[className];
-      }
-
-      return next;
-    });
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
   };
 
   /* =======================================================
@@ -256,11 +129,7 @@ export const AppProvider = ({ children }) => {
 
   const [toasts, setToasts] = useState([]);
 
-  const showToast = (
-    title,
-    message,
-    type = 'info'
-  ) => {
+  const showToast = (title, message, type = 'info') => {
     const id = Date.now() + Math.random();
 
     const newToast = {
@@ -271,270 +140,108 @@ export const AppProvider = ({ children }) => {
       time: new Date().toLocaleTimeString()
     };
 
-    setToasts(prev => [
-      newToast,
-      ...prev.slice(0, 4)
-    ]);
+    setToasts(prev => [newToast, ...prev.slice(0, 4)]);
 
     setTimeout(() => {
-      setToasts(prev =>
-        prev.filter(toast => toast.id !== id)
-      );
+      setToasts(prev => prev.filter(toast => toast.id !== id));
     }, 4500);
   };
 
   const removeToast = id => {
-    setToasts(prev =>
-      prev.filter(toast => toast.id !== id)
-    );
+    setToasts(prev => prev.filter(toast => toast.id !== id));
   };
 
   /* =======================================================
-     NAVIGATION ACTIONS
+     STUDENTS & ATTENDANCE FROM DATABASE
   ======================================================= */
 
-  const loginAsAdmin = () => {
-    setUserRole('admin');
-    setCurrentView('portal');
-  };
+  const [dbStudents, setDbStudents] = useState([]);
+  const [dailyAttendanceMap, setDailyAttendanceMap] = useState({});
+  const [isLoadingStudents, setIsLoadingStudents] = useState(true);
 
-  const loginAsStudent = studentId => {
-    if (studentId) {
-      setCurrentStudentId(studentId);
+  // Fetch students and today's attendance from backend
+  const refreshDataFromDB = useCallback(async () => {
+    try {
+      setIsLoadingStudents(true);
+      const [studentsRes, attendanceRes] = await Promise.all([
+        apiGetStudents().catch(err => {
+          console.warn('Could not load students from DB:', err.message);
+          return [];
+        }),
+        apiGetAttendance({ date: getToday() }).catch(err => {
+          console.warn('Could not load attendance from DB:', err.message);
+          return [];
+        })
+      ]);
+
+      setDbStudents(Array.isArray(studentsRes) ? studentsRes : []);
+
+      const attMap = {};
+      if (Array.isArray(attendanceRes)) {
+        attendanceRes.forEach(record => {
+          if (record && record.studentId) {
+            attMap[record.studentId] = record;
+          }
+        });
+      }
+      setDailyAttendanceMap(attMap);
+    } catch (err) {
+      console.error('Failed to load data from DB:', err);
+    } finally {
+      setIsLoadingStudents(false);
     }
+  }, []);
 
-    setUserRole('student');
-    setCurrentView('portal');
-  };
+  useEffect(() => {
+    refreshDataFromDB();
+  }, [refreshDataFromDB]);
 
-  const goToHome = () => {
-    setCurrentView('home');
-  };
+  // Combine DB students with daily attendance record
+  const students = dbStudents.map(s => {
+    const sid = s.studentId || s.id;
+    const att = dailyAttendanceMap[sid] || {};
 
-  const goToClassroom = () => {
-    setCurrentView('classroom');
-  };
+    const class1 = att.class1Attendance || 'absent';
+    const class2 = att.class2Attendance || 'absent';
+    const class3 = att.class3Attendance || 'absent';
+    const class4 = att.class4Attendance || 'absent';
+    const hostel = att.hostelAttendance || 'absent';
 
-  /* =======================================================
-     STUDENT ACTIONS
-  ======================================================= */
+    const isPresent =
+      class1 === 'present' ||
+      class2 === 'present' ||
+      class3 === 'present' ||
+      class4 === 'present' ||
+      hostel === 'present';
 
-  const addStudent = studentData => {
-    const newId = `STU-2026-${String(
-      students.length + 1
-    ).padStart(3, '0')}`;
+    const latestMarkedAt =
+      att.details?.[activeClassSlot]?.markedAt ||
+      att.details?.hostel?.markedAt ||
+      att.details?.class1?.markedAt ||
+      null;
 
-    const newStudent = {
-      id: newId,
-
-      avatar:
-        studentData.avatar ||
-        `https://images.unsplash.com/photo-${
-          1535713875002 + students.length
-        }?auto=format&fit=crop&w=256&q=80`,
-
-      faceEnrolled: true,
-      faceConfidence: '98.5%',
-      status: 'Active',
-      joinedDate: getToday(),
-
-      ...studentData
+    return {
+      ...s,
+      id: sid,
+      studentId: sid,
+      class1Attendance: class1,
+      class2Attendance: class2,
+      class3Attendance: class3,
+      class4Attendance: class4,
+      hostelAttendance: hostel,
+      present: isPresent,
+      presentAt: latestMarkedAt,
+      attendanceDetails: att.details || {}
     };
-
-    setStudents(prev => [
-      newStudent,
-      ...prev
-    ]);
-
-    showToast(
-      'Student Registered',
-      `${newStudent.name} (${newStudent.id}) has been added to the database.`,
-      'success'
-    );
-
-    return newStudent;
-  };
-
-  const updateStudent = (
-    id,
-    updatedFields
-  ) => {
-    setStudents(prev =>
-      prev.map(student =>
-        student.id === id
-          ? {
-              ...student,
-              ...updatedFields
-            }
-          : student
-      )
-    );
-
-    showToast(
-      'Record Updated',
-      `Student ID ${id} information has been refreshed.`,
-      'info'
-    );
-  };
-
-  const deleteStudent = id => {
-    const student = students.find(
-      item => item.id === id
-    );
-
-    setStudents(prev =>
-      prev.filter(
-        item => item.id !== id
-      )
-    );
-
-    showToast(
-      'Student Removed',
-      `${student?.name || id} removed from registry.`,
-      'warning'
-    );
-  };
+  });
 
   /* =======================================================
-     FINE ACTIONS
+     LOGS
   ======================================================= */
 
-  const addFine = fineData => {
-    const newId =
-      `FINE-2026-${100 + fines.length + 1}`;
-
-    const student = students.find(
-      item => item.id === fineData.studentId
-    );
-
-    const newFine = {
-      id: newId,
-
-      studentName:
-        student?.name ||
-        fineData.studentName,
-
-      avatar:
-        student?.avatar ||
-        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
-
-      room:
-        student?.room ||
-        fineData.room,
-
-      block:
-        student?.block ||
-        fineData.block ||
-        'Block A',
-
-      issuedDate: getToday(),
-
-      dueDate: new Date(
-        Date.now() + 7 * 86400000
-      )
-        .toISOString()
-        .split('T')[0],
-
-      status: 'Unserved / Pending',
-      servedDate: null,
-      paymentMethod: null,
-      issuedBy: DEFAULT_ADMIN.name,
-      guardianNotified: true,
-
-      ...fineData
-    };
-
-    setFines(prev => [
-      newFine,
-      ...prev
-    ]);
-
-    showToast(
-      'Disciplinary Notice Issued',
-      `Penalty ₹${newFine.amount} logged for ${newFine.studentName}.`,
-      'warning'
-    );
-
-    return newFine;
-  };
-
-  const toggleFineStatus = fineId => {
-    setFines(prev =>
-      prev.map(fine => {
-        if (fine.id !== fineId) {
-          return fine;
-        }
-
-        const isNowServed =
-          fine.status !== 'Served / Paid';
-
-        if (isNowServed) {
-          confetti({
-            particleCount: 60,
-            spread: 70,
-            origin: {
-              y: 0.6
-            }
-          });
-
-          showToast(
-            'Disciplinary Action Served',
-            `${fine.studentName}'s fine of ₹${fine.amount} has been marked as SERVED & CLEARED.`,
-            'success'
-          );
-
-          return {
-            ...fine,
-            status: 'Served / Paid',
-            servedDate:
-              new Date().toLocaleString(),
-            paymentMethod:
-              'Admin Manual Clearance / Receipt Verified'
-          };
-        }
-
-        showToast(
-          'Status Reset',
-          `${fine.studentName}'s fine returned to PENDING / UNSERVED status.`,
-          'info'
-        );
-
-        return {
-          ...fine,
-          status: 'Unserved / Pending',
-          servedDate: null,
-          paymentMethod: null
-        };
-      })
-    );
-  };
-
-  const notifyGuardian = fineId => {
-    setFines(prev =>
-      prev.map(fine =>
-        fine.id === fineId
-          ? {
-              ...fine,
-              guardianNotified: true
-            }
-          : fine
-      )
-    );
-
-    const targetFine = fines.find(
-      fine => fine.id === fineId
-    );
-
-    showToast(
-      'Guardian Alert Dispatched',
-      `Official SMS & Email alert sent to guardian of ${targetFine?.studentName}.`,
-      'info'
-    );
-  };
-
-  /* =======================================================
-     LOG ACTIONS
-  ======================================================= */
+  const [logs, setLogs] = useState(() => {
+    return getStoredValue(STORAGE_KEYS.LOGS, INITIAL_LOGS);
+  });
 
   const addLog = logData => {
     const newLog = {
@@ -543,224 +250,237 @@ export const AppProvider = ({ children }) => {
       ...logData
     };
 
-    setLogs(prev => [
-      newLog,
-      ...prev
-    ]);
-
+    setLogs(prev => [newLog, ...prev]);
     return newLog;
   };
 
   /* =======================================================
-     ATTENDANCE
+     FINES
   ======================================================= */
 
-  const markStudentPresent = (
-    studentId,
-    confidence = null,
-    options = {}
-  ) => {
-    const { manual = false } = options;
+  const [fines, setFines] = useState(() => {
+    return getStoredValue(STORAGE_KEYS.FINES, INITIAL_FINES);
+  });
 
-    const student = students.find(
-      item => item.id === studentId
-    );
+  /* =======================================================
+     CAMERA SYSTEM
+  ======================================================= */
 
-    if (!student) {
-      return false;
+  const [cameras] = useState(CAMERAS);
+  const [activeCameraId, setActiveCameraId] = useState('CAM-01');
+  const [aiOverlayEnabled, setAiOverlayEnabled] = useState(true);
+  const [nightVision, setNightVision] = useState(false);
+
+  const [currentDetection, setCurrentDetection] = useState({
+    student: { name: 'Aarav Sharma', id: 'STU-2026-001', room: 'A-304', avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=256&q=80' },
+    confidence: '99.4%',
+    timestamp: new Date().toLocaleTimeString(),
+    box: {
+      top: 22,
+      left: 32,
+      width: 36,
+      height: 48
+    },
+    status: 'AUTHORIZED'
+  });
+
+  /* =======================================================
+     FACIAL RECOGNITION
+  ======================================================= */
+
+  const [tmModelURL, setTmModelURL] = useState(() => {
+    return getStoredString(STORAGE_KEYS.TM_MODEL_URL, DEFAULT_TM_MODEL_URL);
+  });
+
+  const [classMappings, setClassMappings] = useState(() => {
+    const saved = getStoredValue(STORAGE_KEYS.TM_MAPPINGS, {});
+    return {
+      ...DEFAULT_TM_MAPPINGS,
+      ...saved
+    };
+  });
+
+  const setClassMapping = (className, studentId) => {
+    setClassMappings(prev => {
+      const next = { ...prev };
+      if (studentId) {
+        next[className] = studentId;
+      } else {
+        delete next[className];
+      }
+      return next;
+    });
+  };
+
+  /* =======================================================
+     STUDENT ACTIONS (PERSISTED TO DB)
+  ======================================================= */
+
+  const addStudent = async studentData => {
+    try {
+      const created = await apiCreateStudent(studentData);
+      setDbStudents(prev => [created, ...prev]);
+      showToast(
+        'Student Registered',
+        `${created.name} (${created.studentId}) saved to database.`,
+        'success'
+      );
+      return created;
+    } catch (err) {
+      showToast('Registration Error', err.message || 'Failed to add student to DB', 'error');
+      throw err;
     }
+  };
 
-    const today = getToday();
+  const updateStudent = async (id, updatedFields) => {
+    try {
+      const updated = await apiUpdateStudent(id, updatedFields);
+      setDbStudents(prev =>
+        prev.map(s => (s.studentId === id || s._id === id ? { ...s, ...updated } : s))
+      );
+      showToast('Record Updated', `Student ${id} updated in database.`, 'info');
+      return updated;
+    } catch (err) {
+      showToast('Update Error', err.message || 'Failed to update student in DB', 'error');
+    }
+  };
 
-    const alreadyPresentToday =
-      student.present &&
-      student.presentDate === today;
+  const deleteStudent = async id => {
+    try {
+      await apiDeleteStudent(id);
+      setDbStudents(prev => prev.filter(s => s.studentId !== id && s._id !== id));
+      showToast('Student Removed', `Student ${id} removed from database.`, 'warning');
+    } catch (err) {
+      showToast('Delete Error', err.message || 'Failed to remove student from DB', 'error');
+    }
+  };
 
-    setStudents(prev =>
-      prev.map(item =>
-        item.id === studentId
-          ? {
-              ...item,
-              present: true,
-              presentDate: today,
-              presentAt:
-                new Date().toLocaleString(),
+  /* =======================================================
+     ATTENDANCE ACTIONS (PER-DAY TO DB)
+     Updates class1, class2, class3, class4, or hostel attendance.
+  ======================================================= */
 
-              lastRecognitionConfidence:
-                manual
-                  ? confidence || 'Manual'
-                  : confidence,
+  const markStudentPresent = async (studentId, confidence = null, options = {}) => {
+    const { slot = activeClassSlot || 'class1', manual = false, date = getToday() } = options;
 
-              attendanceDates:
-                (item.attendanceDates || []).includes(
-                  today
-                )
-                  ? item.attendanceDates
-                  : [
-                      ...(item.attendanceDates || []),
-                      today
-                    ]
-            }
-          : item
-      )
-    );
+    const student = students.find(item => item.id === studentId || item.studentId === studentId);
+    if (!student) return false;
 
-    if (!alreadyPresentToday) {
-      const currentHour =
-        new Date().getHours();
+    try {
+      const updatedRecord = await apiMarkAttendance({
+        studentId,
+        name: student.name,
+        date,
+        slot,
+        status: 'present',
+        confidence: confidence || (manual ? 'Manual' : 'AI Match'),
+        method: manual ? 'Manual Override (Admin)' : 'AI Facial Recognition'
+      });
 
-      const isCurfew =
-        currentHour >= 22;
+      // Update local state map immediately
+      setDailyAttendanceMap(prev => ({
+        ...prev,
+        [studentId]: updatedRecord
+      }));
+
+      // Log event
+      const currentHour = new Date().getHours();
+      const isCurfew = slot === 'hostel' && (currentHour >= 22 || currentHour < 6);
 
       const newLog = {
         id: generateLogId(),
-
         studentId: student.id,
         studentName: student.name,
         avatar: student.avatar,
         room: student.room,
-
         direction: 'IN',
         timestamp: getTimestamp(),
-
-        gate: manual
-          ? 'Manual Admin Entry'
-          : 'Attendance Point - Face AI',
-
-        method: manual
-          ? 'Manual Override (Admin)'
-          : 'AI Facial Recognition (Teachable Machine)',
-
-        status: isCurfew
-          ? 'Curfew Violation'
-          : 'Present - Attendance Marked',
-
+        gate: slot === 'hostel' ? 'Hostel Entry Gate' : `Classroom (${slot.toUpperCase()})`,
+        method: manual ? 'Manual Admin Entry' : 'AI Facial Recognition',
+        status: isCurfew ? 'Curfew Violation' : `Present (${slot.toUpperCase()})`,
         curfewAlert: isCurfew,
-
         remarks: manual
-          ? 'Attendance marked manually by administrator'
+          ? `Marked present manually in ${slot}`
           : isCurfew
-            ? 'Recognized past curfew threshold'
-            : 'Attendance auto-marked on face recognition',
-
-        confidence:
-          confidence ||
-          (manual ? 'Manual' : 'N/A')
+          ? 'Curfew breach detected'
+          : `Recognized for ${slot} attendance`,
+        confidence: confidence || (manual ? 'Manual' : '98.5%')
       };
 
-      setLogs(prev => [
-        newLog,
-        ...prev
-      ]);
+      setLogs(prev => [newLog, ...prev]);
 
       setCurrentDetection({
         student,
-
-        confidence:
-          confidence ||
-          (manual ? 'Manual' : 'N/A'),
-
-        timestamp:
-          new Date().toLocaleTimeString(),
-
-        box: {
-          top: 22,
-          left: 32,
-          width: 36,
-          height: 48
-        },
-
-        status: isCurfew
-          ? 'CURFEW_ALERT'
-          : 'AUTHORIZED'
+        confidence: confidence || (manual ? 'Manual' : '98.5%'),
+        timestamp: new Date().toLocaleTimeString(),
+        box: { top: 22, left: 32, width: 36, height: 48 },
+        status: isCurfew ? 'CURFEW_ALERT' : 'AUTHORIZED'
       });
 
       if (!manual) {
         confetti({
-          particleCount: 55,
+          particleCount: 50,
           spread: 70,
-          origin: {
-            y: 0.6
-          }
+          origin: { y: 0.6 }
         });
       }
 
       showToast(
         `✅ Present: ${student.name}`,
-
-        manual
-          ? `Manually marked present by admin (${student.id}).`
-          : `Face recognized (${confidence || 'match'}) — attendance marked for ${student.id}.`,
-
+        `${student.name} marked present for ${slot.toUpperCase()} in database.`,
         'success'
       );
-    }
 
-    return !alreadyPresentToday;
+      return true;
+    } catch (err) {
+      console.error('Failed to mark attendance in DB:', err);
+      showToast('Attendance Sync Error', err.message || 'Could not update DB', 'error');
+      return false;
+    }
   };
 
-  const markStudentAbsent = studentId => {
-    const student = students.find(
-      item => item.id === studentId
-    );
+  const markStudentAbsent = async (studentId, options = {}) => {
+    const { slot = activeClassSlot || 'class1', date = getToday() } = options;
 
-    if (!student) {
-      return;
+    const student = students.find(item => item.id === studentId || item.studentId === studentId);
+    if (!student) return;
+
+    try {
+      const updatedRecord = await apiMarkAttendance({
+        studentId,
+        name: student.name,
+        date,
+        slot,
+        status: 'absent',
+        method: 'Manual Override (Admin)'
+      });
+
+      setDailyAttendanceMap(prev => ({
+        ...prev,
+        [studentId]: updatedRecord
+      }));
+
+      showToast(
+        'Marked Absent',
+        `${student.name} marked absent for ${slot.toUpperCase()} in database.`,
+        'info'
+      );
+    } catch (err) {
+      console.error('Failed to mark absent in DB:', err);
+      showToast('Error', err.message || 'Could not update DB', 'error');
     }
-
-    const today = getToday();
-
-    setStudents(prev =>
-      prev.map(item =>
-        item.id === studentId
-          ? {
-              ...item,
-
-              present: false,
-              presentDate: null,
-              presentAt: null,
-              lastRecognitionConfidence: null,
-
-              attendanceDates:
-                (item.attendanceDates || []).filter(
-                  date => date !== today
-                )
-            }
-          : item
-      )
-    );
-
-    showToast(
-      'Marked Absent',
-      `${student.name} (${student.id}) set back to absent by admin.`,
-      'info'
-    );
   };
 
-  const resetAttendance = () => {
-    const today = getToday();
-
-    setStudents(prev =>
-      prev.map(student => ({
-        ...student,
-
-        present: false,
-        presentDate: null,
-        presentAt: null,
-        lastRecognitionConfidence: null,
-
-        attendanceDates:
-          (student.attendanceDates || []).filter(
-            date => date !== today
-          )
-      }))
-    );
-
-    showToast(
-      'Attendance Reset',
-      "Today's attendance cleared. Past history preserved.",
-      'info'
-    );
+  const resetAttendance = async (options = {}) => {
+    const { date = getToday() } = options;
+    try {
+      await apiResetAttendance({ date });
+      setDailyAttendanceMap({});
+      showToast('Attendance Reset', `Today's attendance cleared from database.`, 'info');
+    } catch (err) {
+      console.error('Failed to reset attendance in DB:', err);
+      showToast('Error', err.message || 'Could not reset attendance', 'error');
+    }
   };
 
   /* =======================================================
@@ -768,95 +488,51 @@ export const AppProvider = ({ children }) => {
   ======================================================= */
 
   const triggerSimulatedScan = () => {
-    if (students.length === 0) {
-      return;
-    }
+    if (students.length === 0) return;
 
-    const randomStudent =
-      students[
-        Math.floor(
-          Math.random() * students.length
-        )
-      ];
-
-    const directions = [
-      'IN',
-      'OUT'
-    ];
-
-    const randomDirection =
-      directions[
-        Math.floor(
-          Math.random() *
-          directions.length
-        )
-      ];
-
-    const currentHour =
-      new Date().getHours();
-
-    const isCurfew =
-      randomDirection === 'IN' &&
-      (
-        currentHour >= 22 ||
-        Math.random() > 0.65
-      );
-
-    const confidence =
-      `${(
-        97 +
-        Math.random() * 2.9
-      ).toFixed(1)}%`;
+    const randomStudent = students[Math.floor(Math.random() * students.length)];
+    const directions = ['IN', 'OUT'];
+    const randomDirection = directions[Math.floor(Math.random() * directions.length)];
+    const currentHour = new Date().getHours();
+    const isCurfew = randomDirection === 'IN' && (currentHour >= 22 || Math.random() > 0.65);
+    const confidence = `${(97 + Math.random() * 2.9).toFixed(1)}%`;
 
     const newLog = {
       id: generateLogId(),
-
       studentId: randomStudent.id,
       studentName: randomStudent.name,
       avatar: randomStudent.avatar,
       room: randomStudent.room,
-
       direction: randomDirection,
       timestamp: getTimestamp(),
-
       gate: 'Main Gate - Cam 01 Live',
       method: 'AI Facial Recognition Scan',
-
-      status: isCurfew
-        ? 'Curfew Violation'
-        : 'Authorized Normal',
-
+      status: isCurfew ? 'Curfew Violation' : 'Authorized Normal',
       curfewAlert: isCurfew,
-
       remarks: isCurfew
         ? 'Late arrival detected past hostel curfew deadline'
         : 'Normal movement verified',
-
       confidence
     };
 
-    setLogs(prev => [
-      newLog,
-      ...prev
-    ]);
+    setLogs(prev => [newLog, ...prev]);
+
+    // Also mark hostel attendance in DB if entering
+    if (randomDirection === 'IN') {
+      markStudentPresent(randomStudent.id, confidence, { slot: 'hostel' }).catch(() => {});
+    }
 
     setCurrentDetection({
       student: randomStudent,
       confidence,
-
-      timestamp:
-        new Date().toLocaleTimeString(),
-
+      timestamp: new Date().toLocaleTimeString(),
       box: {
         top: 20 + Math.random() * 10,
         left: 30 + Math.random() * 10,
         width: 32 + Math.random() * 8,
         height: 44 + Math.random() * 8
       },
-
-      status: isCurfew
-        ? 'CURFEW_ALERT'
-        : 'AUTHORIZED'
+      status: isCurfew ? 'CURFEW_ALERT' : 'AUTHORIZED'
     });
 
     if (isCurfew) {
@@ -875,58 +551,80 @@ export const AppProvider = ({ children }) => {
   };
 
   /* =======================================================
-     STUDENT FINE PAYMENT
+     FINE ACTIONS
   ======================================================= */
 
-  const payFineByStudent = (
-    fineId,
-    paymentData = {}
-  ) => {
-    const txnId =
-      paymentData.txnId ||
-      `UPI-${Math.floor(
-        100000 +
-        Math.random() * 900000
-      )}`;
+  const addFine = fineData => {
+    const newId = `FINE-2026-${100 + fines.length + 1}`;
+    const student = students.find(item => item.id === fineData.studentId);
 
-    const paymentMethod =
-      paymentData.method ||
-      'UPI QR Code Instant Payment';
+    const newFine = {
+      id: newId,
+      studentName: student?.name || fineData.studentName,
+      avatar:
+        student?.avatar ||
+        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
+      room: student?.room || fineData.room,
+      block: student?.block || fineData.block || 'Block A',
+      issuedDate: getToday(),
+      dueDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
+      status: 'Unserved / Pending',
+      servedDate: null,
+      paymentMethod: null,
+      issuedBy: DEFAULT_ADMIN.name,
+      guardianNotified: true,
+      ...fineData
+    };
 
-    setFines(prev =>
-      prev.map(fine =>
-        fine.id === fineId
-          ? {
-              ...fine,
-              status: 'Served / Paid',
-              servedDate:
-                new Date().toLocaleString(),
-              paymentMethod:
-                `${paymentMethod} (Txn: ${txnId})`
-            }
-          : fine
-      )
-    );
-
-    confetti({
-      particleCount: 75,
-      spread: 80,
-      origin: {
-        y: 0.6
-      }
-    });
-
-    const targetFine = fines.find(
-      fine => fine.id === fineId
-    );
-
+    setFines(prev => [newFine, ...prev]);
     showToast(
-      'Payment Successful! 🎉',
-      `₹${targetFine?.amount} fine marked as PAID. Record updated in Admin Dashboard.`,
-      'success'
+      'Disciplinary Notice Issued',
+      `Penalty ₹${newFine.amount} logged for ${newFine.studentName}.`,
+      'warning'
     );
+    return newFine;
+  };
 
-    return txnId;
+  const toggleFineStatus = fineId => {
+    setFines(prev =>
+      prev.map(fine => {
+        if (fine.id !== fineId) return fine;
+        const isNowServed = fine.status !== 'Served / Paid';
+        if (isNowServed) {
+          confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
+          showToast(
+            'Disciplinary Action Served',
+            `${fine.studentName}'s fine of ₹${fine.amount} has been marked as SERVED & CLEARED.`,
+            'success'
+          );
+          return {
+            ...fine,
+            status: 'Served / Paid',
+            servedDate: new Date().toLocaleString(),
+            paymentMethod: 'Admin Manual Clearance / Receipt Verified'
+          };
+        }
+        showToast('Status Reset', `${fine.studentName}'s fine returned to PENDING.`, 'info');
+        return {
+          ...fine,
+          status: 'Unserved / Pending',
+          servedDate: null,
+          paymentMethod: null
+        };
+      })
+    );
+  };
+
+  const notifyGuardian = fineId => {
+    setFines(prev =>
+      prev.map(fine => (fine.id === fineId ? { ...fine, guardianNotified: true } : fine))
+    );
+    const targetFine = fines.find(fine => fine.id === fineId);
+    showToast(
+      'Guardian Alert Dispatched',
+      `Official SMS & Email alert sent to guardian of ${targetFine?.studentName}.`,
+      'info'
+    );
   };
 
   /* =======================================================
@@ -934,144 +632,110 @@ export const AppProvider = ({ children }) => {
   ======================================================= */
 
   useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEYS.ACTIVE_TAB,
-      activeTab
-    );
+    localStorage.setItem(STORAGE_KEYS.ACTIVE_TAB, activeTab);
   }, [activeTab]);
 
   useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEYS.CURRENT_VIEW,
-      currentView
-    );
+    localStorage.setItem(STORAGE_KEYS.CURRENT_VIEW, currentView);
   }, [currentView]);
 
   useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEYS.USER_ROLE,
-      userRole
-    );
+    localStorage.setItem(STORAGE_KEYS.USER_ROLE, userRole);
   }, [userRole]);
 
   useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEYS.CURRENT_STUDENT_ID,
-      currentStudentId
-    );
+    localStorage.setItem(STORAGE_KEYS.CURRENT_STUDENT_ID, currentStudentId);
   }, [currentStudentId]);
 
   useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEYS.STUDENTS,
-      JSON.stringify(students)
-    );
-  }, [students]);
-
-  useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEYS.LOGS,
-      JSON.stringify(logs)
-    );
+    localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(logs));
   }, [logs]);
 
   useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEYS.FINES,
-      JSON.stringify(fines)
-    );
+    localStorage.setItem(STORAGE_KEYS.FINES, JSON.stringify(fines));
   }, [fines]);
 
   useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEYS.TM_MODEL_URL,
-      tmModelURL
-    );
+    localStorage.setItem(STORAGE_KEYS.TM_MODEL_URL, tmModelURL);
   }, [tmModelURL]);
 
   useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEYS.TM_MAPPINGS,
-      JSON.stringify(classMappings)
-    );
+    localStorage.setItem(STORAGE_KEYS.TM_MAPPINGS, JSON.stringify(classMappings));
   }, [classMappings]);
 
   useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEYS.THEME,
-      theme
-    );
-
-    document.documentElement.classList.toggle(
-      'dark',
-      theme === 'dark'
-    );
-
-    document.documentElement.classList.toggle(
-      'light',
-      theme === 'light'
-    );
+    localStorage.setItem(STORAGE_KEYS.THEME, theme);
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    document.documentElement.classList.toggle('light', theme === 'light');
   }, [theme]);
 
   /* =======================================================
-     DERIVED DATA
+     DERIVED DATA & NAVIGATION HELPERS
   ======================================================= */
 
-  const activeCamera =
-    cameras.find(
-      camera => camera.id === activeCameraId
-    ) || cameras[0];
+  const activeCamera = cameras.find(c => c.id === activeCameraId) || cameras[0];
+  const currentStudent = students.find(s => s.id === currentStudentId) || students[0];
 
-  const currentStudent =
-    students.find(
-      student => student.id === currentStudentId
-    ) || students[0];
+  const loginAsAdmin = () => {
+    setUserRole('admin');
+    setCurrentView('portal');
+  };
 
-  /* =======================================================
-     CONTEXT VALUE
-  ======================================================= */
+  const loginAsStudent = studentId => {
+    if (studentId) setCurrentStudentId(studentId);
+    setUserRole('student');
+    setCurrentView('portal');
+  };
+
+  const goToHome = () => setCurrentView('home');
+  const goToClassroom = () => {
+    setActiveTab('classroom');
+    setCurrentView('portal');
+  };
 
   const contextValue = {
-    /* Navigation */
     activeTab,
     setActiveTab,
     currentView,
     setCurrentView,
     userRole,
     setUserRole,
-
-    /* Theme */
     theme,
     toggleTheme,
 
-    /* Students */
+    // Database students & attendance
     students,
+    isLoadingStudents,
+    refreshDataFromDB,
     addStudent,
     updateStudent,
     deleteStudent,
 
-    /* Current Student */
+    // Class / Slot selection
+    activeClassSlot,
+    setActiveClassSlot,
+
+    // Current Student
     currentStudentId,
     setCurrentStudentId,
     currentStudent,
 
-    /* Logs */
+    // Logs
     logs,
     addLog,
 
-    /* Attendance */
+    // Attendance
     markStudentPresent,
     markStudentAbsent,
     resetAttendance,
 
-    /* Fines */
+    // Fines
     fines,
     addFine,
     toggleFineStatus,
     notifyGuardian,
-    payFineByStudent,
 
-    /* Cameras */
+    // Cameras
     cameras,
     activeCameraId,
     setActiveCameraId,
@@ -1083,32 +747,26 @@ export const AppProvider = ({ children }) => {
     currentDetection,
     triggerSimulatedScan,
 
-    /* Facial Recognition */
+    // Facial Recognition
     tmModelURL,
     setTmModelURL,
     classMappings,
     setClassMapping,
 
-    /* Toasts */
+    // Toasts
     toasts,
     showToast,
     removeToast,
 
-    /* Navigation Helpers */
+    // Navigation Helpers
     loginAsAdmin,
     loginAsStudent,
     goToHome,
     goToClassroom,
-
-    /* Admin */
     adminUser: DEFAULT_ADMIN
   };
 
-  return (
-    <AppContext.Provider value={contextValue}>
-      {children}
-    </AppContext.Provider>
-  );
+  return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;
 };
 
 /* =========================================================
@@ -1117,12 +775,8 @@ export const AppProvider = ({ children }) => {
 
 export const useApp = () => {
   const context = useContext(AppContext);
-
   if (!context) {
-    throw new Error(
-      'useApp must be used within an AppProvider'
-    );
+    throw new Error('useApp must be used within an AppProvider');
   }
-
   return context;
 };

@@ -18,10 +18,9 @@ import {
   Activity,
   CircleDot,
   ShieldCheck,
+  Check,
   X,
-  UserPlus,
-  ChevronRight,
-  Crosshair
+  BookOpen
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { io } from 'socket.io-client';
@@ -35,6 +34,13 @@ import {
 
 const RE_MARK_COOLDOWN_MS = 8000;
 
+const CLASS_SLOTS = [
+  { id: 'class1', label: 'Class 1', time: '09:00 - 09:50', subject: 'Data Structures' },
+  { id: 'class2', label: 'Class 2', time: '10:00 - 10:50', subject: 'Operating Systems' },
+  { id: 'class3', label: 'Class 3', time: '11:10 - 12:00', subject: 'Database Systems' },
+  { id: 'class4', label: 'Class 4', time: '12:00 - 12:50', subject: 'Computer Networks' },
+];
+
 export default function ClassroomAttendancePage() {
   const {
     students,
@@ -45,7 +51,9 @@ export default function ClassroomAttendancePage() {
     markStudentPresent,
     markStudentAbsent,
     resetAttendance,
-    showToast
+    showToast,
+    activeClassSlot,
+    setActiveClassSlot
   } = useApp();
 
   const [urlInput, setUrlInput] = useState(tmModelURL);
@@ -70,12 +78,15 @@ export default function ClassroomAttendancePage() {
   const cooldownRef = useRef({});
   const thresholdRef = useRef(threshold);
   const mappingsRef = useRef(classMappings);
+  const activeSlotRef = useRef(activeClassSlot);
 
   useEffect(() => { thresholdRef.current = threshold; }, [threshold]);
   useEffect(() => { mappingsRef.current = classMappings; }, [classMappings]);
+  useEffect(() => { activeSlotRef.current = activeClassSlot; }, [activeClassSlot]);
 
-  const presentStudents = students.filter(s => s.present);
-  const absentStudents = students.length - presentStudents.length;
+  // Attendance counts for currently selected class slot
+  const slotPresentCount = students.filter(s => s[`${activeClassSlot}Attendance`] === 'present').length;
+  const slotAbsentCount = students.length - slotPresentCount;
   const mappedCount = labels.filter(l => classMappings[l]).length;
 
   // Real-time YOLO detection listener via backend Socket.IO
@@ -91,16 +102,19 @@ export default function ClassroomAttendancePage() {
           [detection.trackId]: { ...detection, receivedAt: Date.now() }
         }));
 
-        // Future face-recognition: when identity is provided, verify against student registry
+        // When identity is provided, verify against student registry and mark DB
         if (detection.identity) {
           const matched = students.find(
-            s => s.name.toLowerCase() === detection.identity.toLowerCase() || s.id === detection.identity
+            s =>
+              (s.name || '').toLowerCase() === detection.identity.toLowerCase() ||
+              s.id === detection.identity ||
+              s.studentId === detection.identity
           );
           if (matched) {
             const conf = detection.identityConfidence > 0
               ? `${(detection.identityConfidence * 100).toFixed(1)}%`
               : 'AI Match';
-            markStudentPresent(matched.id, conf);
+            markStudentPresent(matched.id, conf, { slot: activeSlotRef.current });
           }
         }
       });
@@ -160,7 +174,6 @@ export default function ClassroomAttendancePage() {
       })
       .catch(() => {});
 
-    // Ensure camera process is stopped if the user closes or refreshes the page
     const handleBeforeUnload = () => {
       fetch(`${getSocketURL()}/api/cameras/stream/stop`, {
         method: 'POST',
@@ -231,7 +244,7 @@ export default function ClassroomAttendancePage() {
       classLabels.forEach(label => {
         if (classMappings[label]) return;
         const norm = label.trim().toLowerCase();
-        const match = students.find(s => s.name.toLowerCase() === norm || s.id.toLowerCase() === norm);
+        const match = students.find(s => (s.name || '').toLowerCase() === norm || s.id.toLowerCase() === norm);
         if (match) setClassMapping(label, match.id);
       });
       setModelStatus('ready');
@@ -263,7 +276,7 @@ export default function ClassroomAttendancePage() {
             const last = cooldownRef.current[studentId] || 0;
             if (now - last > RE_MARK_COOLDOWN_MS) {
               cooldownRef.current[studentId] = now;
-              markStudentPresent(studentId, conf);
+              markStudentPresent(studentId, conf, { slot: activeSlotRef.current });
             }
           }
         }
@@ -283,7 +296,7 @@ export default function ClassroomAttendancePage() {
     runningRef.current = true;
     setRunning(true);
     rafRef.current = requestAnimationFrame(predictLoop);
-    showToast('Recognition Started', 'Watching live feed for enrolled faces…', 'info');
+    showToast('Recognition Started', `Watching live feed for ${activeClassSlot.toUpperCase()} attendance…`, 'info');
   };
 
   const stopRecognition = () => {
@@ -297,25 +310,34 @@ export default function ClassroomAttendancePage() {
     return () => {
       runningRef.current = false;
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      // Camera is exclusively managed by Python YOLO detector — no getUserMedia tracks to release
     };
   }, []);
 
   const exportCSV = () => {
     const today = new Date().toISOString().split('T')[0];
-    const rows = students.map(s => [s.id, s.name, s.room, s.present ? 'Present' : 'Absent', s.presentAt || ''].join(','));
-    const csv = ['Student ID,Name,Room,Status,Marked At', ...rows].join('\n');
+    const rows = students.map(s => [
+      s.studentId || s.id,
+      `"${s.name}"`,
+      s.room || '',
+      s.class1Attendance || 'absent',
+      s.class2Attendance || 'absent',
+      s.class3Attendance || 'absent',
+      s.class4Attendance || 'absent',
+      s.hostelAttendance || 'absent'
+    ].join(','));
+    const csv = ['Student ID,Name,Room,Class 1,Class 2,Class 3,Class 4,Hostel Attendance', ...rows].join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `attendance-${today}.csv`;
+    a.download = `attendance-daywise-${today}.csv`;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    showToast('Exported', `Attendance CSV downloaded.`, 'success');
+    showToast('Exported', `Day-wise attendance CSV downloaded.`, 'success');
   };
+
+  const activeSlotInfo = CLASS_SLOTS.find(s => s.id === activeClassSlot) || CLASS_SLOTS[0];
 
   return (
     <div className="space-y-5">
-
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -329,7 +351,9 @@ export default function ClassroomAttendancePage() {
               {isStartingStream ? 'INITIALIZING AI' : webcamOn && !webcamError ? 'AI CAMERA LIVE' : 'FEED OFFLINE'}
             </span>
           </div>
-          <p className="text-xs text-slate-500">AI face recognition marks attendance automatically from the live camera feed.</p>
+          <p className="text-xs text-slate-500">
+            AI face recognition updates {activeSlotInfo.label} ({activeSlotInfo.subject}) in the database per day-wise.
+          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -342,11 +366,11 @@ export default function ClassroomAttendancePage() {
           </button>
 
           <button
-            onClick={resetAttendance}
+            onClick={() => resetAttendance()}
             className="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-slate-700 bg-slate-900 text-slate-300 hover:bg-slate-800 cursor-pointer transition"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            Reset
+            Reset Today
           </button>
 
           <button
@@ -382,19 +406,52 @@ export default function ClassroomAttendancePage() {
         </div>
       </div>
 
+      {/* CLASS PERIOD SELECTOR */}
+      <div className="flex flex-wrap items-center gap-2 p-2.5 rounded-xl bg-[#0b1320] border border-slate-800">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-2 flex items-center gap-1.5">
+          <BookOpen className="w-3.5 h-3.5 text-blue-400" />
+          Select Class Period:
+        </span>
+        {CLASS_SLOTS.map(slot => {
+          const isSelected = activeClassSlot === slot.id;
+          const count = students.filter(s => s[`${slot.id}Attendance`] === 'present').length;
+          return (
+            <button
+              key={slot.id}
+              onClick={() => setActiveClassSlot(slot.id)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                isSelected
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-slate-900 border border-slate-700 text-slate-300 hover:bg-slate-800'
+              }`}
+            >
+              <span>{slot.label}</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${isSelected ? 'bg-blue-700 text-blue-100' : 'bg-slate-800 text-slate-400'}`}>
+                {count}/{students.length}
+              </span>
+              <span className="text-[10px] opacity-75 hidden md:inline">({slot.subject})</span>
+            </button>
+          );
+        })}
+      </div>
+
       {/* STATS */}
       <div className="grid grid-cols-3 gap-3">
-        <StatCard label="Registered" value={students.length} icon={Users} />
-        <StatCard label="Present" value={presentStudents.length} icon={UserCheck} accent="emerald" sub={`${students.length ? Math.round((presentStudents.length / students.length) * 100) : 0}%`} />
-        <StatCard label="Absent" value={absentStudents} icon={Clock3} />
+        <StatCard label="Registered Students" value={students.length} icon={Users} />
+        <StatCard
+          label={`${activeSlotInfo.label} Present`}
+          value={slotPresentCount}
+          icon={UserCheck}
+          accent="emerald"
+          sub={`${students.length ? Math.round((slotPresentCount / students.length) * 100) : 0}%`}
+        />
+        <StatCard label={`${activeSlotInfo.label} Absent`} value={slotAbsentCount} icon={Clock3} />
       </div>
 
       {/* MODEL + CAMERA */}
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-5">
-
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-5">
         {/* LEFT — camera + model */}
         <div className="space-y-4">
-
           {/* Model URL */}
           <div className="bg-[#0b1320] border border-slate-800 rounded-xl overflow-hidden">
             <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
@@ -430,7 +487,7 @@ export default function ClassroomAttendancePage() {
               {modelStatus === 'ready' && (
                 <p className="mt-2 text-[11px] text-emerald-400 flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  Model connected — {labels.length} classes, {mappedCount} mapped to students
+                  Model connected — {labels.length} classes, {mappedCount} mapped to DB students
                 </p>
               )}
               {modelStatus === 'error' && (
@@ -449,7 +506,7 @@ export default function ClassroomAttendancePage() {
                 <Activity className={`w-4 h-4 ${webcamOn && !webcamError ? 'text-emerald-400' : 'text-slate-500'}`} />
                 <div>
                   <p className="text-xs font-bold text-white">AI Camera Feed</p>
-                  <p className="text-[9px] text-slate-500 font-mono">YOLO · Python AI · camera-1</p>
+                  <p className="text-[9px] text-slate-500 font-mono">YOLO · Python AI · camera-1 · Target: {activeSlotInfo.label}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -465,7 +522,6 @@ export default function ClassroomAttendancePage() {
             </div>
 
             <div className="relative aspect-[4/3] bg-black overflow-hidden">
-              {/* Hidden video element preserved for Teachable Machine model.predict compatibility */}
               <video ref={videoRef} className="hidden" />
 
               {webcamOn ? (
@@ -530,22 +586,18 @@ export default function ClassroomAttendancePage() {
                 </div>
               )}
 
-
-              {/* Match overlay if recognized */}
+              {/* Match overlay */}
               {running && lastMatch && (
                 <div className="absolute left-4 right-4 bottom-4 z-10">
                   <div className={`rounded-xl border backdrop-blur-md shadow-2xl p-3 ${lastMatch.studentId ? 'bg-emerald-950/80 border-emerald-500/40' : 'bg-slate-950/85 border-slate-700'}`}>
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0">
                         <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${lastMatch.studentId ? 'bg-emerald-500/20' : 'bg-slate-800'}`}>
-                          {lastMatch.studentId
-                            ? <ShieldCheck className="w-5 h-5 text-emerald-400" />
-                            : <ScanFace className="w-5 h-5 text-slate-400" />
-                          }
+                          {lastMatch.studentId ? <ShieldCheck className="w-5 h-5 text-emerald-400" /> : <ScanFace className="w-5 h-5 text-slate-400" />}
                         </div>
                         <div className="min-w-0">
                           <p className="text-[9px] uppercase tracking-wider font-bold text-slate-500">
-                            {lastMatch.studentId ? 'Attendance Marked ✓' : 'Unknown Face'}
+                            {lastMatch.studentId ? `${activeSlotInfo.label} Attendance Marked in DB ✓` : 'Unknown Face'}
                           </p>
                           <p className="text-sm font-bold text-white truncate">{lastMatch.label}</p>
                         </div>
@@ -581,9 +633,7 @@ export default function ClassroomAttendancePage() {
                     <div
                       key={d.trackId}
                       className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-mono ${
-                        hasId
-                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                          : 'bg-blue-500/10 border-blue-500/30 text-blue-300'
+                        hasId ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-blue-500/10 border-blue-500/30 text-blue-300'
                       }`}
                     >
                       <span className={`w-1.5 h-1.5 rounded-full ${hasId ? 'bg-emerald-400' : 'bg-blue-400'}`} />
@@ -601,36 +651,66 @@ export default function ClassroomAttendancePage() {
           )}
         </div>
 
-        {/* RIGHT — attendance list */}
+        {/* RIGHT — attendance roster for selected class slot */}
         <div className="space-y-3">
           <div className="bg-[#0b1320] border border-slate-800 rounded-xl overflow-hidden">
             <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-200">Attendance Roster</span>
-              <span className="text-[9px] font-mono text-slate-500">{presentStudents.length}/{students.length}</span>
+              <div>
+                <span className="text-xs font-bold text-white">{activeSlotInfo.label} Roster</span>
+                <span className="text-[9px] text-slate-500 ml-2">({activeSlotInfo.subject})</span>
+              </div>
+              <span className="text-[9px] font-mono text-emerald-400 font-bold">{slotPresentCount}/{students.length}</span>
             </div>
             <div className="max-h-[600px] overflow-y-auto divide-y divide-slate-800">
-              {students.map(s => (
-                <div key={s.id} className="flex items-center gap-3 px-4 py-2.5">
-                  <img src={s.avatar} alt={s.name} className="w-8 h-8 rounded-lg object-cover border border-slate-700 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-slate-200 truncate">{s.name}</p>
-                    <p className="text-[9px] font-mono text-slate-600">{s.id} · R{s.room}</p>
+              {students.map(s => {
+                const sid = s.studentId || s.id;
+                const isSlotPresent = s[`${activeClassSlot}Attendance`] === 'present';
+                return (
+                  <div key={sid} className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-900/40 transition">
+                    <img
+                      src={s.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=2563eb&color=fff&size=256&bold=true`}
+                      alt={s.name}
+                      className="w-8 h-8 rounded-lg object-cover border border-slate-700 shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-slate-200 truncate">{s.name}</p>
+                      <p className="text-[9px] font-mono text-slate-600">{sid} · R{s.room}</p>
+                    </div>
+                    <div className="shrink-0 flex items-center gap-1.5">
+                      <button
+                        onClick={() => {
+                          if (isSlotPresent) {
+                            markStudentAbsent(sid, { slot: activeClassSlot });
+                          } else {
+                            markStudentPresent(sid, null, { slot: activeClassSlot, manual: true });
+                          }
+                        }}
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold font-mono transition cursor-pointer border ${
+                          isSlotPresent
+                            ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25'
+                            : 'bg-slate-900 border-slate-800 text-slate-500 hover:border-slate-700 hover:text-slate-400'
+                        }`}
+                        title="Click to toggle attendance in DB"
+                      >
+                        {isSlotPresent ? (
+                          <>
+                            <Check className="w-3 h-3" />
+                            <span>PRESENT</span>
+                          </>
+                        ) : (
+                          <>
+                            <X className="w-3 h-3 opacity-50" />
+                            <span>ABSENT</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
-                  <div className="shrink-0">
-                    {s.present ? (
-                      <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-400">
-                        <CheckCircle2 className="w-3 h-3" />
-                        PRESENT
-                      </span>
-                    ) : (
-                      <span className="text-[9px] font-mono text-slate-600">ABSENT</span>
-                    )}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
               {students.length === 0 && (
                 <div className="py-12 text-center">
-                  <p className="text-xs text-slate-500">No students registered</p>
+                  <p className="text-xs text-slate-500">No students registered in database</p>
                 </div>
               )}
             </div>
