@@ -1,0 +1,18 @@
+# AI Layer dependencies — YOLO person detector + MJPEG stream server
+# The backend (cameraService.js) launches ai/YOLO/Scripts/Detector.py using
+# ai/.venv/bin/python, so install these into that virtual environment:
+#
+#   cd ai
+#   python3 -m venv .venv
+#   source .venv/bin/activate      # Windows: .venv\Scripts\activate
+#   pip install -r requirements.txt
+#
+# Versions below are the ones verified working on this machine.
+
+ultralytics==8.4.170
+opencv-python==4.11.0.86
+flask==2.2.2
+requests==2.28.1
+torch==2.14.1
+torchvision==0.29.1
+numpy==1.23.5

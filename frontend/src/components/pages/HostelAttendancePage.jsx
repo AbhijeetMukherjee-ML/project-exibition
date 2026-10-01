@@ -21,9 +21,19 @@ import {
   Wifi,
   Grid,
   Square,
-  Maximize2
+  Maximize2,
+  Loader2
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import {
+  getSocketURL,
+  apiStartCameraStream,
+  apiStopCameraStream,
+  apiGetCameraStreamStatus,
+} from '../../services/api';
+
+// Live AI MJPEG stream served by the Python YOLO detector (same feed as Classroom)
+const AI_STREAM_URL = 'http://localhost:5001/video';
 
 // Hostel blocks 1–8 (independent of the shared camera system)
 const HOSTEL_BLOCKS = [
@@ -36,17 +46,6 @@ const HOSTEL_BLOCKS = [
   { id: 'BLK-7', name: 'Block 7', label: 'Tesla Block',     gender: 'Boys',  floors: 4 },
   { id: 'BLK-8', name: 'Block 8', label: 'Ramanujan Block', gender: 'Mixed', floors: 6 },
 ];
-
-const BLOCK_IMAGES = {
-  'BLK-1': 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1600&q=85',
-  'BLK-2': 'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1600&q=85',
-  'BLK-3': 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=1600&q=85',
-  'BLK-4': 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=85',
-  'BLK-5': 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1600&q=85',
-  'BLK-6': 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=1600&q=85',
-  'BLK-7': 'https://images.unsplash.com/photo-1571260899304-425eee4c7efc?auto=format&fit=crop&w=1600&q=85',
-  'BLK-8': 'https://images.unsplash.com/photo-1564981797816-1043664bf78d?auto=format&fit=crop&w=1600&q=85',
-};
 
 export default function HostelAttendancePage() {
   const {
@@ -65,11 +64,13 @@ export default function HostelAttendancePage() {
   const [activeBlockId, setActiveBlockId] = useState('BLK-1');
   const activeBlock = HOSTEL_BLOCKS.find(b => b.id === activeBlockId);
 
-  const [useWebcam, setUseWebcam] = useState(false);
+  // Live AI camera feed (backend-launched Python YOLO detector) — same as Classroom
+  const [webcamOn, setWebcamOn] = useState(false);
+  const [isStartingStream, setIsStartingStream] = useState(false);
   const [webcamError, setWebcamError] = useState(null);
+  const [streamKey, setStreamKey] = useState(Date.now());
   const [isGridMode, setIsGridMode] = useState(false);
 
-  const videoRef = useRef(null);
   const viewportRef = useRef(null);
 
   // Live clock
@@ -93,29 +94,56 @@ export default function HostelAttendancePage() {
   const totalOut = hostelLogs.filter(l => l.direction === 'OUT').length;
   const violations = hostelLogs.filter(l => l.curfewAlert).length;
 
-  // Webcam (only available on Block 1 — live camera gate)
+  // Ensure the AI detector is stopped by default when this page loads, and
+  // clean it up when leaving so we never leave the camera process running.
   useEffect(() => {
-    let stream = null;
-    if (useWebcam) {
-      navigator.mediaDevices?.getUserMedia({ video: { width: 1280, height: 720 } })
-        .then(ms => {
-          stream = ms;
-          if (videoRef.current) videoRef.current.srcObject = ms;
-          setWebcamError(null);
-          showToast('Camera Connected', 'Live hostel gate feed active.', 'success');
-        })
-        .catch(err => {
-          setWebcamError('Camera access denied. Showing simulated feed.');
-          setUseWebcam(false);
-        });
+    setWebcamOn(false);
+    apiGetCameraStreamStatus()
+      .then(res => { if (res && res.running) apiStopCameraStream().catch(() => {}); })
+      .catch(() => {});
+
+    const handleBeforeUnload = () => {
+      fetch(`${getSocketURL()}/api/cameras/stream/stop`, { method: 'POST', keepalive: true }).catch(() => {});
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      apiStopCameraStream().catch(() => {});
+    };
+  }, []);
+
+  // Start / stop the backend Python YOLO detector — identical flow to Classroom
+  const handleToggleFeed = async () => {
+    if (!webcamOn) {
+      setIsStartingStream(true);
+      setWebcamError(null);
+      try {
+        const res = await apiStartCameraStream();
+        if (res && res.running) {
+          setStreamKey(Date.now());
+          setWebcamOn(true);
+          showToast('AI Camera Online', 'Python YOLO detector active at hostel gate.', 'success');
+        } else {
+          throw new Error('AI detector failed to report ready state.');
+        }
+      } catch (err) {
+        console.error('Failed to start AI stream:', err);
+        setWebcamError(err.message || 'Failed to launch AI detector via backend service.');
+        showToast('AI Camera Error', err.message || 'Failed to start AI detector.', 'error');
+      } finally {
+        setIsStartingStream(false);
+      }
     } else {
-      if (videoRef.current?.srcObject) {
-        videoRef.current.srcObject.getTracks().forEach(t => t.stop());
-        videoRef.current.srcObject = null;
+      setWebcamOn(false);
+      try {
+        await apiStopCameraStream();
+        showToast('AI Camera Offline', 'Detector process stopped.', 'info');
+      } catch (err) {
+        console.error('Failed to stop AI stream:', err);
       }
     }
-    return () => { if (stream) stream.getTracks().forEach(t => t.stop()); };
-  }, [useWebcam]);
+  };
 
   const detectionIsAlert = currentDetection.status === 'CURFEW_ALERT';
 
@@ -160,11 +188,20 @@ export default function HostelAttendancePage() {
             Export Log
           </button>
           <button
-            onClick={() => setUseWebcam(!useWebcam)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer border transition ${useWebcam ? 'bg-emerald-600 border-emerald-500 text-white' : 'bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800'}`}
+            onClick={handleToggleFeed}
+            disabled={isStartingStream}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer border transition ${
+              webcamOn ? 'bg-emerald-600 border-emerald-500 text-white' : 'bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800'
+            } ${isStartingStream ? 'opacity-70 cursor-wait' : ''}`}
           >
-            {useWebcam ? <Video className="w-3.5 h-3.5" /> : <VideoOff className="w-3.5 h-3.5" />}
-            {useWebcam ? 'Live Feed' : 'Use Webcam'}
+            {isStartingStream ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-400" />
+            ) : webcamOn ? (
+              <Video className="w-3.5 h-3.5" />
+            ) : (
+              <VideoOff className="w-3.5 h-3.5" />
+            )}
+            {isStartingStream ? 'Starting AI...' : webcamOn ? 'AI Feed Active' : 'Enable AI Feed'}
           </button>
           <button
             onClick={triggerSimulatedScan}
@@ -224,7 +261,7 @@ export default function HostelAttendancePage() {
                 return (
                   <button
                     key={blk.id}
-                    onClick={() => { setActiveBlockId(blk.id); if (blk.id !== 'BLK-1') setUseWebcam(false); }}
+                    onClick={() => setActiveBlockId(blk.id)}
                     className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${selected ? 'bg-violet-600 text-white shadow-md' : 'bg-slate-900 border border-slate-700 text-slate-300 hover:bg-slate-800'}`}
                   >
                     <span className={`w-1.5 h-1.5 rounded-full ${selected ? 'bg-white' : 'bg-emerald-500'}`} />
@@ -252,9 +289,9 @@ export default function HostelAttendancePage() {
                 <span>{activeBlock.gender}</span>
                 <span className="text-slate-600">·</span>
                 <span>{activeBlock.floors} Floors</span>
-                <span className="ml-auto flex items-center gap-1.5 text-emerald-400">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  ONLINE
+                <span className={`ml-auto flex items-center gap-1.5 ${webcamOn && !webcamError ? 'text-emerald-400' : 'text-slate-500'}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${webcamOn && !webcamError ? 'bg-emerald-500 animate-pulse' : 'bg-slate-600'}`} />
+                  {webcamOn && !webcamError ? 'ONLINE' : 'OFFLINE'}
                 </span>
               </div>
             )}
@@ -263,14 +300,41 @@ export default function HostelAttendancePage() {
           {!isGridMode ? (
             /* SINGLE VIEW */
             <div ref={viewportRef} className="relative aspect-video rounded-2xl overflow-hidden bg-black border border-slate-800 shadow-2xl">
-              {useWebcam ? (
-                <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover transform -scale-x-100" />
-              ) : (
+              {webcamOn ? (
                 <img
-                  src={BLOCK_IMAGES[activeBlockId]}
-                  alt={activeBlock?.label}
+                  key={streamKey}
+                  src={`${AI_STREAM_URL}?t=${streamKey}`}
+                  alt="Hostel AI Video Stream"
                   className={`w-full h-full object-cover ${nightVision ? 'brightness-125 contrast-125 saturate-50 hue-rotate-90' : ''}`}
+                  onLoad={() => setWebcamError(null)}
+                  onError={() => setWebcamError(`AI video stream unavailable at ${AI_STREAM_URL}. Ensure the Python YOLO detector is running on port 5001.`)}
                 />
+              ) : isStartingStream ? (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black">
+                  <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+                  </div>
+                  <p className="text-xs font-semibold text-slate-200">Starting AI Camera Process...</p>
+                  <p className="text-[10px] text-slate-500 font-mono">Launching YOLO detector via backend service</p>
+                </div>
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black">
+                  <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center">
+                    <VideoOff className="w-7 h-7 text-slate-600" />
+                  </div>
+                  <p className="text-xs font-semibold text-slate-500">AI Feed Offline</p>
+                  <p className="text-[10px] text-slate-600">Enable AI feed to launch the hostel gate camera</p>
+                </div>
+              )}
+
+              {/* Feed error overlay */}
+              {webcamOn && webcamError && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-slate-950/90 text-center gap-2 z-30">
+                  <AlertTriangle className="w-8 h-8 text-amber-400 mb-1" />
+                  <p className="text-sm font-semibold text-slate-200">AI Camera Feed Offline</p>
+                  <p className="text-xs text-slate-400 max-w-sm">{webcamError}</p>
+                  <p className="text-[10px] font-mono text-slate-500 mt-2">Expected stream: {AI_STREAM_URL}</p>
+                </div>
               )}
 
               {/* Overlay gradient */}
@@ -281,7 +345,7 @@ export default function HostelAttendancePage() {
                 style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,.4) 4px)' }}
               />
 
-              {aiOverlayEnabled && (
+              {aiOverlayEnabled && webcamOn && !webcamError && (
                 <>
                   {/* Top HUD */}
                   <div className="absolute top-4 left-4 right-4 flex items-start justify-between">
@@ -366,14 +430,21 @@ export default function HostelAttendancePage() {
                   onClick={() => { setActiveBlockId(blk.id); setIsGridMode(false); }}
                   className="relative aspect-video overflow-hidden rounded-xl bg-black border border-slate-800 shadow-lg group cursor-pointer"
                 >
-                  <img
-                    src={BLOCK_IMAGES[blk.id]}
-                    alt={blk.label}
-                    className="w-full h-full object-cover group-hover:brightness-110 transition-all"
-                  />
+                  {webcamOn && !webcamError ? (
+                    <img
+                      key={`${streamKey}-${blk.id}`}
+                      src={`${AI_STREAM_URL}?t=${streamKey}&blk=${blk.id}`}
+                      alt={blk.label}
+                      className={`w-full h-full object-cover group-hover:brightness-110 transition-all ${nightVision ? 'brightness-125 contrast-125 saturate-50 hue-rotate-90' : ''}`}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-slate-950">
+                      <VideoOff className="w-6 h-6 text-slate-700" />
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/60" />
                   <div className="absolute top-2 left-2 flex items-center gap-1.5 px-2 py-1 rounded-md bg-black/70 border border-white/10 font-mono text-[10px] text-white">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className={`w-1.5 h-1.5 rounded-full ${webcamOn && !webcamError ? 'bg-emerald-500 animate-pulse' : 'bg-slate-600'}`} />
                     {blk.name}
                   </div>
                   <div className="absolute bottom-2 left-2 right-2">
