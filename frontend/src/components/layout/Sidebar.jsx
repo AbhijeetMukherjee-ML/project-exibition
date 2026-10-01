@@ -1,155 +1,343 @@
 import React from 'react';
-import { 
-  LayoutDashboard, 
-  Database, 
-  Cctv, 
-  History, 
-  Gavel, 
-  ShieldAlert,
+import {
+  LayoutDashboard,
+  Database,
+  Cctv,
+  History,
+  Gavel,
+  ShieldCheck,
   ChevronRight,
   Sparkles,
-  Info
+  Info,
+  Activity,
+  Users,
+  AlertTriangle,
+  Circle
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 export default function Sidebar() {
   const { activeTab, setActiveTab, students, logs, fines } = useApp();
 
-  const pendingFines = fines.filter(f => f.status !== "Served / Paid").length;
-  const curfewViolationsToday = logs.filter(l => l.curfewAlert).length;
+  const pendingFines = fines.filter(
+    (f) => f.status !== 'Served / Paid'
+  ).length;
+
+  const curfewViolationsToday = logs.filter(
+    (l) => l.curfewAlert
+  ).length;
 
   const navItems = [
     {
       id: 'home',
-      name: 'System Overview & Features',
-      shortName: 'Home',
+      label: 'Overview',
+      description: 'System dashboard',
       icon: LayoutDashboard,
-      badge: null,
-      desc: 'Architecture & Capabilities'
     },
     {
       id: 'database',
-      name: 'Student Database Registry',
-      shortName: 'Database',
+      label: 'Student Registry',
+      description: 'Resident profiles',
       icon: Database,
-      badge: `${students.length} Enrolled`,
-      desc: 'Resident Records & Profiles'
+      badge: students.length,
+      badgeLabel: 'students',
     },
     {
       id: 'camera',
-      name: 'Live CCTV Camera Feed',
-      shortName: 'Camera Live',
+      label: 'Live Surveillance',
+      description: 'AI camera monitoring',
       icon: Cctv,
-      badge: 'LIVE AI',
-      badgeColor: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-      desc: 'Realtime Face Recognition'
+      live: true,
     },
     {
       id: 'logs',
-      name: 'Hostel Entry & Exit Logs',
-      shortName: 'In / Out Logs',
+      label: 'Entry & Exit Logs',
+      description: 'Movement & curfew',
       icon: History,
-      badge: curfewViolationsToday > 0 ? `${curfewViolationsToday} Alerts` : null,
-      badgeColor: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-      desc: 'Movement & Curfew Audits'
+      badge: curfewViolationsToday,
+      badgeLabel: 'alerts',
+      alert: curfewViolationsToday > 0,
     },
     {
       id: 'fines',
-      name: 'Fines & Disciplinary Actions',
-      shortName: 'Disciplinary & Fines',
+      label: 'Discipline & Fines',
+      description: 'Violations & payments',
       icon: Gavel,
-      badge: pendingFines > 0 ? `${pendingFines} Pending` : 'All Clear',
-      badgeColor: pendingFines > 0 ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-      desc: 'Infraction & Served Status'
+      badge: pendingFines,
+      badgeLabel: 'pending',
+      alert: pendingFines > 0,
     },
   ];
 
   return (
-    <aside className="w-full lg:w-64 xl:w-72 bg-slate-950/90 border-r border-slate-800/80 flex flex-col justify-between p-4 flex-shrink-0">
-      <div className="space-y-6">
-        {/* Navigation Label */}
-        <div>
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-3 mb-2 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-            Admin Navigation Modules
-          </p>
-          <nav className="space-y-1.5">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`w-full group text-left px-3.5 py-3 rounded-xl transition-all duration-200 flex items-center justify-between cursor-pointer border ${
-                    isActive
-                      ? 'bg-gradient-to-r from-indigo-600/20 to-indigo-500/10 border-indigo-500/40 text-white shadow-lg shadow-indigo-500/10'
-                      : 'bg-slate-900/40 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 hover:border-slate-800'
-                  }`}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div
-                      className={`p-2 rounded-lg transition-colors flex-shrink-0 ${
-                        isActive
-                          ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                          : 'bg-slate-800/80 text-slate-400 group-hover:text-indigo-400 group-hover:bg-slate-800'
-                      }`}
-                    >
-                      <Icon className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className={`text-xs font-semibold truncate ${isActive ? 'text-white font-bold' : 'text-slate-300'}`}>
-                        {item.name}
-                      </p>
-                      <p className="text-[10px] text-slate-400 truncate mt-0.5">
-                        {item.desc}
-                      </p>
-                    </div>
-                  </div>
+    <aside className="w-full lg:w-[260px] xl:w-[280px] bg-slate-950 border-r border-slate-800/80 flex-shrink-0 flex flex-col">
 
-                  {item.badge && (
-                    <span
-                      className={`ml-2 text-[10px] font-mono px-2 py-0.5 rounded-full border whitespace-nowrap font-semibold ${
-                        item.badgeColor || 'bg-slate-800 text-slate-300 border-slate-700'
-                      }`}
-                    >
-                      {item.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-        </div>
+      {/* ───────────────── BRAND / SYSTEM HEADER ───────────────── */}
+      <div className="px-4 pt-5 pb-4">
+        <div className="flex items-center gap-3 px-2">
+          <div className="relative">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <ShieldCheck className="w-5 h-5 text-white" />
+            </div>
 
-        {/* System Summary Card */}
-        <div className="p-3.5 rounded-xl bg-gradient-to-b from-indigo-950/40 to-slate-900/60 border border-indigo-900/40 text-slate-300 space-y-2.5">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-indigo-300 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-              AI Surveillance Engine
-            </span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-mono font-medium border border-emerald-500/20">
-              v4.8 Ready
-            </span>
+            <span className="absolute -right-0.5 -bottom-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-950" />
           </div>
-          <div className="text-[11px] text-slate-400 leading-relaxed">
-            Multi-factor facial geometry and RFID cross-referencing active across 4 gate nodes.
-          </div>
-          <div className="pt-2 border-t border-indigo-900/30 flex items-center justify-between text-[10px] text-slate-400 font-mono">
-            <span>Latency: 18ms</span>
-            <span className="text-emerald-400 font-medium">Uptime: 99.98%</span>
+
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-white truncate">
+              Hostel Security
+            </p>
+
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span className="text-[10px] text-slate-400 font-medium">
+                SYSTEM OPERATIONAL
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Admin Disclaimer Footer */}
-      <div className="pt-4 border-t border-slate-800/80 text-[11px] text-slate-400 flex items-center justify-between">
-        <span className="flex items-center gap-1 text-slate-400">
-          <Info className="w-3.5 h-3.5 text-indigo-400" />
-          Admin Access Only
-        </span>
-        <span className="font-mono text-[10px] text-indigo-400/80">SECURE PORTAL</span>
+      {/* ───────────────── NAVIGATION ───────────────── */}
+      <div className="px-3 flex-1 overflow-y-auto">
+
+        <div className="flex items-center justify-between px-3 mb-2">
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">
+            Control Center
+          </p>
+
+          <Activity className="w-3.5 h-3.5 text-slate-600" />
+        </div>
+
+        <nav className="space-y-1">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`
+                  group relative w-full flex items-center gap-3
+                  px-3 py-2.5 rounded-xl text-left
+                  transition-all duration-200 cursor-pointer
+                  border
+                  ${
+                    isActive
+                      ? 'bg-indigo-500/10 border-indigo-500/25 shadow-lg shadow-indigo-950/20'
+                      : 'bg-transparent border-transparent hover:bg-slate-900 hover:border-slate-800'
+                  }
+                `}
+              >
+
+                {/* Active indicator */}
+                {isActive && (
+                  <span className="absolute left-0 top-2 bottom-2 w-0.5 rounded-full bg-indigo-500" />
+                )}
+
+                {/* Icon */}
+                <div
+                  className={`
+                    w-9 h-9 rounded-lg flex items-center justify-center
+                    flex-shrink-0 transition-all duration-200
+                    ${
+                      isActive
+                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                        : 'bg-slate-900 text-slate-500 group-hover:bg-slate-800 group-hover:text-indigo-400'
+                    }
+                  `}
+                >
+                  <Icon className="w-4 h-4" />
+                </div>
+
+                {/* Text */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p
+                      className={`
+                        text-xs font-semibold truncate
+                        ${
+                          isActive
+                            ? 'text-white'
+                            : 'text-slate-300 group-hover:text-white'
+                        }
+                      `}
+                    >
+                      {item.label}
+                    </p>
+
+                    {item.live && (
+                      <span className="flex items-center gap-1 text-[8px] font-bold text-emerald-400 uppercase">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        Live
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="text-[10px] text-slate-500 truncate mt-0.5">
+                    {item.description}
+                  </p>
+                </div>
+
+                {/* Badge */}
+                {typeof item.badge === 'number' && (
+                  <span
+                    className={`
+                      min-w-[24px] h-5 px-1.5 rounded-md
+                      flex items-center justify-center
+                      text-[9px] font-bold font-mono
+                      border
+                      ${
+                        item.alert
+                          ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                          : 'bg-slate-800 text-slate-400 border-slate-700'
+                      }
+                    `}
+                  >
+                    {item.badge}
+                  </span>
+                )}
+
+                {/* Arrow */}
+                <ChevronRight
+                  className={`
+                    w-3.5 h-3.5 flex-shrink-0 transition-all
+                    ${
+                      isActive
+                        ? 'text-indigo-400 translate-x-0'
+                        : 'text-slate-700 group-hover:text-slate-500 -translate-x-1 group-hover:translate-x-0'
+                    }
+                  `}
+                />
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* ───────────────── QUICK STATUS ───────────────── */}
+        <div className="mt-6 px-1">
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500 px-2 mb-2">
+            System Status
+          </p>
+
+          <div className="rounded-xl border border-slate-800 bg-slate-900/70 overflow-hidden">
+
+            {/* AI Engine */}
+            <div className="p-3">
+              <div className="flex items-center justify-between mb-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-indigo-500/10 flex items-center justify-center">
+                    <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                  </div>
+
+                  <div>
+                    <p className="text-[11px] font-semibold text-slate-200">
+                      AI Surveillance
+                    </p>
+                    <p className="text-[9px] text-slate-500">
+                      Recognition Engine
+                    </p>
+                  </div>
+                </div>
+
+                <span className="flex items-center gap-1 text-[9px] font-semibold text-emerald-400">
+                  <Circle className="w-1.5 h-1.5 fill-current" />
+                  Ready
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="rounded-lg bg-slate-950/70 border border-slate-800 p-2">
+                  <p className="text-[9px] text-slate-500">
+                    Latency
+                  </p>
+                  <p className="text-[11px] font-mono font-semibold text-slate-300 mt-0.5">
+                    18ms
+                  </p>
+                </div>
+
+                <div className="rounded-lg bg-slate-950/70 border border-slate-800 p-2">
+                  <p className="text-[9px] text-slate-500">
+                    Uptime
+                  </p>
+                  <p className="text-[11px] font-mono font-semibold text-emerald-400 mt-0.5">
+                    99.98%
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Nodes */}
+            <div className="px-3 py-2.5 border-t border-slate-800 flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <Cctv className="w-3.5 h-3.5 text-slate-500" />
+                <span className="text-[10px] text-slate-400">
+                  Surveillance Nodes
+                </span>
+              </div>
+
+              <span className="text-[10px] font-mono font-semibold text-slate-300">
+                4 / 4
+              </span>
+            </div>
+
+            {/* Students */}
+            <div className="px-3 py-2.5 border-t border-slate-800 flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-slate-500" />
+                <span className="text-[10px] text-slate-400">
+                  Registered Residents
+                </span>
+              </div>
+
+              <span className="text-[10px] font-mono font-semibold text-slate-300">
+                {students.length}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* ───────────────── ALERT SUMMARY ───────────────── */}
+        {(pendingFines > 0 || curfewViolationsToday > 0) && (
+          <div className="mt-3 rounded-xl border border-amber-500/15 bg-amber-500/5 p-3">
+            <div className="flex items-start gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+              </div>
+
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold text-amber-300">
+                  Attention Required
+                </p>
+
+                <p className="text-[9px] text-slate-500 mt-0.5 leading-relaxed">
+                  {pendingFines > 0 &&
+                    `${pendingFines} unpaid fine${pendingFines !== 1 ? 's' : ''}`}
+                  {pendingFines > 0 && curfewViolationsToday > 0 && ' • '}
+                  {curfewViolationsToday > 0 &&
+                    `${curfewViolationsToday} curfew alert${curfewViolationsToday !== 1 ? 's' : ''}`}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ───────────────── FOOTER ───────────────── */}
+      <div className="p-3 mt-3 border-t border-slate-800/80">
+        <div className="flex items-center justify-between px-2 py-1.5">
+          <div className="flex items-center gap-1.5">
+            <Info className="w-3 h-3 text-slate-600" />
+            <span className="text-[9px] text-slate-500">
+              Administrative Access
+            </span>
+          </div>
+
+          <span className="text-[8px] font-mono text-indigo-400/70 tracking-wider">
+            SECURE
+          </span>
+        </div>
       </div>
     </aside>
   );

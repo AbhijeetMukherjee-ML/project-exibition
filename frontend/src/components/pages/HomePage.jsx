@@ -1,27 +1,30 @@
 import React, { useState } from 'react';
-import { 
-  Building2, 
-  Video, 
-  History, 
-  Scale, 
-  QrCode, 
-  ShieldCheck, 
-  Users, 
-  Lock, 
-  ArrowRight, 
-  CheckCircle2, 
-  Clock, 
-  Zap, 
-  Eye, 
-  AlertTriangle, 
-  ChevronRight,
-  Sun,
-  Moon,
-  Smartphone,
-  Sparkles,
+import {
+  Shield,
+  Camera,
+  ScanFace,
+  Activity,
+  AlertTriangle,
+  Users,
+  Lock,
+  ArrowRight,
+  CheckCircle2,
+  Clock3,
   Database,
-  GraduationCap
+  Eye,
+  Radio,
+  Siren,
+  Moon,
+  Sun,
+  GraduationCap,
+  ChevronRight,
+  Cpu,
+  Network,
+  Fingerprint,
+  FileWarning,
+  QrCode
 } from 'lucide-react';
+
 import { useApp } from '../../context/AppContext';
 import LoginModal from '../modals/LoginModal';
 
@@ -45,513 +48,615 @@ export default function HomePage() {
     setIsLoginModalOpen(true);
   };
 
-  const pendingFines = fines.filter(f => f.status !== "Served / Paid").length;
-  const curfewAlerts = logs.filter(l => l.curfewAlert).length;
+  const activeAlerts = logs.filter(l => l.curfewAlert).length;
+  const pendingFines = fines.filter(f => f.status !== 'Served / Paid').length;
+  const activeStudents = students.length;
 
-  const coreFeatures = [
+  const modules = [
     {
-      icon: Video,
-      title: "Real-Time CCTV & Facial AI Detection",
-      badge: "Vision AI",
-      color: "blue",
-      description: "Connects to campus CCTV turnstile feeds and live webcams. Employs deep facial recognition with high-speed bounding boxes, real-time confidence scores, and night-vision enhancement.",
-      bullets: [
-        "Sub-second biometric facial matching (99.4% accuracy)",
-        "Support for live device webcams & multi-channel CCTV",
-        "Visual HUD bounding box with night vision mode"
+      icon: Camera,
+      title: 'Live CCTV Surveillance',
+      tag: 'VIDEO ANALYTICS',
+      description:
+        'Monitor connected hostel cameras and security zones with continuous video surveillance and event detection.',
+      points: [
+        'Multi-camera monitoring',
+        'Live surveillance feeds',
+        'AI event detection'
       ]
     },
     {
-      icon: History,
-      title: "Hostel Entry & Exit Automation",
-      badge: "Curfew Engine",
-      color: "amber",
-      description: "Logs every student's ingress and egress with precision timestamps. Features an intelligent curfew rule engine that automatically detects and flags returns past 10:00 PM.",
-      bullets: [
-        "Automatic IN / OUT direction detection",
-        "Instant curfew breach tagging and alerts",
-        "Searchable logs with one-click CSV export"
+      icon: ScanFace,
+      title: 'AI Face Recognition',
+      tag: 'BIOMETRIC AI',
+      description:
+        'Identify registered residents from camera feeds and associate detected faces with their institutional identity.',
+      points: [
+        'Face detection & matching',
+        'Confidence scoring',
+        'Resident identification'
       ]
     },
     {
-      icon: Scale,
-      title: "Fine & Disciplinary Action Ledger",
-      badge: "Enforcement",
-      color: "rose",
-      description: "Administrative console to issue structured disciplinary notices, levy fines for late arrivals, and instantly generate SMS/Email notices to send to parents or guardians.",
-      bullets: [
-        "Curfew, security & unauthorized absence fines",
-        "Automated Guardian SMS/Email notification templates",
-        "Instant Served / Unserved fine status toggle"
+      icon: Activity,
+      title: 'Movement Intelligence',
+      tag: 'EVENT ENGINE',
+      description:
+        'Automatically create structured entry and exit events from surveillance activity across monitored gates.',
+      points: [
+        'IN / OUT classification',
+        'Timestamped events',
+        'Gate-level tracking'
       ]
     },
     {
-      icon: QrCode,
-      title: "UPI QR Code Fine Settlement",
-      badge: "Instant Sync",
-      color: "emerald",
-      description: "Students can settle disciplinary fines directly on their dashboard via dynamic UPI QR codes. Payment instantly updates the central admin records without manual paperwork.",
-      bullets: [
-        "Dynamic UPI QR code generation (Google Pay, PhonePe, Paytm)",
-        "Instant payment simulation with downloadable receipt",
-        "Auto-syncs 'Paid / Served' status to the Admin ledger"
-      ]
-    },
-    {
-      icon: Smartphone,
-      title: "Dedicated Student Self-Service Portal",
-      badge: "Resident View",
-      color: "indigo",
-      description: "A secure, student-facing view allowing residents to inspect their own movement history, verify curfew compliance, and view their disciplinary record independently.",
-      bullets: [
-        "Personalized movement timestamps and entry gates",
-        "Clear status breakdown of active and settled citations",
-        "No administrative queue needed for fine verification"
+      icon: AlertTriangle,
+      title: 'Security Alerts',
+      tag: 'THREAT MONITORING',
+      description:
+        'Detect abnormal or policy-violating activity and surface high-priority events for administrators.',
+      points: [
+        'Curfew violations',
+        'Unknown-person events',
+        'Priority alerting'
       ]
     },
     {
       icon: Database,
-      title: "Centralized Student & Hostel Registry",
-      badge: "Directory",
-      color: "teal",
-      description: "Comprehensive student directory with room allocations (Block & Floor), contact data, emergency guardian numbers, and live on-campus presence indicators.",
-      bullets: [
-        "Complete resident profile and biometric status",
-        "Quick search by name, roll number, room, or branch",
-        "Add, edit, or remove resident records dynamically"
+      title: 'Central Event Database',
+      tag: 'AUDIT TRAIL',
+      description:
+        'Maintain a searchable record of surveillance events, identities, timestamps, locations and actions.',
+      points: [
+        'Complete event history',
+        'Search & filtering',
+        'Exportable records'
+      ]
+    },
+    {
+      icon: Shield,
+      title: 'Security Administration',
+      tag: 'CONTROL CENTER',
+      description:
+        'Give authorized administrators a centralized interface to investigate events and manage resident security records.',
+      points: [
+        'Resident registry',
+        'Incident investigation',
+        'Administrative controls'
       ]
     }
   ];
 
-  const workflowSteps = [
+  const workflow = [
     {
-      step: "01",
-      title: "Gate Face Capture",
-      desc: "Student approaches the turnstile camera; biometric model matches facial embeddings in <500ms."
+      number: '01',
+      icon: Camera,
+      title: 'Camera Detects',
+      text: 'A connected CCTV camera continuously observes the monitored security zone.'
     },
     {
-      step: "02",
-      title: "Curfew Verification",
-      desc: "System verifies timestamp against hostel rules (10:00 PM curfew) and logs movement record."
+      number: '02',
+      icon: ScanFace,
+      title: 'AI Identifies',
+      text: 'Computer vision detects a person and attempts to match them with registered residents.'
     },
     {
-      step: "03",
-      title: "Automated Notice",
-      desc: "If curfew is breached, a fine notice is logged and an automated SMS alert is ready for guardians."
+      number: '03',
+      icon: Activity,
+      title: 'Event Created',
+      text: 'The system creates a timestamped movement event containing identity, gate and direction.'
     },
     {
-      step: "04",
-      title: "UPI QR Settlement",
-      desc: "Student opens their portal, scans the UPI QR code to pay, and the status clears in real-time."
+      number: '04',
+      icon: Siren,
+      title: 'Security Action',
+      text: 'Policy violations are surfaced as alerts for administrative review and action.'
     }
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
-      
-      {/* ================= PUBLIC NAVBAR ================= */}
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
+    <div className="min-h-screen bg-[#060b14] text-slate-100 font-sans">
+
+      {/* NAVBAR */}
+      <header className="sticky top-0 z-50 bg-[#070d18]/90 backdrop-blur-xl border-b border-slate-800/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          
-          {/* Logo / Brand */}
+
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20">
-              <Building2 className="w-5 h-5" />
+            <div className="relative w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center">
+              <Shield className="w-5 h-5 text-white" />
+              <span className="absolute -right-1 -top-1 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#070d18]" />
             </div>
+
             <div>
-              <span className="font-bold text-base sm:text-lg tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-                Hostel Surveillance & Access
-                <span className="hidden sm:inline text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 font-bold border border-blue-200 dark:border-blue-800">
-                  AI v2.6
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-sm sm:text-base tracking-tight">
+                  Sentinel
                 </span>
-              </span>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">
-                Institutional Campus Security & Resident Management Platform
+
+                <span className="hidden sm:inline px-1.5 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-[9px] font-mono text-blue-400">
+                  AI SECURITY
+                </span>
+              </div>
+
+              <p className="hidden sm:block text-[10px] text-slate-500">
+                Intelligent Hostel Surveillance System
               </p>
             </div>
           </div>
 
-          {/* Navigation Links & Actions */}
-          <div className="flex items-center gap-3 sm:gap-4">
-            <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-600 dark:text-slate-300 mr-2">
-              <a href="#features" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                Features
-              </a>
-              <a href="#workflow" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                How It Works
-              </a>
-              <a href="#portals" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                Portal Access
-              </a>
-            </nav>
+          <div className="hidden md:flex items-center gap-7 text-[11px] font-semibold text-slate-400">
+            <a href="#surveillance" className="hover:text-blue-400 transition">
+              Surveillance
+            </a>
+            <a href="#architecture" className="hover:text-blue-400 transition">
+              Architecture
+            </a>
+            <a href="#access" className="hover:text-blue-400 transition">
+              Access
+            </a>
+          </div>
 
-            {/* Theme Toggle Button */}
+          <div className="flex items-center gap-2">
             <button
               onClick={toggleTheme}
-              title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
-              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer flex items-center gap-1.5"
+              className="p-2 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-800 transition cursor-pointer"
+              title="Toggle theme"
             >
               {theme === 'dark' ? (
                 <Sun className="w-4 h-4 text-amber-400" />
               ) : (
-                <Moon className="w-4 h-4 text-slate-600" />
+                <Moon className="w-4 h-4 text-slate-300" />
               )}
             </button>
 
-            {/* Login / Access Button */}
             <button
               onClick={() => openLogin('admin')}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl shadow-sm hover:shadow transition-all flex items-center gap-2 cursor-pointer"
+              className="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-semibold flex items-center gap-2 transition cursor-pointer"
             >
               <Lock className="w-3.5 h-3.5" />
-              <span>Login / Access</span>
+              Security Console
             </button>
           </div>
         </div>
       </header>
 
-      {/* ================= HERO SECTION ================= */}
-      <section className="relative overflow-hidden pt-12 pb-16 sm:pt-20 sm:pb-24 border-b border-slate-200 dark:border-slate-800/80 bg-gradient-to-b from-white via-slate-50 to-slate-100/50 dark:from-slate-900/60 dark:via-[#0b0f19] dark:to-[#0b0f19]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-3xl mx-auto space-y-6">
-            
-            {/* System Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/70 border border-blue-200 dark:border-blue-800/80 text-blue-700 dark:text-blue-300 text-xs font-semibold shadow-xs">
-              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-              <span>Next-Gen Smart Campus Security & Curfew Automation</span>
+      {/* HERO */}
+      <section className="relative overflow-hidden border-b border-slate-800/80">
+
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-blue-600/10 blur-[120px]" />
+          <div className="absolute top-20 left-10 w-1 h-1 bg-blue-400 rounded-full shadow-[0_0_30px_8px_rgba(59,130,246,0.25)]" />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-28 relative">
+
+          <div className="max-w-4xl">
+
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 text-[10px] font-mono font-bold mb-7">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              SURVEILLANCE SYSTEM ONLINE
             </div>
 
-            {/* Headline */}
-            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.15]">
-              Institutional Hostel Surveillance, AI Biometrics & Automated Access
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.02]">
+              Intelligent
+              <span className="text-blue-500"> CCTV Surveillance </span>
+              for Smarter Hostels.
             </h1>
 
-            {/* Subtitle */}
-            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
-              A comprehensive system integrating real-time facial recognition at turnstiles, 
-              automated ingress/egress logs, late-night curfew enforcement, and instant UPI QR fine settlements.
+            <p className="mt-6 max-w-2xl text-sm sm:text-base leading-7 text-slate-400">
+              A centralized security platform combining CCTV monitoring,
+              computer vision, facial recognition, movement intelligence and
+              automated incident detection into one operational console.
             </p>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-wrap items-center justify-center gap-3 pt-3">
+            <div className="flex flex-wrap gap-3 mt-8">
+
               <button
                 onClick={() => openLogin('admin')}
-                className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer"
+                className="px-5 py-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-sm font-semibold flex items-center gap-2 transition shadow-lg shadow-blue-600/10 cursor-pointer"
               >
-                <ShieldCheck className="w-4 h-4" />
-                <span>Admin Management Console</span>
+                <Shield className="w-4 h-4" />
+                Open Security Console
                 <ArrowRight className="w-4 h-4" />
               </button>
 
               <button
                 onClick={() => openLogin('student')}
-                className="px-6 py-3 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 font-semibold text-xs sm:text-sm border border-slate-200 dark:border-slate-700 shadow-sm transition-all flex items-center gap-2 cursor-pointer"
+                className="px-5 py-3 rounded-lg border border-slate-700 bg-slate-900 hover:bg-slate-800 text-sm font-semibold text-slate-200 flex items-center gap-2 transition cursor-pointer"
               >
-                <Users className="w-4 h-4 text-emerald-500" />
-                <span>Student Resident Portal</span>
+                <Users className="w-4 h-4" />
+                Resident Portal
               </button>
 
               <button
                 onClick={goToClassroom}
-                className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer"
+                className="px-5 py-3 rounded-lg border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 text-sm font-semibold flex items-center gap-2 transition cursor-pointer"
               >
                 <GraduationCap className="w-4 h-4" />
-                <span>Classroom Attendance</span>
-                <ArrowRight className="w-4 h-4" />
+                Attendance
               </button>
             </div>
+          </div>
 
-            {/* Live Operational Metrics */}
-            <div className="pt-8 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-4xl mx-auto text-left">
-              <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 mb-1">
-                  <Video className="w-4 h-4" />
-                  <span className="text-[11px] font-bold uppercase tracking-wider">CCTV Feeds</span>
-                </div>
-                <div className="text-xl font-bold text-slate-900 dark:text-white font-mono">4 Channels</div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Turnstiles & Main Gate</div>
+          {/* SYSTEM STATUS */}
+          <div className="mt-16 border border-slate-800 rounded-xl bg-[#0a111d]/90 overflow-hidden">
+
+            <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Activity className="w-4 h-4 text-blue-400" />
+                <span className="text-xs font-semibold">
+                  SYSTEM STATUS
+                </span>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 mb-1">
-                  <Zap className="w-4 h-4" />
-                  <span className="text-[11px] font-bold uppercase tracking-wider">AI Accuracy</span>
-                </div>
-                <div className="text-xl font-bold text-slate-900 dark:text-white font-mono">99.4% Match</div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Sub-second Latency</div>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 mb-1">
-                  <Clock className="w-4 h-4" />
-                  <span className="text-[11px] font-bold uppercase tracking-wider">Curfew Rule</span>
-                </div>
-                <div className="text-xl font-bold text-slate-900 dark:text-white font-mono">10:00 PM</div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Automated Tagging</div>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 mb-1">
-                  <QrCode className="w-4 h-4" />
-                  <span className="text-[11px] font-bold uppercase tracking-wider">UPI Clearance</span>
-                </div>
-                <div className="text-xl font-bold text-slate-900 dark:text-white font-mono">Instant Sync</div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Zero Bureaucracy</div>
-              </div>
+              <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+                OPERATIONAL
+              </span>
             </div>
 
+            <div className="grid grid-cols-2 md:grid-cols-5 divide-x divide-y md:divide-y-0 divide-slate-800">
+
+              <StatusBox
+                icon={Camera}
+                label="CAMERAS"
+                value="04"
+                sub="CONNECTED"
+              />
+
+              <StatusBox
+                icon={ScanFace}
+                label="AI ENGINE"
+                value="ONLINE"
+                sub="FACE DETECTION"
+              />
+
+              <StatusBox
+                icon={Users}
+                label="RESIDENTS"
+                value={activeStudents}
+                sub="REGISTERED"
+              />
+
+              <StatusBox
+                icon={AlertTriangle}
+                label="ALERTS"
+                value={activeAlerts}
+                sub="REQUIRES REVIEW"
+                danger
+              />
+
+              <StatusBox
+                icon={FileWarning}
+                label="PENDING"
+                value={pendingFines}
+                sub="DISCIPLINARY"
+              />
+
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ================= FEATURES EXPLANATION SECTION ================= */}
-      <section id="features" className="py-16 sm:py-20 bg-white dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-12">
-          
-          <div className="text-center max-w-2xl mx-auto space-y-3">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400 font-mono">
-              Comprehensive Feature Suite
-            </h2>
-            <p className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              Engineered for Precision, Safety & Seamless Hostel Operations
-            </p>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
-              Explore how each integrated module eliminates security blindspots and automates administrative workloads.
-            </p>
-          </div>
+      {/* SURVEILLANCE */}
+      <section
+        id="surveillance"
+        className="py-20 border-b border-slate-800/80 bg-[#080e18]"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {coreFeatures.map((feat, idx) => {
-              const Icon = feat.icon;
+          <SectionHeading
+            eyebrow="CORE CAPABILITIES"
+            title="A complete surveillance intelligence layer"
+            description="Every camera event becomes structured security information that administrators can investigate and act upon."
+          />
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mt-12">
+
+            {modules.map((module, index) => {
+              const Icon = module.icon;
+
               return (
-                <div 
-                  key={idx}
-                  className="bg-slate-50/80 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 transition-all shadow-xs flex flex-col justify-between space-y-4 group"
+                <div
+                  key={index}
+                  className="group border border-slate-800 bg-[#0b1320] hover:border-blue-500/40 transition rounded-xl p-5"
                 >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-105 transition-transform">
-                        <Icon className="w-5 h-5" />
-                      </div>
-                      <span className="text-[10px] font-mono font-bold uppercase px-2.5 py-0.5 rounded bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                        {feat.badge}
-                      </span>
+
+                  <div className="flex items-start justify-between">
+                    <div className="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                      <Icon className="w-5 h-5 text-blue-400" />
                     </div>
 
-                    <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                      {feat.title}
-                    </h3>
-
-                    <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                      {feat.description}
-                    </p>
+                    <span className="text-[8px] font-mono text-slate-500 border border-slate-800 px-2 py-1 rounded">
+                      {module.tag}
+                    </span>
                   </div>
 
-                  <div className="pt-3 border-t border-slate-200/60 dark:border-slate-800 space-y-2">
-                    {feat.bullets.map((bullet, bIdx) => (
-                      <div key={bIdx} className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-[11px] leading-tight">{bullet}</span>
+                  <h3 className="mt-5 text-sm font-bold">
+                    {module.title}
+                  </h3>
+
+                  <p className="mt-2 text-xs leading-6 text-slate-500">
+                    {module.description}
+                  </p>
+
+                  <div className="mt-5 pt-4 border-t border-slate-800 space-y-2">
+
+                    {module.points.map((point, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-2 text-[11px] text-slate-400"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                        {point}
                       </div>
                     ))}
+
                   </div>
                 </div>
               );
             })}
-          </div>
 
+          </div>
         </div>
       </section>
 
-      {/* ================= WORKFLOW SECTION ================= */}
-      <section id="workflow" className="py-16 sm:py-20 bg-slate-50 dark:bg-[#0b0f19] border-b border-slate-200 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-12">
-          
-          <div className="text-center max-w-2xl mx-auto space-y-3">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 font-mono">
-              System Architecture & Flow
-            </h2>
-            <p className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              How Automated Surveillance & UPI Settlement Works
-            </p>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
-              From the moment a resident steps before the turnstile to instant disciplinary clearance.
-            </p>
+      {/* ARCHITECTURE */}
+      <section
+        id="architecture"
+        className="py-20 border-b border-slate-800/80"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+
+          <SectionHeading
+            eyebrow="EVENT PIPELINE"
+            title="From camera feed to security action"
+            description="The surveillance pipeline converts raw video into actionable, auditable security events."
+          />
+
+          <div className="grid md:grid-cols-4 gap-4 mt-12">
+
+            {workflow.map((item, index) => {
+              const Icon = item.icon;
+
+              return (
+                <div key={index} className="relative">
+
+                  <div className="border border-slate-800 bg-[#0a111d] rounded-xl p-5 h-full">
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-2xl font-black font-mono text-blue-500/50">
+                        {item.number}
+                      </span>
+
+                      <div className="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                        <Icon className="w-4 h-4 text-blue-400" />
+                      </div>
+                    </div>
+
+                    <h3 className="mt-5 text-sm font-bold">
+                      {item.title}
+                    </h3>
+
+                    <p className="mt-2 text-xs leading-6 text-slate-500">
+                      {item.text}
+                    </p>
+
+                  </div>
+
+                  {index < workflow.length - 1 && (
+                    <ChevronRight className="hidden lg:block absolute -right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-700 z-10" />
+                  )}
+
+                </div>
+              );
+            })}
+
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {workflowSteps.map((step, idx) => (
-              <div 
-                key={idx}
-                className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden space-y-3"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-black font-mono text-blue-600 dark:text-blue-400">
-                    {step.step}
-                  </span>
-                  <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                </div>
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                  {step.title}
-                </h4>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                  {step.desc}
-                </p>
-              </div>
-            ))}
-          </div>
+          {/* Architecture strip */}
+          <div className="mt-8 border border-slate-800 rounded-xl bg-[#080e18] p-5">
 
-        </div>
-      </section>
+            <div className="flex flex-wrap items-center justify-center gap-3 text-[10px] font-mono">
 
-      {/* ================= PORTAL ACCESS & LOGIN SECTION ================= */}
-      <section id="portals" className="py-16 sm:py-20 bg-white dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-10">
-          
-          <div className="text-center max-w-2xl mx-auto space-y-3">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 font-mono">
-              Direct Portal Access
-            </h2>
-            <p className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              Choose Your Access Level to Proceed
-            </p>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
-              Sign in with your institutional credentials or launch in interactive demo mode.
-            </p>
-          </div>
+              <ArchitectureNode icon={Camera} text="CCTV CAMERA" />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            
-            {/* Admin Console Card */}
-            <div className="bg-slate-50 dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-6 hover:shadow-md transition-shadow">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-                    <ShieldCheck className="w-6 h-6" />
-                  </div>
-                  <span className="text-xs font-mono font-bold px-2.5 py-1 rounded bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                    WARDEN / ADMIN
-                  </span>
-                </div>
+              <ArrowRight className="w-4 h-4 text-slate-700" />
 
-                <div className="space-y-1.5">
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">Admin Management Console</h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                    Full oversight of student registry, live CCTV feeds, turnstile movement ledgers, and automated disciplinary management.
-                  </p>
-                </div>
+              <ArchitectureNode icon={Cpu} text="VISION ENGINE" />
 
-                <div className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-blue-500" />
-                    <span>Live 4-Channel CCTV feed with AI overlay</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-blue-500" />
-                    <span>Real-time Ingress & Egress movement tracker</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-blue-500" />
-                    <span>Fine issuance & Guardian notification system</span>
-                  </div>
-                </div>
-              </div>
+              <ArrowRight className="w-4 h-4 text-slate-700" />
 
-              <div className="space-y-2 pt-2">
-                <button
-                  onClick={() => openLogin('admin')}
-                  className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <Lock className="w-4 h-4" />
-                  <span>Sign In to Admin Console</span>
-                </button>
-                <button
-                  onClick={() => loginAsAdmin()}
-                  className="w-full py-2 px-3 text-[11px] font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 bg-slate-200/60 dark:bg-slate-800/60 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                >
-                  ⚡ Direct Admin Demo Launch
-                </button>
-              </div>
-            </div>
+              <ArchitectureNode icon={Fingerprint} text="FACE MATCH" />
 
-            {/* Student Resident Portal Card */}
-            <div className="bg-slate-50 dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-6 hover:shadow-md transition-shadow">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                    <Users className="w-6 h-6" />
-                  </div>
-                  <span className="text-xs font-mono font-bold px-2.5 py-1 rounded bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                    RESIDENT / STUDENT
-                  </span>
-                </div>
+              <ArrowRight className="w-4 h-4 text-slate-700" />
 
-                <div className="space-y-1.5">
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">Student Resident Portal</h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                    Personalized dashboard for hostel residents to view their entry/exit logs, track curfew status, and pay fines via UPI QR.
-                  </p>
-                </div>
+              <ArchitectureNode icon={Database} text="EVENT DB" />
 
-                <div className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                    <span>Personalized gate entry & exit log history</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                    <span>Curfew compliance and penalty ledger</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                    <span>Instant UPI QR code fine payment & clearance</span>
-                  </div>
-                </div>
-              </div>
+              <ArrowRight className="w-4 h-4 text-slate-700" />
 
-              <div className="space-y-2 pt-2">
-                <button
-                  onClick={() => openLogin('student')}
-                  className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <Lock className="w-4 h-4" />
-                  <span>Sign In as Student</span>
-                </button>
-                <button
-                  onClick={() => loginAsStudent(students[0]?.id || 'STU-2026-001')}
-                  className="w-full py-2 px-3 text-[11px] font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 bg-slate-200/60 dark:bg-slate-800/60 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                >
-                  ⚡ Direct Student Demo Launch
-                </button>
-              </div>
+              <ArchitectureNode icon={Shield} text="ADMIN CONSOLE" />
+
             </div>
 
           </div>
-
         </div>
       </section>
 
-      {/* ================= FOOTER ================= */}
-      <footer className="mt-auto py-8 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      {/* ACCESS */}
+      <section id="access" className="py-20 bg-[#080e18]">
+
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+
+          <SectionHeading
+            eyebrow="SECURE ACCESS"
+            title="Choose your operational interface"
+            description="Access the surveillance console or resident-facing services using authorized credentials."
+          />
+
+          <div className="grid md:grid-cols-2 gap-5 mt-12">
+
+            <AccessCard
+              icon={Shield}
+              title="Security Operations Console"
+              label="ADMIN / WARDEN"
+              description="Monitor cameras, investigate events, review resident movement and manage security incidents."
+              button="Open Security Console"
+              color="blue"
+              onClick={() => openLogin('admin')}
+              demo={() => loginAsAdmin()}
+            />
+
+            <AccessCard
+              icon={Users}
+              title="Resident Portal"
+              label="STUDENT"
+              description="View personal movement records, compliance information and active disciplinary records."
+              button="Open Resident Portal"
+              color="emerald"
+              onClick={() => openLogin('student')}
+              demo={() => loginAsStudent(students[0]?.id || 'STU-2026-001')}
+            />
+
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="border-t border-slate-800 py-7 bg-[#050a12]">
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+
           <div className="flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            <span className="font-semibold text-slate-700 dark:text-slate-300">
-              Hostel Surveillance & Automated Access Management System
+            <Shield className="w-4 h-4 text-blue-500" />
+            <span className="text-xs font-semibold text-slate-300">
+              Intelligent Hostel Surveillance System
             </span>
           </div>
-          <p className="text-[11px]">
-            Institutional Project Exhibition Edition • Powered by React & Tailwind CSS
-          </p>
+
+          <span className="text-[10px] text-slate-600 font-mono">
+            CCTV • COMPUTER VISION • ACCESS INTELLIGENCE
+          </span>
+
         </div>
+
       </footer>
 
-      {/* Login Modal */}
-      <LoginModal 
-        isOpen={isLoginModalOpen} 
-        onClose={() => setIsLoginModalOpen(false)} 
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
         initialRole={loginModalInitialRole}
       />
+
+    </div>
+  );
+}
+
+function StatusBox({ icon: Icon, label, value, sub, danger }) {
+  return (
+    <div className="p-4">
+      <div className="flex items-center gap-2 text-[9px] font-mono text-slate-500">
+        <Icon className={`w-3.5 h-3.5 ${danger ? 'text-rose-400' : 'text-blue-400'}`} />
+        {label}
+      </div>
+
+      <div className={`mt-2 text-lg font-bold font-mono ${
+        danger ? 'text-rose-400' : 'text-slate-100'
+      }`}>
+        {value}
+      </div>
+
+      <div className="text-[8px] text-slate-600 font-mono mt-1">
+        {sub}
+      </div>
+    </div>
+  );
+}
+
+function SectionHeading({ eyebrow, title, description }) {
+  return (
+    <div className="max-w-2xl">
+      <div className="text-[10px] font-mono font-bold tracking-[0.2em] text-blue-400">
+        {eyebrow}
+      </div>
+
+      <h2 className="mt-3 text-2xl sm:text-3xl font-black tracking-tight">
+        {title}
+      </h2>
+
+      <p className="mt-3 text-sm leading-6 text-slate-500">
+        {description}
+      </p>
+    </div>
+  );
+}
+
+function ArchitectureNode({ icon: Icon, text }) {
+  return (
+    <div className="flex items-center gap-2 px-3 py-2 rounded-md border border-slate-800 bg-slate-900/70 text-slate-400">
+      <Icon className="w-3.5 h-3.5 text-blue-400" />
+      {text}
+    </div>
+  );
+}
+
+function AccessCard({
+  icon: Icon,
+  title,
+  label,
+  description,
+  button,
+  color,
+  onClick,
+  demo
+}) {
+  const blue = color === 'blue';
+
+  return (
+    <div className="border border-slate-800 bg-[#0b1320] rounded-xl p-6">
+
+      <div className="flex items-center justify-between">
+
+        <div className={`w-11 h-11 rounded-lg flex items-center justify-center ${
+          blue
+            ? 'bg-blue-500/10 text-blue-400'
+            : 'bg-emerald-500/10 text-emerald-400'
+        }`}>
+          <Icon className="w-5 h-5" />
+        </div>
+
+        <span className="text-[9px] font-mono px-2 py-1 border border-slate-800 rounded text-slate-500">
+          {label}
+        </span>
+
+      </div>
+
+      <h3 className="mt-5 text-base font-bold">
+        {title}
+      </h3>
+
+      <p className="mt-2 text-xs text-slate-500 leading-6">
+        {description}
+      </p>
+
+      <button
+        onClick={onClick}
+        className={`mt-6 w-full py-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer ${
+          blue
+            ? 'bg-blue-600 hover:bg-blue-500'
+            : 'bg-emerald-600 hover:bg-emerald-500'
+        }`}
+      >
+        <Lock className="w-3.5 h-3.5" />
+        {button}
+      </button>
+
+      <button
+        onClick={demo}
+        className="mt-2 w-full py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-[10px] text-slate-500 hover:text-slate-300 cursor-pointer"
+      >
+        Launch Demo Environment
+      </button>
 
     </div>
   );

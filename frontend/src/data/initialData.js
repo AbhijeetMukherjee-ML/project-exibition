@@ -1,8 +1,17 @@
+// ============================================================
+// AEGIS — INITIAL APPLICATION DATA
+// ============================================================
+
+// ============================================================
+// STUDENTS
+// ============================================================
+
 export const INITIAL_STUDENTS = [
   {
     id: "STU-2026-001",
     name: "Aarav Sharma",
-    avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=256&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=256&q=80",
     email: "aarav.sharma@hostel.edu",
     phone: "+91 98765 43210",
     department: "Computer Science & Engineering",
@@ -18,12 +27,14 @@ export const INITIAL_STUDENTS = [
     faceConfidence: "99.4%",
     status: "Active",
     bloodGroup: "O+",
-    joinedDate: "2023-08-10"
+    joinedDate: "2023-08-10",
   },
+
   {
     id: "STU-2026-002",
     name: "Riya Patel",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80",
     email: "riya.patel@hostel.edu",
     phone: "+91 98234 56789",
     department: "Electronics & Communication",
@@ -39,12 +50,14 @@ export const INITIAL_STUDENTS = [
     faceConfidence: "98.7%",
     status: "Active",
     bloodGroup: "B+",
-    joinedDate: "2024-08-12"
+    joinedDate: "2024-08-12",
   },
+
   {
     id: "STU-2026-003",
     name: "Vikramaditya Rao",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=256&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=256&q=80",
     email: "vikram.rao@hostel.edu",
     phone: "+91 97654 32109",
     department: "Mechanical Engineering",
@@ -60,12 +73,14 @@ export const INITIAL_STUDENTS = [
     faceConfidence: "97.9%",
     status: "Active",
     bloodGroup: "A+",
-    joinedDate: "2022-08-05"
+    joinedDate: "2022-08-05",
   },
+
   {
     id: "STU-2026-004",
     name: "Ananya Deshmukh",
-    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=256&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=256&q=80",
     email: "ananya.d@hostel.edu",
     phone: "+91 96543 21098",
     department: "Information Technology",
@@ -81,12 +96,14 @@ export const INITIAL_STUDENTS = [
     faceConfidence: "99.1%",
     status: "Active",
     bloodGroup: "AB+",
-    joinedDate: "2023-08-10"
+    joinedDate: "2023-08-10",
   },
+
   {
     id: "STU-2026-005",
     name: "Rohan Kulkarni",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=256&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=256&q=80",
     email: "rohan.k@hostel.edu",
     phone: "+91 95432 10987",
     department: "Civil Engineering",
@@ -102,12 +119,14 @@ export const INITIAL_STUDENTS = [
     faceConfidence: "96.5%",
     status: "Under Watch",
     bloodGroup: "O-",
-    joinedDate: "2024-08-12"
+    joinedDate: "2024-08-12",
   },
+
   {
     id: "STU-2026-006",
     name: "Meera Sen",
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=256&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=256&q=80",
     email: "meera.sen@hostel.edu",
     phone: "+91 94321 09876",
     department: "Biotechnology",
@@ -123,12 +142,14 @@ export const INITIAL_STUDENTS = [
     faceConfidence: "Pending Scan",
     status: "Active",
     bloodGroup: "A-",
-    joinedDate: "2025-08-14"
+    joinedDate: "2025-08-14",
   },
+
   {
     id: "STU-2026-007",
     name: "Kabir Singh Malhotra",
-    avatar: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=256&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=256&q=80",
     email: "kabir.malhotra@hostel.edu",
     phone: "+91 93210 98765",
     department: "Computer Science & Engineering",
@@ -144,12 +165,14 @@ export const INITIAL_STUDENTS = [
     faceConfidence: "99.0%",
     status: "Suspended",
     bloodGroup: "B-",
-    joinedDate: "2022-08-05"
+    joinedDate: "2022-08-05",
   },
+
   {
     id: "STU-2026-008",
     name: "Sneha Nair",
-    avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=256&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=256&q=80",
     email: "sneha.nair@hostel.edu",
     phone: "+91 92109 87654",
     department: "Data Science & AI",
@@ -165,12 +188,14 @@ export const INITIAL_STUDENTS = [
     faceConfidence: "98.2%",
     status: "Active",
     bloodGroup: "O+",
-    joinedDate: "2024-08-12"
+    joinedDate: "2024-08-12",
   },
+
   {
     id: "STU-2026-009",
     name: "Adarsh Tiwari",
-    avatar: "https://ui-avatars.com/api/?name=Adarsh+Tiwari&background=2563eb&color=fff&size=256&bold=true",
+    avatar:
+      "https://ui-avatars.com/api/?name=Adarsh+Tiwari&background=2563eb&color=fff&size=256&bold=true",
     email: "adarsh.tiwari@hostel.edu",
     phone: "+91 90000 10009",
     department: "Computer Science & Engineering",
@@ -189,12 +214,14 @@ export const INITIAL_STUDENTS = [
     joinedDate: "2024-08-12",
     present: false,
     presentDate: null,
-    presentAt: null
+    presentAt: null,
   },
+
   {
     id: "STU-2026-010",
     name: "Shubh",
-    avatar: "https://ui-avatars.com/api/?name=Shubh&background=059669&color=fff&size=256&bold=true",
+    avatar:
+      "https://ui-avatars.com/api/?name=Shubh&background=059669&color=fff&size=256&bold=true",
     email: "shubh@hostel.edu",
     phone: "+91 90000 10010",
     department: "Computer Science & Engineering",
@@ -213,25 +240,33 @@ export const INITIAL_STUDENTS = [
     joinedDate: "2024-08-12",
     present: false,
     presentDate: null,
-    presentAt: null
-  }
+    presentAt: null,
+  },
 ];
 
-// Face-recognition defaults — the trained Teachable Machine model and its
-// class → student mapping, so recognition is plug-and-play on first load.
-export const DEFAULT_TM_MODEL_URL = "https://teachablemachine.withgoogle.com/models/Vxw4jMg7l/";
+// ============================================================
+// TEACHABLE MACHINE — FACE RECOGNITION
+// ============================================================
+
+export const DEFAULT_TM_MODEL_URL =
+  "https://teachablemachine.withgoogle.com/models/Vxw4jMg7l/";
 
 export const DEFAULT_TM_MAPPINGS = {
   "Adarsh Tiwari": "STU-2026-009",
-  "Shubh": "STU-2026-010"
+  Shubh: "STU-2026-010",
 };
+
+// ============================================================
+// ENTRY / EXIT LOGS
+// ============================================================
 
 export const INITIAL_LOGS = [
   {
     id: "LOG-9821",
     studentId: "STU-2026-001",
     studentName: "Aarav Sharma",
-    avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=256&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=256&q=80",
     room: "A-304",
     direction: "IN",
     timestamp: "2026-09-28 23:42:15",
@@ -240,13 +275,15 @@ export const INITIAL_LOGS = [
     status: "Curfew Violation",
     curfewAlert: true,
     remarks: "Entered 1 hr 42 min past curfew limit (22:00 PM)",
-    confidence: "99.4%"
+    confidence: "99.4%",
   },
+
   {
     id: "LOG-9820",
     studentId: "STU-2026-004",
     studentName: "Ananya Deshmukh",
-    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=256&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=256&q=80",
     room: "B-215",
     direction: "IN",
     timestamp: "2026-09-28 21:55:04",
@@ -255,13 +292,15 @@ export const INITIAL_LOGS = [
     status: "Authorized Normal",
     curfewAlert: false,
     remarks: "Returned before curfew",
-    confidence: "99.1%"
+    confidence: "99.1%",
   },
+
   {
     id: "LOG-9819",
     studentId: "STU-2026-003",
     studentName: "Vikramaditya Rao",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=256&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=256&q=80",
     room: "A-112",
     direction: "OUT",
     timestamp: "2026-09-28 20:10:30",
@@ -270,13 +309,15 @@ export const INITIAL_LOGS = [
     status: "Authorized Outpass",
     curfewAlert: false,
     remarks: "Outpass approved by Warden Dr. M. Roy",
-    confidence: "97.9%"
+    confidence: "97.9%",
   },
+
   {
     id: "LOG-9818",
     studentId: "STU-2026-005",
     studentName: "Rohan Kulkarni",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=256&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=256&q=80",
     room: "C-402",
     direction: "IN",
     timestamp: "2026-09-28 23:15:20",
@@ -285,13 +326,15 @@ export const INITIAL_LOGS = [
     status: "Curfew Violation",
     curfewAlert: true,
     remarks: "Entered 1 hr 15 min past curfew limit",
-    confidence: "96.5%"
+    confidence: "96.5%",
   },
+
   {
     id: "LOG-9817",
     studentId: "STU-2026-002",
     studentName: "Riya Patel",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80",
     room: "B-108",
     direction: "IN",
     timestamp: "2026-09-28 19:40:12",
@@ -300,13 +343,15 @@ export const INITIAL_LOGS = [
     status: "Authorized Normal",
     curfewAlert: false,
     remarks: "Library study session return",
-    confidence: "98.7%"
+    confidence: "98.7%",
   },
+
   {
     id: "LOG-9816",
     studentId: "STU-2026-008",
     studentName: "Sneha Nair",
-    avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=256&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=256&q=80",
     room: "B-306",
     direction: "OUT",
     timestamp: "2026-09-28 17:30:00",
@@ -315,13 +360,15 @@ export const INITIAL_LOGS = [
     status: "Authorized Normal",
     curfewAlert: false,
     remarks: "Evening sports session",
-    confidence: "98.2%"
+    confidence: "98.2%",
   },
+
   {
     id: "LOG-9815",
     studentId: "STU-2026-007",
     studentName: "Kabir Singh Malhotra",
-    avatar: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=256&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=256&q=80",
     room: "A-410",
     direction: "IN",
     timestamp: "2026-09-28 01:25:00",
@@ -330,16 +377,21 @@ export const INITIAL_LOGS = [
     status: "Critical Breach",
     curfewAlert: true,
     remarks: "Unauthorized entry over boundary wall",
-    confidence: "99.0%"
-  }
+    confidence: "99.0%",
+  },
 ];
+
+// ============================================================
+// FINES & DISCIPLINARY ACTIONS
+// ============================================================
 
 export const INITIAL_FINES = [
   {
     id: "FINE-2026-101",
     studentId: "STU-2026-001",
     studentName: "Aarav Sharma",
-    avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=256&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=256&q=80",
     room: "A-304",
     block: "Block A",
     infraction: "Late Entry Past Curfew (10:00 PM)",
@@ -347,19 +399,21 @@ export const INITIAL_FINES = [
     amount: 500,
     issuedDate: "2026-09-28",
     dueDate: "2026-10-05",
-    status: "Unserved / Pending", // "Served / Paid" or "Unserved / Pending" or "Under Appeal"
+    status: "Unserved / Pending",
     servedDate: null,
     paymentMethod: null,
     disciplinaryAction: "Warning Notice 1 + Fine ₹500",
     evidence: "Main Gate Cam 01 snapshot at 23:42 PM",
     issuedBy: "Chief Warden Office",
-    guardianNotified: true
+    guardianNotified: true,
   },
+
   {
     id: "FINE-2026-102",
     studentId: "STU-2026-005",
     studentName: "Rohan Kulkarni",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=256&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=256&q=80",
     room: "C-402",
     block: "Block C",
     infraction: "Unpermitted Electrical Appliance (Heater)",
@@ -373,13 +427,15 @@ export const INITIAL_FINES = [
     disciplinaryAction: "Confiscation of appliance + Fine ₹1,500",
     evidence: "Room Inspection report by Caretaker Mr. Verma",
     issuedBy: "Hostel Committee",
-    guardianNotified: true
+    guardianNotified: true,
   },
+
   {
     id: "FINE-2026-103",
     studentId: "STU-2026-007",
     studentName: "Kabir Singh Malhotra",
-    avatar: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=256&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=256&q=80",
     room: "A-410",
     block: "Block A",
     infraction: "Severe Curfew Breach & Boundary Climbing",
@@ -390,16 +446,19 @@ export const INITIAL_FINES = [
     status: "Unserved / Pending",
     servedDate: null,
     paymentMethod: null,
-    disciplinaryAction: "Suspension for 7 Days + Mandatory Guardian Meeting + Fine ₹3,000",
+    disciplinaryAction:
+      "Suspension for 7 Days + Mandatory Guardian Meeting + Fine ₹3,000",
     evidence: "Perimeter Cam 03 video clip & Security Log #9815",
     issuedBy: "Disciplinary Board & Proctor",
-    guardianNotified: true
+    guardianNotified: true,
   },
+
   {
     id: "FINE-2026-104",
     studentId: "STU-2026-003",
     studentName: "Vikramaditya Rao",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=256&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=256&q=80",
     room: "A-112",
     block: "Block A",
     infraction: "Noise Violation During Quiet Hours (01:00 AM)",
@@ -410,16 +469,19 @@ export const INITIAL_FINES = [
     status: "Served / Paid",
     servedDate: "2026-09-23 11:15",
     paymentMethod: "Cash Receipt #CR-8821",
-    disciplinaryAction: "Written apology to floor residents + Fine ₹300",
+    disciplinaryAction:
+      "Written apology to floor residents + Fine ₹300",
     evidence: "Floor Resident complaints & Floor Warden verification",
     issuedBy: "Floor Warden",
-    guardianNotified: false
+    guardianNotified: false,
   },
+
   {
     id: "FINE-2026-105",
     studentId: "STU-2026-001",
     studentName: "Aarav Sharma",
-    avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=256&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=256&q=80",
     room: "A-304",
     block: "Block A",
     infraction: "Missing Mandatory Night Roll Call",
@@ -433,9 +495,13 @@ export const INITIAL_FINES = [
     disciplinaryAction: "Fine ₹400 + Community Service 2 Hours",
     evidence: "Floor Attendance Biometric Log",
     issuedBy: "Assistant Warden",
-    guardianNotified: true
-  }
+    guardianNotified: true,
+  },
 ];
+
+// ============================================================
+// CAMERAS
+// ============================================================
 
 export const CAMERAS = [
   {
@@ -447,8 +513,9 @@ export const CAMERAS = [
     aiEnabled: true,
     detectedPerson: "Aarav Sharma (STU-2026-001)",
     matchConfidence: "99.4%",
-    type: "live"
+    type: "live",
   },
+
   {
     id: "CAM-02",
     name: "Main Gate - Outbound Lane",
@@ -458,8 +525,9 @@ export const CAMERAS = [
     aiEnabled: true,
     detectedPerson: "Riya Patel (STU-2026-002)",
     matchConfidence: "98.7%",
-    type: "simulated"
+    type: "simulated",
   },
+
   {
     id: "CAM-03",
     name: "Hostel Wing B Entrance",
@@ -469,8 +537,9 @@ export const CAMERAS = [
     aiEnabled: true,
     detectedPerson: "Ananya Deshmukh (STU-2026-004)",
     matchConfidence: "99.1%",
-    type: "simulated"
+    type: "simulated",
   },
+
   {
     id: "CAM-04",
     name: "Hostel Mess & Dining Hall",
@@ -480,6 +549,6 @@ export const CAMERAS = [
     aiEnabled: true,
     detectedPerson: "Vikramaditya Rao (STU-2026-003)",
     matchConfidence: "97.9%",
-    type: "simulated"
-  }
+    type: "simulated",
+  },
 ];
