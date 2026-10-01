@@ -5,9 +5,17 @@ import {
     createCamera,
     updateCamera,
     deleteCamera,
+    startStream,
+    stopStream,
+    getStreamStatus,
 } from "../controllers/cameraController.js";
 
 const router = express.Router();
+
+// AI Stream lifecycle routes (must come before /:id)
+router.post("/stream/start", startStream);
+router.post("/stream/stop", stopStream);
+router.get("/stream/status", getStreamStatus);
 
 router.route("/")
     .get(getCameras)

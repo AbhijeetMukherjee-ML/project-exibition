@@ -25,12 +25,31 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
+// Hostel blocks 1–8 (independent of the shared camera system)
+const HOSTEL_BLOCKS = [
+  { id: 'BLK-1', name: 'Block 1', label: 'Aryabhata Wing',  gender: 'Boys',  floors: 4 },
+  { id: 'BLK-2', name: 'Block 2', label: 'Kalpana Wing',    gender: 'Girls', floors: 4 },
+  { id: 'BLK-3', name: 'Block 3', label: 'Raman Block',     gender: 'Boys',  floors: 3 },
+  { id: 'BLK-4', name: 'Block 4', label: 'Sarabhai Block',  gender: 'Girls', floors: 3 },
+  { id: 'BLK-5', name: 'Block 5', label: 'Bhabha Block',    gender: 'Boys',  floors: 5 },
+  { id: 'BLK-6', name: 'Block 6', label: 'Curie Block',     gender: 'Girls', floors: 5 },
+  { id: 'BLK-7', name: 'Block 7', label: 'Tesla Block',     gender: 'Boys',  floors: 4 },
+  { id: 'BLK-8', name: 'Block 8', label: 'Ramanujan Block', gender: 'Mixed', floors: 6 },
+];
+
+const BLOCK_IMAGES = {
+  'BLK-1': 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1600&q=85',
+  'BLK-2': 'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1600&q=85',
+  'BLK-3': 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=1600&q=85',
+  'BLK-4': 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=85',
+  'BLK-5': 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1600&q=85',
+  'BLK-6': 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=1600&q=85',
+  'BLK-7': 'https://images.unsplash.com/photo-1571260899304-425eee4c7efc?auto=format&fit=crop&w=1600&q=85',
+  'BLK-8': 'https://images.unsplash.com/photo-1564981797816-1043664bf78d?auto=format&fit=crop&w=1600&q=85',
+};
+
 export default function HostelAttendancePage() {
   const {
-    cameras,
-    activeCameraId,
-    setActiveCameraId,
-    activeCamera,
     aiOverlayEnabled,
     setAiOverlayEnabled,
     nightVision,
@@ -41,6 +60,10 @@ export default function HostelAttendancePage() {
     students,
     showToast
   } = useApp();
+
+  // Hostel block selector state (Blocks 1–8)
+  const [activeBlockId, setActiveBlockId] = useState('BLK-1');
+  const activeBlock = HOSTEL_BLOCKS.find(b => b.id === activeBlockId);
 
   const [useWebcam, setUseWebcam] = useState(false);
   const [webcamError, setWebcamError] = useState(null);
@@ -70,7 +93,7 @@ export default function HostelAttendancePage() {
   const totalOut = hostelLogs.filter(l => l.direction === 'OUT').length;
   const violations = hostelLogs.filter(l => l.curfewAlert).length;
 
-  // Webcam
+  // Webcam (only available on Block 1 — live camera gate)
   useEffect(() => {
     let stream = null;
     if (useWebcam) {
@@ -95,15 +118,6 @@ export default function HostelAttendancePage() {
   }, [useWebcam]);
 
   const detectionIsAlert = currentDetection.status === 'CURFEW_ALERT';
-
-  const getCameraImage = (cam) => {
-    const imgs = {
-      'CAM-01': 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1600&q=85',
-      'CAM-02': 'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1600&q=85',
-      'CAM-03': 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=1600&q=85',
-    };
-    return imgs[cam.id] || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=85';
-  };
 
   const exportCSV = () => {
     const rows = hostelLogs.map(l =>
@@ -198,33 +212,52 @@ export default function HostelAttendancePage() {
         {/* CAMERA FEED */}
         <div className="space-y-3">
 
-          {/* Channel selector */}
-          <div className="flex flex-wrap items-center gap-2 p-2 rounded-xl bg-[#0b1320] border border-slate-800">
-            <div className="px-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-1.5">
-              <Video className="w-3.5 h-3.5" />
-              Gate Cameras
+          {/* Hostel Block selector */}
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2 p-2 rounded-xl bg-[#0b1320] border border-slate-800">
+              <div className="px-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-1.5">
+                <Building2 className="w-3.5 h-3.5" />
+                Hostel Blocks
+              </div>
+              {HOSTEL_BLOCKS.map(blk => {
+                const selected = blk.id === activeBlockId;
+                return (
+                  <button
+                    key={blk.id}
+                    onClick={() => { setActiveBlockId(blk.id); if (blk.id !== 'BLK-1') setUseWebcam(false); }}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${selected ? 'bg-violet-600 text-white shadow-md' : 'bg-slate-900 border border-slate-700 text-slate-300 hover:bg-slate-800'}`}
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full ${selected ? 'bg-white' : 'bg-emerald-500'}`} />
+                    {blk.name}
+                    <span className="hidden sm:inline text-xs opacity-80">{blk.label}</span>
+                  </button>
+                );
+              })}
+              <button
+                onClick={() => setIsGridMode(!isGridMode)}
+                className="ml-auto px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:bg-slate-800 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+              >
+                {isGridMode ? <Square className="w-3.5 h-3.5" /> : <Grid className="w-3.5 h-3.5" />}
+                {isGridMode ? 'Single' : 'Grid'}
+              </button>
             </div>
-            {cameras.map(cam => {
-              const selected = cam.id === activeCameraId;
-              return (
-                <button
-                  key={cam.id}
-                  onClick={() => { setActiveCameraId(cam.id); if (cam.id !== 'CAM-01') setUseWebcam(false); }}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${selected ? 'bg-violet-600 text-white shadow-md' : 'bg-slate-900 border border-slate-700 text-slate-300 hover:bg-slate-800'}`}
-                >
-                  <span className={`w-1.5 h-1.5 rounded-full ${selected ? 'bg-white' : 'bg-emerald-500'}`} />
-                  {cam.id}
-                  <span className="hidden sm:inline text-xs opacity-80">{cam.name}</span>
-                </button>
-              );
-            })}
-            <button
-              onClick={() => setIsGridMode(!isGridMode)}
-              className="ml-auto px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:bg-slate-800 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
-            >
-              {isGridMode ? <Square className="w-3.5 h-3.5" /> : <Grid className="w-3.5 h-3.5" />}
-              {isGridMode ? 'Single' : 'Grid'}
-            </button>
+
+            {/* Active block info pill */}
+            {activeBlock && (
+              <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-[#0b1320] border border-slate-800 text-[10px] font-mono text-slate-400">
+                <span className="font-bold text-violet-400">{activeBlock.name}</span>
+                <span className="text-slate-600">·</span>
+                <span>{activeBlock.label}</span>
+                <span className="text-slate-600">·</span>
+                <span>{activeBlock.gender}</span>
+                <span className="text-slate-600">·</span>
+                <span>{activeBlock.floors} Floors</span>
+                <span className="ml-auto flex items-center gap-1.5 text-emerald-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  ONLINE
+                </span>
+              </div>
+            )}
           </div>
 
           {!isGridMode ? (
@@ -234,8 +267,8 @@ export default function HostelAttendancePage() {
                 <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover transform -scale-x-100" />
               ) : (
                 <img
-                  src={getCameraImage(activeCamera)}
-                  alt={activeCamera?.name}
+                  src={BLOCK_IMAGES[activeBlockId]}
+                  alt={activeBlock?.label}
                   className={`w-full h-full object-cover ${nightVision ? 'brightness-125 contrast-125 saturate-50 hue-rotate-90' : ''}`}
                 />
               )}
@@ -255,9 +288,9 @@ export default function HostelAttendancePage() {
                     <div className="flex gap-2">
                       <div className="px-3 py-2 rounded-lg bg-black/75 backdrop-blur-md border border-white/10 text-white font-mono text-[11px] flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                        <span className="font-bold">{activeCamera?.id}</span>
+                        <span className="font-bold">{activeBlock?.name}</span>
                         <span className="text-slate-400">/</span>
-                        <span className="text-slate-300">{activeCamera?.name}</span>
+                        <span className="text-slate-300">{activeBlock?.label}</span>
                       </div>
                       <div className="hidden sm:flex px-3 py-2 rounded-lg bg-black/75 backdrop-blur-md border border-white/10 text-white font-mono text-[11px] items-center gap-2">
                         <Clock3 className="w-3 h-3 text-violet-400" />
@@ -314,7 +347,7 @@ export default function HostelAttendancePage() {
                   {/* Bottom HUD */}
                   <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
                     <div className="px-3 py-2 rounded-lg bg-black/75 backdrop-blur-md border border-white/10 text-[10px] font-mono text-slate-300">
-                      HOSTEL GATE · {activeCamera?.id} · ENCRYPTED
+                      {activeBlock?.name} · {activeBlock?.label} · ENCRYPTED
                     </div>
                     <div className={`px-3 py-2 rounded-lg backdrop-blur-md border text-[10px] font-mono font-bold ${detectionIsAlert ? 'bg-red-950/80 border-red-500/30 text-red-400' : 'bg-violet-950/80 border-violet-500/30 text-violet-400'}`}>
                       <span className="inline-block w-1.5 h-1.5 rounded-full bg-current mr-1.5 animate-pulse" />
@@ -325,22 +358,27 @@ export default function HostelAttendancePage() {
               )}
             </div>
           ) : (
-            /* GRID VIEW */
-            <div className="grid grid-cols-2 gap-3">
-              {cameras.map(cam => (
-                <div key={cam.id} className="relative aspect-video overflow-hidden rounded-xl bg-black border border-slate-800 shadow-lg group">
+            /* GRID VIEW — all 8 blocks */
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {HOSTEL_BLOCKS.map(blk => (
+                <div
+                  key={blk.id}
+                  onClick={() => { setActiveBlockId(blk.id); setIsGridMode(false); }}
+                  className="relative aspect-video overflow-hidden rounded-xl bg-black border border-slate-800 shadow-lg group cursor-pointer"
+                >
                   <img
-                    src={getCameraImage(cam)}
-                    alt={cam.name}
+                    src={BLOCK_IMAGES[blk.id]}
+                    alt={blk.label}
                     className="w-full h-full object-cover group-hover:brightness-110 transition-all"
                   />
                   <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/60" />
                   <div className="absolute top-2 left-2 flex items-center gap-1.5 px-2 py-1 rounded-md bg-black/70 border border-white/10 font-mono text-[10px] text-white">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    {cam.id}
+                    {blk.name}
                   </div>
                   <div className="absolute bottom-2 left-2 right-2">
-                    <p className="text-white text-[11px] font-semibold truncate">{cam.name}</p>
+                    <p className="text-white text-[11px] font-semibold truncate">{blk.label}</p>
+                    <p className="text-slate-400 text-[9px] font-mono">{blk.gender} · {blk.floors}F</p>
                   </div>
                 </div>
               ))}

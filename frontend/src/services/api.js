@@ -77,6 +77,9 @@ export const apiGetCamera    = (id)        => get(`/api/cameras/${id}`);
 export const apiCreateCamera = (data)      => post('/api/cameras', data);
 export const apiUpdateCamera = (id, data)  => patch(`/api/cameras/${id}`, data);
 export const apiDeleteCamera = (id)        => del(`/api/cameras/${id}`);
+export const apiStartCameraStream = ()     => post('/api/cameras/stream/start');
+export const apiStopCameraStream  = ()     => post('/api/cameras/stream/stop');
+export const apiGetCameraStreamStatus = () => get('/api/cameras/stream/status');
 
 // ─── persons ────────────────────────────────────────────────
 // Response shapes follow the backend exactly:
@@ -153,6 +156,9 @@ export default {
   apiCreateCamera,
   apiUpdateCamera,
   apiDeleteCamera,
+  apiStartCameraStream,
+  apiStopCameraStream,
+  apiGetCameraStreamStatus,
   // persons
   apiGetPersons,
   apiGetPerson,

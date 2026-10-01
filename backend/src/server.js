@@ -24,4 +24,21 @@ server.listen(PORT, () => {
     logger.info(`Backend running on http://localhost:${PORT}`);
 });
 
+import { stopStream } from "./services/cameraService.js";
+
+const cleanup = () => {
+    logger.info("Cleaning up backend processes...");
+    stopStream();
+};
+
+process.on("SIGINT", () => {
+    cleanup();
+    process.exit(0);
+});
+
+process.on("SIGTERM", () => {
+    cleanup();
+    process.exit(0);
+});
+
 export { server, app, io, getIO };

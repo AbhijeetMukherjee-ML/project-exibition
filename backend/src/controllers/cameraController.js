@@ -33,10 +33,28 @@ export const deleteCamera = asyncHandler(async (req, res) => {
     });
 });
 
+export const startStream = asyncHandler(async (req, res) => {
+    const status = await cameraService.startStream();
+    res.json({ message: "AI stream started", ...status });
+});
+
+export const stopStream = asyncHandler(async (req, res) => {
+    const status = await cameraService.stopStream();
+    res.json({ message: "AI stream stopped", ...status });
+});
+
+export const getStreamStatus = asyncHandler(async (req, res) => {
+    const status = await cameraService.getStreamStatus();
+    res.json(status);
+});
+
 export default {
     getCameras,
     getCamera,
     createCamera,
     updateCamera,
     deleteCamera,
+    startStream,
+    stopStream,
+    getStreamStatus,
 };

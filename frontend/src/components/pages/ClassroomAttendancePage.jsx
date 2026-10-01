@@ -20,9 +20,18 @@ import {
   ShieldCheck,
   X,
   UserPlus,
-  ChevronRight
+  ChevronRight,
+  Crosshair
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { io } from 'socket.io-client';
+import {
+  getSocketURL,
+  apiGetCurrentDetections,
+  apiStartCameraStream,
+  apiStopCameraStream,
+  apiGetCameraStreamStatus,
+} from '../../services/api';
 
 const RE_MARK_COOLDOWN_MS = 8000;
 
@@ -45,8 +54,12 @@ export default function ClassroomAttendancePage() {
   const [labels, setLabels] = useState([]);
   const [predictions, setPredictions] = useState([]);
   const [running, setRunning] = useState(false);
-  const [webcamOn, setWebcamOn] = useState(false);
+  const [webcamOn, setWebcamOn] = useState(false); // Closed by default
+  const [isStartingStream, setIsStartingStream] = useState(false);
   const [webcamError, setWebcamError] = useState(null);
+  const [streamAvailable, setStreamAvailable] = useState(false);
+  const [frameDimensions, setFrameDimensions] = useState({ width: 640, height: 480 });
+  const [liveDetections, setLiveDetections] = useState({});
   const [threshold, setThreshold] = useState(0.85);
   const [lastMatch, setLastMatch] = useState(null);
 
@@ -65,29 +78,137 @@ export default function ClassroomAttendancePage() {
   const absentStudents = students.length - presentStudents.length;
   const mappedCount = labels.filter(l => classMappings[l]).length;
 
-  // Webcam
+  // Real-time YOLO detection listener via backend Socket.IO
   useEffect(() => {
-    let stream = null;
-    if (webcamOn) {
-      navigator.mediaDevices?.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 } })
-        .then(ms => {
-          stream = ms;
-          if (videoRef.current) videoRef.current.srcObject = ms;
-          setWebcamError(null);
-        })
-        .catch(err => {
-          console.error(err);
-          setWebcamError('Camera access denied or unavailable.');
-          setWebcamOn(false);
-        });
+    let socket;
+    try {
+      socket = io(getSocketURL(), { transports: ['websocket', 'polling'] });
+
+      socket.on('detection:update', (detection) => {
+        if (!detection || detection.trackId === undefined) return;
+        setLiveDetections(prev => ({
+          ...prev,
+          [detection.trackId]: { ...detection, receivedAt: Date.now() }
+        }));
+
+        // Future face-recognition: when identity is provided, verify against student registry
+        if (detection.identity) {
+          const matched = students.find(
+            s => s.name.toLowerCase() === detection.identity.toLowerCase() || s.id === detection.identity
+          );
+          if (matched) {
+            const conf = detection.identityConfidence > 0
+              ? `${(detection.identityConfidence * 100).toFixed(1)}%`
+              : 'AI Match';
+            markStudentPresent(matched.id, conf);
+          }
+        }
+      });
+    } catch (err) {
+      console.error('Socket.IO connection failed:', err);
+    }
+
+    return () => {
+      if (socket) socket.disconnect();
+    };
+  }, [students, markStudentPresent]);
+
+  // Load current detections on mount & prune stale detections (> 3.5s without update)
+  useEffect(() => {
+    apiGetCurrentDetections(10)
+      .then(res => {
+        if (res?.detections && Array.isArray(res.detections)) {
+          const map = {};
+          const now = Date.now();
+          res.detections.forEach(d => {
+            map[d.trackId] = { ...d, receivedAt: now };
+          });
+          setLiveDetections(map);
+        }
+      })
+      .catch(() => {});
+
+    const pruneTimer = setInterval(() => {
+      const cutoff = Date.now() - 3500;
+      setLiveDetections(prev => {
+        let changed = false;
+        const next = {};
+        for (const [id, d] of Object.entries(prev)) {
+          if (d.receivedAt >= cutoff) {
+            next[id] = d;
+          } else {
+            changed = true;
+          }
+        }
+        return changed ? next : prev;
+      });
+    }, 1000);
+
+    return () => clearInterval(pruneTimer);
+  }, []);
+
+  const [streamKey, setStreamKey] = useState(Date.now());
+
+  // Ensure camera is closed/stopped by default when frontend loads
+  useEffect(() => {
+    setWebcamOn(false);
+    apiGetCameraStreamStatus()
+      .then(res => {
+        if (res && res.running) {
+          apiStopCameraStream().catch(() => {});
+        }
+      })
+      .catch(() => {});
+
+    // Ensure camera process is stopped if the user closes or refreshes the page
+    const handleBeforeUnload = () => {
+      fetch(`${getSocketURL()}/api/cameras/stream/stop`, {
+        method: 'POST',
+        keepalive: true,
+      }).catch(() => {});
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      apiStopCameraStream().catch(() => {});
+    };
+  }, []);
+
+  // Request backend to start or stop Python YOLO Detector.py process
+  const handleToggleFeed = async () => {
+    if (!webcamOn) {
+      setIsStartingStream(true);
+      setWebcamError(null);
+      try {
+        const res = await apiStartCameraStream();
+        if (res && res.running) {
+          setStreamKey(Date.now());
+          setWebcamOn(true);
+          setStreamAvailable(true);
+          showToast('AI Camera Online', 'Python YOLO detector active.', 'success');
+        } else {
+          throw new Error('AI detector failed to report ready state.');
+        }
+      } catch (err) {
+        console.error('Failed to start AI stream:', err);
+        setWebcamError(err.message || 'Failed to launch AI detector via backend service.');
+        showToast('AI Camera Error', err.message || 'Failed to start AI detector.', 'error');
+      } finally {
+        setIsStartingStream(false);
+      }
     } else {
-      if (videoRef.current?.srcObject) {
-        videoRef.current.srcObject.getTracks().forEach(t => t.stop());
-        videoRef.current.srcObject = null;
+      setWebcamOn(false);
+      setStreamAvailable(false);
+      try {
+        await apiStopCameraStream();
+        showToast('AI Camera Offline', 'Detector process stopped.', 'info');
+      } catch (err) {
+        console.error('Failed to stop AI stream:', err);
       }
     }
-    return () => { if (stream) stream.getTracks().forEach(t => t.stop()); };
-  }, [webcamOn]);
+  };
 
   // Load model
   const loadModel = async () => {
@@ -156,7 +277,9 @@ export default function ClassroomAttendancePage() {
       showToast('Load a Model First', 'Paste your Teachable Machine URL and load the model.', 'warning');
       return;
     }
-    if (!webcamOn) setWebcamOn(true);
+    if (!webcamOn) {
+      await handleToggleFeed();
+    }
     runningRef.current = true;
     setRunning(true);
     rafRef.current = requestAnimationFrame(predictLoop);
@@ -174,8 +297,7 @@ export default function ClassroomAttendancePage() {
     return () => {
       runningRef.current = false;
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      if (videoRef.current?.srcObject)
-        videoRef.current.srcObject.getTracks().forEach(t => t.stop());
+      // Camera is exclusively managed by Python YOLO detector — no getUserMedia tracks to release
     };
   }, []);
 
@@ -202,9 +324,9 @@ export default function ClassroomAttendancePage() {
               <ScanFace className="w-5 h-5 text-blue-400" />
             </div>
             <h2 className="text-xl font-bold text-white">Classroom Attendance</h2>
-            <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[10px] font-bold font-mono ${running ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-slate-800 border-slate-700 text-slate-400'}`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${running ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`} />
-              {running ? 'SCANNING' : 'IDLE'}
+            <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[10px] font-bold font-mono ${webcamOn && !webcamError ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : isStartingStream ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' : 'bg-slate-800 border-slate-700 text-slate-400'}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${webcamOn && !webcamError ? 'bg-emerald-400 animate-pulse' : isStartingStream ? 'bg-indigo-400 animate-ping' : 'bg-slate-500'}`} />
+              {isStartingStream ? 'INITIALIZING AI' : webcamOn && !webcamError ? 'AI CAMERA LIVE' : 'FEED OFFLINE'}
             </span>
           </div>
           <p className="text-xs text-slate-500">AI face recognition marks attendance automatically from the live camera feed.</p>
@@ -228,11 +350,22 @@ export default function ClassroomAttendancePage() {
           </button>
 
           <button
-            onClick={() => setWebcamOn(!webcamOn)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer border transition ${webcamOn ? 'bg-emerald-600 border-emerald-500 text-white' : 'bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800'}`}
+            onClick={handleToggleFeed}
+            disabled={isStartingStream}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer border transition ${
+              webcamOn
+                ? 'bg-emerald-600 border-emerald-500 text-white'
+                : 'bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800'
+            } ${isStartingStream ? 'opacity-70 cursor-wait' : ''}`}
           >
-            {webcamOn ? <Video className="w-3.5 h-3.5" /> : <VideoOff className="w-3.5 h-3.5" />}
-            {webcamOn ? 'Camera On' : 'Camera Off'}
+            {isStartingStream ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-400" />
+            ) : webcamOn ? (
+              <Video className="w-3.5 h-3.5" />
+            ) : (
+              <VideoOff className="w-3.5 h-3.5" />
+            )}
+            {isStartingStream ? 'Starting AI...' : webcamOn ? 'AI Feed Active' : 'Enable AI Feed'}
           </button>
 
           {!running ? (
@@ -309,34 +442,84 @@ export default function ClassroomAttendancePage() {
             </div>
           </div>
 
-          {/* Live camera */}
+          {/* AI Live Camera & Detection Stream */}
           <div className="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
             <div className="px-4 py-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Activity className={`w-4 h-4 ${running ? 'text-emerald-400' : 'text-slate-500'}`} />
-                <p className="text-xs font-bold text-white">Live Recognition Feed</p>
+                <Activity className={`w-4 h-4 ${webcamOn && !webcamError ? 'text-emerald-400' : 'text-slate-500'}`} />
+                <div>
+                  <p className="text-xs font-bold text-white">AI Camera Feed</p>
+                  <p className="text-[9px] text-slate-500 font-mono">YOLO · Python AI · camera-1</p>
+                </div>
               </div>
-              <span className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-black/30 border border-slate-800 text-[9px] font-mono text-slate-400">
-                <CircleDot className={`w-2.5 h-2.5 ${running ? 'text-emerald-400 animate-pulse' : 'text-slate-600'}`} />
-                {running ? 'SCANNING' : 'STANDBY'}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-black/40 border border-slate-800 text-[9px] font-mono text-emerald-400 font-bold">
+                  <span className={`w-1.5 h-1.5 rounded-full ${webcamOn && !webcamError ? 'bg-emerald-400 animate-pulse' : 'bg-slate-600'}`} />
+                  {webcamOn && !webcamError ? 'LIVE' : 'OFFLINE'}
+                </span>
+                <span className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-[9px] font-mono text-indigo-400 font-bold">
+                  <CircleDot className="w-2.5 h-2.5 text-indigo-400" />
+                  YOLO ACTIVE
+                </span>
+              </div>
             </div>
 
             <div className="relative aspect-[4/3] bg-black overflow-hidden">
-              <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover transform -scale-x-100" />
+              {/* Hidden video element preserved for Teachable Machine model.predict compatibility */}
+              <video ref={videoRef} className="hidden" />
 
-              {!webcamOn && (
+              {webcamOn ? (
+                <img
+                  key={streamKey}
+                  src={`http://localhost:5001/video?t=${streamKey}`}
+                  alt="YOLO AI Video Stream"
+                  className="w-full h-full object-cover"
+                  onLoad={(e) => {
+                    setStreamAvailable(true);
+                    setWebcamError(null);
+                    if (e.target.naturalWidth && e.target.naturalHeight) {
+                      setFrameDimensions({
+                        width: e.target.naturalWidth,
+                        height: e.target.naturalHeight
+                      });
+                    }
+                  }}
+                  onError={() => {
+                    setStreamAvailable(false);
+                    setWebcamError('AI video stream unavailable at http://localhost:5001/video. Ensure the Python YOLO detector is running on port 5001.');
+                  }}
+                />
+              ) : isStartingStream ? (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black">
+                  <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+                  </div>
+                  <p className="text-xs font-semibold text-slate-200">Starting AI Camera Process...</p>
+                  <p className="text-[10px] text-slate-500 font-mono">Launching YOLO detector via backend service</p>
+                </div>
+              ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black">
                   <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center">
                     <VideoOff className="w-7 h-7 text-slate-600" />
                   </div>
-                  <p className="text-xs font-semibold text-slate-500">Camera offline</p>
-                  <p className="text-[10px] text-slate-600">Enable camera to start recognition</p>
+                  <p className="text-xs font-semibold text-slate-500">AI Feed Offline</p>
+                  <p className="text-[10px] text-slate-600">Enable AI feed to launch camera & begin monitoring</p>
                 </div>
               )}
 
-              {webcamOn && (
-                <div className="absolute inset-0 pointer-events-none">
+              {/* Feed error overlay */}
+              {webcamOn && webcamError && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-slate-950/90 text-center gap-2 z-20">
+                  <AlertTriangle className="w-8 h-8 text-amber-400 mb-1" />
+                  <p className="text-sm font-semibold text-slate-200">AI Camera Feed Offline</p>
+                  <p className="text-xs text-slate-400 max-w-sm">{webcamError}</p>
+                  <p className="text-[10px] font-mono text-slate-500 mt-2">Expected stream: http://localhost:5001/video</p>
+                </div>
+              )}
+
+              {/* Scanner HUD Corners */}
+              {webcamOn && !webcamError && (
+                <div className="absolute inset-0 pointer-events-none z-10">
                   <div className="absolute top-5 left-5 w-10 h-10 border-l-2 border-t-2 border-blue-400/80 rounded-tl-lg" />
                   <div className="absolute top-5 right-5 w-10 h-10 border-r-2 border-t-2 border-blue-400/80 rounded-tr-lg" />
                   <div className="absolute bottom-5 left-5 w-10 h-10 border-l-2 border-b-2 border-blue-400/80 rounded-bl-lg" />
@@ -347,8 +530,10 @@ export default function ClassroomAttendancePage() {
                 </div>
               )}
 
+
+              {/* Match overlay if recognized */}
               {running && lastMatch && (
-                <div className="absolute left-4 right-4 bottom-4">
+                <div className="absolute left-4 right-4 bottom-4 z-10">
                   <div className={`rounded-xl border backdrop-blur-md shadow-2xl p-3 ${lastMatch.studentId ? 'bg-emerald-950/80 border-emerald-500/40' : 'bg-slate-950/85 border-slate-700'}`}>
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0">
@@ -377,6 +562,43 @@ export default function ClassroomAttendancePage() {
               )}
             </div>
           </div>
+
+          {/* Active YOLO Detections Status */}
+          {webcamOn && Object.keys(liveDetections).length > 0 && (
+            <div className="bg-[#0b1320] border border-slate-800 rounded-xl p-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5 text-blue-400" />
+                  Live Tracked Persons ({Object.keys(liveDetections).length})
+                </span>
+                <span className="text-[9px] font-mono text-emerald-400">REAL-TIME</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {Object.values(liveDetections).map(d => {
+                  const hasId = Boolean(d.identity || d.personId?.name);
+                  const name = d.identity || d.personId?.name || `Person #${d.trackId}`;
+                  return (
+                    <div
+                      key={d.trackId}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-mono ${
+                        hasId
+                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                          : 'bg-blue-500/10 border-blue-500/30 text-blue-300'
+                      }`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full ${hasId ? 'bg-emerald-400' : 'bg-blue-400'}`} />
+                      <span>{name}</span>
+                      <span className="text-[10px] opacity-70">
+                        {d.identityConfidence > 0
+                          ? `${Math.round(d.identityConfidence * 100)}%`
+                          : `${Math.round((d.detectionConfidence || 0) * 100)}%`}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* RIGHT — attendance list */}

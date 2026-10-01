@@ -27,6 +27,12 @@ import {
   cutoffLabel,
   cutoffMinutes
 } from '../../context/ClassroomContext';
+import {
+  apiStartCameraStream,
+  apiStopCameraStream,
+  apiGetCameraStreamStatus,
+  getSocketURL
+} from '../../services/api';
 
 const RE_MARK_COOLDOWN_MS = 8000;
 
@@ -80,6 +86,8 @@ export default function LiveAttendancePage() {
   const [predictions, setPredictions] = useState([]);
   const [running, setRunning] = useState(false);
   const [webcamOn, setWebcamOn] = useState(false);
+  const [isStartingStream, setIsStartingStream] = useState(false);
+  const [streamKey, setStreamKey] = useState(Date.now());
   const [webcamError, setWebcamError] = useState(null);
   const [threshold, setThreshold] = useState(0.85);
   const [now, setNow] = useState(new Date());
@@ -107,6 +115,60 @@ export default function LiveAttendancePage() {
     return () => clearInterval(timer);
   }, []);
 
+  // Ensure camera is closed/stopped by default when frontend loads
+  useEffect(() => {
+    setWebcamOn(false);
+    apiGetCameraStreamStatus()
+      .then((res) => {
+        if (res && res.running) {
+          apiStopCameraStream().catch(() => {});
+        }
+      })
+      .catch(() => {});
+
+    const handleBeforeUnload = () => {
+      fetch(`${getSocketURL()}/api/cameras/stream/stop`, {
+        method: 'POST',
+        keepalive: true,
+      }).catch(() => {});
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      apiStopCameraStream().catch(() => {});
+    };
+  }, []);
+
+  const handleToggleFeed = async () => {
+    if (!webcamOn) {
+      setIsStartingStream(true);
+      setWebcamError(null);
+      try {
+        const res = await apiStartCameraStream();
+        if (res && res.running) {
+          setStreamKey(Date.now());
+          setWebcamOn(true);
+        } else {
+          throw new Error('AI detector failed to report ready state.');
+        }
+      } catch (err) {
+        console.error('Failed to start AI stream:', err);
+        setWebcamError(err.message || 'Failed to launch AI detector via backend service.');
+      } finally {
+        setIsStartingStream(false);
+      }
+    } else {
+      setWebcamOn(false);
+      try {
+        await apiStopCameraStream();
+      } catch (err) {
+        console.error('Failed to stop AI stream:', err);
+      }
+    }
+  };
+
   useEffect(() => {
     const mins = now.getHours() * 60 + now.getMinutes();
 
@@ -120,46 +182,7 @@ export default function LiveAttendancePage() {
     }
   }, [now, activePeriod, activePeriodId, finalizePeriod]);
 
-  useEffect(() => {
-    let stream = null;
-
-    if (webcamOn) {
-      navigator.mediaDevices
-        ?.getUserMedia({
-          video: {
-            facingMode: 'user',
-            width: 640,
-            height: 480
-          }
-        })
-        .then((s) => {
-          stream = s;
-
-          if (videoRef.current) {
-            videoRef.current.srcObject = s;
-          }
-
-          setWebcamError(null);
-        })
-        .catch((err) => {
-          console.error(err);
-          setWebcamError('Camera access denied or unavailable.');
-          setWebcamOn(false);
-        });
-    } else if (videoRef.current?.srcObject) {
-      videoRef.current.srcObject
-        .getTracks()
-        .forEach((track) => track.stop());
-
-      videoRef.current.srcObject = null;
-    }
-
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
-      }
-    };
-  }, [webcamOn]);
+  // Python YOLO detector exclusively owns the webcam; frontend consumes http://localhost:5001/video
 
   const loadModel = useCallback(async () => {
     const tmImage = window.tmImage;
@@ -264,7 +287,7 @@ export default function LiveAttendancePage() {
     }
 
     if (!webcamOn) {
-      setWebcamOn(true);
+      await handleToggleFeed();
     }
 
     runningRef.current = true;
@@ -292,11 +315,7 @@ export default function LiveAttendancePage() {
         cancelAnimationFrame(rafRef.current);
       }
 
-      if (videoRef.current?.srcObject) {
-        videoRef.current.srcObject
-          .getTracks()
-          .forEach((track) => track.stop());
-      }
+      // Camera is owned by Python YOLO detector — no getUserMedia tracks to stop
     };
   }, []);
 
@@ -494,20 +513,25 @@ export default function LiveAttendancePage() {
       <section className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-3 shadow-sm">
         <div className="flex flex-wrap items-center gap-2">
           <button
-            onClick={() => setWebcamOn(!webcamOn)}
+            onClick={handleToggleFeed}
+            disabled={isStartingStream}
             className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 border cursor-pointer transition ${
               webcamOn
                 ? 'bg-emerald-600 border-emerald-500 text-white'
+                : isStartingStream
+                ? 'bg-indigo-600 border-indigo-500 text-white'
                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
             }`}
           >
-            {webcamOn ? (
+            {isStartingStream ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : webcamOn ? (
               <Video className="w-4 h-4" />
             ) : (
               <VideoOff className="w-4 h-4" />
             )}
 
-            {webcamOn ? 'Camera Active' : 'Enable Camera'}
+            {isStartingStream ? 'Starting AI...' : webcamOn ? 'AI Feed Active' : 'Enable AI Feed'}
           </button>
 
           {!running ? (
@@ -571,46 +595,57 @@ export default function LiveAttendancePage() {
 
                 <div>
                   <p className="text-xs font-bold text-white">
-                    Classroom Camera
+                    AI Camera Feed
                   </p>
 
                   <p className="text-[10px] text-slate-500 font-mono">
-                    640 × 480 • Face AI
+                    YOLO · Python AI · camera-1
                   </p>
                 </div>
               </div>
 
-              {running && (
+              {webcamOn && (
                 <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   <span className="text-[10px] font-mono font-bold text-emerald-400">
-                    LIVE
+                    YOLO ACTIVE
                   </span>
                 </div>
               )}
             </div>
 
             <div className="relative aspect-video bg-black">
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className="w-full h-full object-cover transform -scale-x-100"
-              />
+              {/* Hidden video element preserved for Teachable Machine compatibility */}
+              <video ref={videoRef} className="hidden" />
 
-              {!webcamOn && (
+              {webcamOn ? (
+                <img
+                  key={streamKey}
+                  src={`http://localhost:5001/video?t=${streamKey}`}
+                  alt="YOLO AI Video Stream"
+                  className="w-full h-full object-cover"
+                  onError={() => setWebcamError('AI video stream unavailable at http://localhost:5001/video. Ensure Python YOLO detector is running on port 5001.')}
+                />
+              ) : isStartingStream ? (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black">
+                  <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+                  </div>
+                  <p className="text-xs font-semibold text-slate-200">Starting AI Camera Process...</p>
+                  <p className="text-[10px] text-slate-500 font-mono">Launching YOLO detector via backend service</p>
+                </div>
+              ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-3">
                     <VideoOff className="w-7 h-7 text-slate-600" />
                   </div>
 
                   <p className="text-sm font-semibold text-slate-400">
-                    Camera is offline
+                    AI feed offline
                   </p>
 
                   <p className="text-[11px] text-slate-600 mt-1">
-                    Enable the camera to begin attendance
+                    Enable AI feed to begin attendance
                   </p>
                 </div>
               )}
