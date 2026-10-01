@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import Detection from "../models/Detection.js";
 import { emitSocketEvent } from "../socket.js";
-import { ensureDbConnected } from "../database.js";
+import { ensureDbConnected, isDbConnected } from "../database.js";
 
 export const validateDetectionInput = (data) => {
     const { cameraId, trackId, boundingBox } = data;
@@ -38,7 +38,6 @@ export const validateDetectionInput = (data) => {
 };
 
 export const createDetection = async (data) => {
-    ensureDbConnected();
     validateDetectionInput(data);
 
     const now = new Date();
@@ -58,6 +57,15 @@ export const createDetection = async (data) => {
         firstSeen: data.firstSeen ? new Date(data.firstSeen) : now,
         lastSeen: data.lastSeen ? new Date(data.lastSeen) : now,
     };
+
+    // When MongoDB is unavailable (offline mode), still broadcast the detection
+    // over Socket.IO so the dashboard receives live YOLO boxes for in-browser
+    // Teachable Machine recognition — persistence is simply skipped.
+    if (!isDbConnected()) {
+        const liveDetection = { ...detectionData, _id: null, persisted: false };
+        emitSocketEvent("detection:update", liveDetection);
+        return liveDetection;
+    }
 
     const detection = new Detection(detectionData);
     const savedDetection = await detection.save();

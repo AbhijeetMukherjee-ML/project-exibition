@@ -25,6 +25,17 @@ frame_lock = threading.Lock()
 cap = None
 
 
+@app.after_request
+def add_cors_headers(response):
+    # Allow the dashboard (served from a different origin, e.g. localhost:3000)
+    # to read pixels from the MJPEG stream for in-browser Teachable Machine
+    # recognition. Without this the canvas becomes tainted and pixel reads throw.
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    return response
+
+
 @app.route("/health")
 def health():
     with frame_lock:

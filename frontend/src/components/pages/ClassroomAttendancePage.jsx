@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   ScanFace,
   Video,
@@ -23,16 +23,13 @@ import {
   BookOpen
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { io } from 'socket.io-client';
 import {
   getSocketURL,
-  apiGetCurrentDetections,
   apiStartCameraStream,
   apiStopCameraStream,
   apiGetCameraStreamStatus,
 } from '../../services/api';
-
-const RE_MARK_COOLDOWN_MS = 8000;
+import { useTmRecognition } from '../../hooks/useTmRecognition';
 
 const CLASS_SLOTS = [
   { id: 'class1', label: 'Class 1', time: '09:00 - 09:50', subject: 'Data Structures' },
@@ -57,111 +54,32 @@ export default function ClassroomAttendancePage() {
   } = useApp();
 
   const [urlInput, setUrlInput] = useState(tmModelURL);
-  const [modelStatus, setModelStatus] = useState('idle'); // idle | loading | ready | error
-  const [modelError, setModelError] = useState(null);
-  const [labels, setLabels] = useState([]);
-  const [predictions, setPredictions] = useState([]);
-  const [running, setRunning] = useState(false);
   const [webcamOn, setWebcamOn] = useState(false); // Closed by default
   const [isStartingStream, setIsStartingStream] = useState(false);
   const [webcamError, setWebcamError] = useState(null);
   const [streamAvailable, setStreamAvailable] = useState(false);
   const [frameDimensions, setFrameDimensions] = useState({ width: 640, height: 480 });
-  const [liveDetections, setLiveDetections] = useState({});
-  const [threshold, setThreshold] = useState(0.85);
-  const [lastMatch, setLastMatch] = useState(null);
+  const [streamKey, setStreamKey] = useState(Date.now());
 
-  const videoRef = useRef(null);
-  const modelRef = useRef(null);
-  const rafRef = useRef(null);
-  const runningRef = useRef(false);
-  const cooldownRef = useRef({});
-  const thresholdRef = useRef(threshold);
-  const mappingsRef = useRef(classMappings);
-  const activeSlotRef = useRef(activeClassSlot);
+  const streamImgRef = useRef(null);
 
-  useEffect(() => { thresholdRef.current = threshold; }, [threshold]);
-  useEffect(() => { mappingsRef.current = classMappings; }, [classMappings]);
-  useEffect(() => { activeSlotRef.current = activeClassSlot; }, [activeClassSlot]);
+  // Shared per-person Teachable Machine recognition over the live YOLO feed.
+  const {
+    modelStatus,
+    modelError,
+    labels,
+    running,
+    liveDetections,
+    lastMatch,
+    loadModel,
+    start,
+    stop,
+  } = useTmRecognition({ slot: activeClassSlot, streamImgRef });
 
   // Attendance counts for currently selected class slot
   const slotPresentCount = students.filter(s => s[`${activeClassSlot}Attendance`] === 'present').length;
   const slotAbsentCount = students.length - slotPresentCount;
   const mappedCount = labels.filter(l => classMappings[l]).length;
-
-  // Real-time YOLO detection listener via backend Socket.IO
-  useEffect(() => {
-    let socket;
-    try {
-      socket = io(getSocketURL(), { transports: ['websocket', 'polling'] });
-
-      socket.on('detection:update', (detection) => {
-        if (!detection || detection.trackId === undefined) return;
-        setLiveDetections(prev => ({
-          ...prev,
-          [detection.trackId]: { ...detection, receivedAt: Date.now() }
-        }));
-
-        // When identity is provided, verify against student registry and mark DB
-        if (detection.identity) {
-          const matched = students.find(
-            s =>
-              (s.name || '').toLowerCase() === detection.identity.toLowerCase() ||
-              s.id === detection.identity ||
-              s.studentId === detection.identity
-          );
-          if (matched) {
-            const conf = detection.identityConfidence > 0
-              ? `${(detection.identityConfidence * 100).toFixed(1)}%`
-              : 'AI Match';
-            markStudentPresent(matched.id, conf, { slot: activeSlotRef.current });
-          }
-        }
-      });
-    } catch (err) {
-      console.error('Socket.IO connection failed:', err);
-    }
-
-    return () => {
-      if (socket) socket.disconnect();
-    };
-  }, [students, markStudentPresent]);
-
-  // Load current detections on mount & prune stale detections (> 3.5s without update)
-  useEffect(() => {
-    apiGetCurrentDetections(10)
-      .then(res => {
-        if (res?.detections && Array.isArray(res.detections)) {
-          const map = {};
-          const now = Date.now();
-          res.detections.forEach(d => {
-            map[d.trackId] = { ...d, receivedAt: now };
-          });
-          setLiveDetections(map);
-        }
-      })
-      .catch(() => {});
-
-    const pruneTimer = setInterval(() => {
-      const cutoff = Date.now() - 3500;
-      setLiveDetections(prev => {
-        let changed = false;
-        const next = {};
-        for (const [id, d] of Object.entries(prev)) {
-          if (d.receivedAt >= cutoff) {
-            next[id] = d;
-          } else {
-            changed = true;
-          }
-        }
-        return changed ? next : prev;
-      });
-    }, 1000);
-
-    return () => clearInterval(pruneTimer);
-  }, []);
-
-  const [streamKey, setStreamKey] = useState(Date.now());
 
   // Ensure camera is closed/stopped by default when frontend loads
   useEffect(() => {
@@ -214,6 +132,7 @@ export default function ClassroomAttendancePage() {
     } else {
       setWebcamOn(false);
       setStreamAvailable(false);
+      stop();
       try {
         await apiStopCameraStream();
         showToast('AI Camera Offline', 'Detector process stopped.', 'info');
@@ -223,68 +142,6 @@ export default function ClassroomAttendancePage() {
     }
   };
 
-  // Load model
-  const loadModel = async () => {
-    const tmImage = window.tmImage;
-    if (!tmImage) {
-      setModelStatus('error');
-      setModelError('Teachable Machine runtime not found. Check internet connection.');
-      return;
-    }
-    const raw = urlInput.trim();
-    if (!raw) { setModelStatus('error'); setModelError('Paste your Teachable Machine model URL first.'); return; }
-    const base = raw.endsWith('/') ? raw : raw + '/';
-    setModelStatus('loading'); setModelError(null);
-    try {
-      const model = await tmImage.load(base + 'model.json', base + 'metadata.json');
-      modelRef.current = model;
-      const classLabels = model.getClassLabels();
-      setLabels(classLabels);
-      setTmModelURL(base);
-      classLabels.forEach(label => {
-        if (classMappings[label]) return;
-        const norm = label.trim().toLowerCase();
-        const match = students.find(s => (s.name || '').toLowerCase() === norm || s.id.toLowerCase() === norm);
-        if (match) setClassMapping(label, match.id);
-      });
-      setModelStatus('ready');
-      showToast('Model Loaded', `${classLabels.length} face classes ready.`, 'success');
-    } catch (err) {
-      console.error(err);
-      setModelStatus('error');
-      setModelError('Could not load model. Check the URL and sharing permissions.');
-    }
-  };
-
-  // Recognition loop
-  const predictLoop = useCallback(async () => {
-    if (!runningRef.current) return;
-    const model = modelRef.current;
-    const video = videoRef.current;
-    if (model && video && video.readyState >= 2) {
-      try {
-        const preds = await model.predict(video);
-        const sorted = [...preds].sort((a, b) => b.probability - a.probability);
-        setPredictions(sorted);
-        const top = sorted[0];
-        if (top && top.probability >= thresholdRef.current) {
-          const studentId = mappingsRef.current[top.className];
-          const conf = `${(top.probability * 100).toFixed(1)}%`;
-          setLastMatch({ label: top.className, studentId, conf });
-          if (studentId) {
-            const now = Date.now();
-            const last = cooldownRef.current[studentId] || 0;
-            if (now - last > RE_MARK_COOLDOWN_MS) {
-              cooldownRef.current[studentId] = now;
-              markStudentPresent(studentId, conf, { slot: activeSlotRef.current });
-            }
-          }
-        }
-      } catch (err) { console.error(err); }
-    }
-    rafRef.current = requestAnimationFrame(predictLoop);
-  }, [markStudentPresent]);
-
   const startRecognition = async () => {
     if (modelStatus !== 'ready') {
       showToast('Load a Model First', 'Paste your Teachable Machine URL and load the model.', 'warning');
@@ -293,25 +150,12 @@ export default function ClassroomAttendancePage() {
     if (!webcamOn) {
       await handleToggleFeed();
     }
-    runningRef.current = true;
-    setRunning(true);
-    rafRef.current = requestAnimationFrame(predictLoop);
-    showToast('Recognition Started', `Watching live feed for ${activeClassSlot.toUpperCase()} attendance…`, 'info');
+    if (start()) {
+      showToast('Recognition Started', `Watching live feed for ${activeClassSlot.toUpperCase()} attendance…`, 'info');
+    }
   };
 
-  const stopRecognition = () => {
-    runningRef.current = false;
-    setRunning(false);
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    setPredictions([]); setLastMatch(null);
-  };
-
-  useEffect(() => {
-    return () => {
-      runningRef.current = false;
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, []);
+  const stopRecognition = () => stop();
 
   const exportCSV = () => {
     const today = new Date().toISOString().split('T')[0];
@@ -476,7 +320,7 @@ export default function ClassroomAttendancePage() {
                   />
                 </div>
                 <button
-                  onClick={loadModel}
+                  onClick={() => loadModel(urlInput)}
                   disabled={modelStatus === 'loading'}
                   className="sm:w-32 px-4 py-2.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer disabled:opacity-60"
                 >
@@ -522,11 +366,11 @@ export default function ClassroomAttendancePage() {
             </div>
 
             <div className="relative aspect-[4/3] bg-black overflow-hidden">
-              <video ref={videoRef} className="hidden" />
-
               {webcamOn ? (
                 <img
                   key={streamKey}
+                  ref={streamImgRef}
+                  crossOrigin="anonymous"
                   src={`http://localhost:5001/video?t=${streamKey}`}
                   alt="YOLO AI Video Stream"
                   className="w-full h-full object-cover"

@@ -21,7 +21,12 @@ import {
   Grid,
   Square,
   Maximize2,
-  Loader2
+  Loader2,
+  Cpu,
+  Link2,
+  Play,
+  ShieldCheck,
+  CircleDot
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import {
@@ -30,6 +35,7 @@ import {
   apiStopCameraStream,
   apiGetCameraStreamStatus,
 } from '../../services/api';
+import { useTmRecognition } from '../../hooks/useTmRecognition';
 
 // Live AI MJPEG stream served by the Python YOLO detector (same feed as Classroom)
 const AI_STREAM_URL = 'http://localhost:5001/video';
@@ -56,7 +62,9 @@ export default function HostelAttendancePage() {
     triggerSimulatedScan,
     logs,
     students,
-    showToast
+    showToast,
+    tmModelURL,
+    classMappings
   } = useApp();
 
   // Hostel block selector state (Blocks 1–8)
@@ -69,8 +77,27 @@ export default function HostelAttendancePage() {
   const [webcamError, setWebcamError] = useState(null);
   const [streamKey, setStreamKey] = useState(Date.now());
   const [isGridMode, setIsGridMode] = useState(false);
+  const [urlInput, setUrlInput] = useState(tmModelURL);
 
   const viewportRef = useRef(null);
+  const streamImgRef = useRef(null);
+
+  // Shared per-person Teachable Machine recognition over the live YOLO feed.
+  // Recognized students are marked present for the 'hostel' slot.
+  const {
+    modelStatus,
+    modelError,
+    labels,
+    running,
+    liveDetections,
+    lastMatch,
+    loadModel,
+    start,
+    stop,
+  } = useTmRecognition({ slot: 'hostel', streamImgRef });
+
+  const mappedCount = labels.filter(l => classMappings[l]).length;
+  const recognizedDetections = Object.values(liveDetections);
 
   // Live clock
   const [now, setNow] = useState(new Date());
@@ -135,6 +162,7 @@ export default function HostelAttendancePage() {
       }
     } else {
       setWebcamOn(false);
+      stop();
       try {
         await apiStopCameraStream();
         showToast('AI Camera Offline', 'Detector process stopped.', 'info');
@@ -143,6 +171,22 @@ export default function HostelAttendancePage() {
       }
     }
   };
+
+  // Start / stop Teachable Machine recognition on the live hostel gate feed.
+  const startRecognition = async () => {
+    if (modelStatus !== 'ready') {
+      showToast('Load a Model First', 'Paste your Teachable Machine URL and load the model.', 'warning');
+      return;
+    }
+    if (!webcamOn) {
+      await handleToggleFeed();
+    }
+    if (start()) {
+      showToast('Recognition Started', 'Watching hostel gate feed for curfew attendance…', 'info');
+    }
+  };
+
+  const stopRecognition = () => stop();
 
   const detectionIsAlert = currentDetection.status === 'CURFEW_ALERT';
 
@@ -202,12 +246,29 @@ export default function HostelAttendancePage() {
             )}
             {isStartingStream ? 'Starting AI...' : webcamOn ? 'AI Feed Active' : 'Enable AI Feed'}
           </button>
+          {!running ? (
+            <button
+              onClick={startRecognition}
+              className="px-4 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-sm transition"
+            >
+              <Play className="w-3.5 h-3.5" />
+              Start Scan
+            </button>
+          ) : (
+            <button
+              onClick={stopRecognition}
+              className="px-4 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-sm transition"
+            >
+              <Square className="w-3.5 h-3.5" />
+              Stop Scan
+            </button>
+          )}
           <button
             onClick={triggerSimulatedScan}
-            className="px-4 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-sm transition"
+            className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:bg-slate-800 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition"
           >
             <Zap className="w-3.5 h-3.5" />
-            Simulate Scan
+            Simulate
           </button>
         </div>
       </div>
@@ -247,6 +308,58 @@ export default function HostelAttendancePage() {
 
         {/* CAMERA FEED */}
         <div className="space-y-3">
+
+          {/* AI Recognition Model (Teachable Machine) — changeable link */}
+          <div className="bg-[#0b1320] border border-slate-800 rounded-xl overflow-hidden">
+            <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Cpu className="w-4 h-4 text-slate-400" />
+                <span className="text-xs font-bold text-slate-200">Face Recognition Model</span>
+              </div>
+              <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded border ${modelStatus === 'ready' ? 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5' : modelStatus === 'error' ? 'text-rose-400 border-rose-500/20 bg-rose-500/5' : 'text-slate-400 border-slate-700 bg-slate-800'}`}>
+                {modelStatus === 'ready' ? `${labels.length} CLASSES` : modelStatus === 'loading' ? 'LOADING…' : modelStatus === 'error' ? 'ERROR' : 'NOT LOADED'}
+              </span>
+            </div>
+            <div className="p-4">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="relative flex-1">
+                  <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+                  <input
+                    type="text"
+                    value={urlInput}
+                    onChange={e => setUrlInput(e.target.value)}
+                    placeholder="https://teachablemachine.withgoogle.com/models/XXXXXXXX/"
+                    className="w-full pl-9 pr-3 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-xs font-mono text-slate-100 placeholder-slate-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500/20"
+                  />
+                </div>
+                <button
+                  onClick={() => loadModel(urlInput)}
+                  disabled={modelStatus === 'loading'}
+                  className="sm:w-32 px-4 py-2.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer disabled:opacity-60"
+                >
+                  {modelStatus === 'loading' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ScanFace className="w-3.5 h-3.5" />}
+                  {modelStatus === 'loading' ? 'Loading…' : 'Load Model'}
+                </button>
+              </div>
+              {modelStatus === 'ready' && (
+                <p className="mt-2 text-[11px] text-emerald-400 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  Model connected — {labels.length} classes, {mappedCount} mapped to DB students
+                </p>
+              )}
+              {modelStatus === 'error' && (
+                <p className="mt-2 text-[11px] text-rose-400 flex items-center gap-1.5">
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  {modelError}
+                </p>
+              )}
+              {modelStatus !== 'ready' && modelStatus !== 'error' && (
+                <p className="mt-2 text-[11px] text-slate-500">
+                  Paste your Teachable Machine model link, then Start Scan — recognized students are marked present at the hostel gate. You can change this link anytime.
+                </p>
+              )}
+            </div>
+          </div>
 
           {/* Hostel Block selector */}
           <div className="space-y-2">
@@ -302,6 +415,8 @@ export default function HostelAttendancePage() {
               {webcamOn ? (
                 <img
                   key={streamKey}
+                  ref={streamImgRef}
+                  crossOrigin="anonymous"
                   src={`${AI_STREAM_URL}?t=${streamKey}`}
                   alt="Hostel AI Video Stream"
                   className={`w-full h-full object-cover ${nightVision ? 'brightness-125 contrast-125 saturate-50 hue-rotate-90' : ''}`}
@@ -371,12 +486,37 @@ export default function HostelAttendancePage() {
                     <div className="px-3 py-2 rounded-lg bg-black/75 backdrop-blur-md border border-white/10 text-[10px] font-mono text-slate-300">
                       {activeBlock?.name} · {activeBlock?.label} · ENCRYPTED
                     </div>
-                    <div className={`px-3 py-2 rounded-lg backdrop-blur-md border text-[10px] font-mono font-bold ${detectionIsAlert ? 'bg-red-950/80 border-red-500/30 text-red-400' : 'bg-violet-950/80 border-violet-500/30 text-violet-400'}`}>
+                    <div className={`px-3 py-2 rounded-lg backdrop-blur-md border text-[10px] font-mono font-bold ${running ? 'bg-emerald-950/80 border-emerald-500/30 text-emerald-400' : detectionIsAlert ? 'bg-red-950/80 border-red-500/30 text-red-400' : 'bg-violet-950/80 border-violet-500/30 text-violet-400'}`}>
                       <span className="inline-block w-1.5 h-1.5 rounded-full bg-current mr-1.5 animate-pulse" />
-                      {detectionIsAlert ? 'CURFEW VIOLATION' : 'HOSTEL AI ACTIVE'}
+                      {running ? 'RECOGNIZING' : detectionIsAlert ? 'CURFEW VIOLATION' : 'HOSTEL AI ACTIVE'}
                     </div>
                   </div>
                 </>
+              )}
+
+              {/* Live recognition match card */}
+              {webcamOn && !webcamError && running && lastMatch && (
+                <div className="absolute left-4 right-4 bottom-16 z-20">
+                  <div className={`rounded-xl border backdrop-blur-md shadow-2xl p-3 ${lastMatch.studentId ? 'bg-emerald-950/80 border-emerald-500/40' : 'bg-slate-950/85 border-slate-700'}`}>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${lastMatch.studentId ? 'bg-emerald-500/20' : 'bg-slate-800'}`}>
+                          {lastMatch.studentId ? <ShieldCheck className="w-5 h-5 text-emerald-400" /> : <ScanFace className="w-5 h-5 text-slate-400" />}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[9px] uppercase tracking-wider font-bold text-slate-400">
+                            {lastMatch.studentId ? 'Hostel Attendance Marked Present ✓' : 'Unknown Face'}
+                          </p>
+                          <p className="text-sm font-bold text-white truncate">{lastMatch.label}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[9px] text-slate-400">Confidence</p>
+                        <p className={`text-lg font-bold font-mono ${lastMatch.studentId ? 'text-emerald-400' : 'text-slate-300'}`}>{lastMatch.conf}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           ) : (
@@ -429,7 +569,48 @@ export default function HostelAttendancePage() {
               onToggle={() => setNightVision(!nightVision)}
               icon={Moon}
             />
+            {running && (
+              <span className="ml-auto flex items-center gap-1.5 px-2 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-mono text-emerald-400 font-bold">
+                <CircleDot className="w-2.5 h-2.5 animate-pulse" />
+                TM RECOGNITION LIVE
+              </span>
+            )}
           </div>
+
+          {/* Live recognized persons (YOLO box + Teachable Machine identity) */}
+          {webcamOn && recognizedDetections.length > 0 && (
+            <div className="bg-[#0b1320] border border-slate-800 rounded-xl p-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5 text-violet-400" />
+                  Live Tracked Persons ({recognizedDetections.length})
+                </span>
+                <span className="text-[9px] font-mono text-emerald-400">REAL-TIME</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {recognizedDetections.map(d => {
+                  const hasId = Boolean(d.identity);
+                  const name = d.identity || `Person #${d.trackId}`;
+                  return (
+                    <div
+                      key={d.trackId}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-mono ${
+                        hasId ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-violet-500/10 border-violet-500/30 text-violet-300'
+                      }`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full ${hasId ? 'bg-emerald-400' : 'bg-violet-400'}`} />
+                      <span>{name}</span>
+                      <span className="text-[10px] opacity-70">
+                        {d.identityConfidence > 0
+                          ? `${Math.round(d.identityConfidence * 100)}%`
+                          : `${Math.round((d.detectionConfidence || 0) * 100)}%`}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* RIGHT — Curfew log */}
