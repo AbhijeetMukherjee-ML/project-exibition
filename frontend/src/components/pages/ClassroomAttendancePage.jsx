@@ -433,31 +433,42 @@ export default function ClassroomAttendancePage() {
               )}
 
               {/* Match overlay */}
-              {running && lastMatch && (
-                <div className="absolute left-4 right-4 bottom-4 z-10">
-                  <div className={`rounded-xl border backdrop-blur-md shadow-2xl p-3 ${lastMatch.studentId ? 'bg-emerald-950/80 border-emerald-500/40' : 'bg-slate-950/85 border-slate-700'}`}>
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${lastMatch.studentId ? 'bg-emerald-500/20' : 'bg-slate-800'}`}>
-                          {lastMatch.studentId ? <ShieldCheck className="w-5 h-5 text-emerald-400" /> : <ScanFace className="w-5 h-5 text-slate-400" />}
+              {running && lastMatch && (() => {
+                const isLate = lastMatch.status === 'late';
+                const matched = Boolean(lastMatch.studentId);
+                const box = !matched
+                  ? 'bg-slate-950/85 border-slate-700'
+                  : isLate
+                  ? 'bg-amber-950/80 border-amber-500/40'
+                  : 'bg-emerald-950/80 border-emerald-500/40';
+                const iconBg = !matched ? 'bg-slate-800' : isLate ? 'bg-amber-500/20' : 'bg-emerald-500/20';
+                const iconColor = !matched ? 'text-slate-400' : isLate ? 'text-amber-400' : 'text-emerald-400';
+                return (
+                  <div className="absolute left-4 right-4 bottom-4 z-10">
+                    <div className={`rounded-xl border backdrop-blur-md shadow-2xl p-3 ${box}`}>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${iconBg}`}>
+                            {matched ? <ShieldCheck className={`w-5 h-5 ${iconColor}`} /> : <ScanFace className="w-5 h-5 text-slate-400" />}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-[9px] uppercase tracking-wider font-bold text-slate-500">
+                              {matched ? `${activeSlotInfo.label} Marked ${isLate ? 'LATE ⏰' : 'Present ✓'}` : 'Unknown Face'}
+                            </p>
+                            <p className="text-sm font-bold text-white truncate">{lastMatch.label}</p>
+                          </div>
                         </div>
-                        <div className="min-w-0">
-                          <p className="text-[9px] uppercase tracking-wider font-bold text-slate-500">
-                            {lastMatch.studentId ? `${activeSlotInfo.label} Attendance Marked in DB ✓` : 'Unknown Face'}
+                        <div className="text-right">
+                          <p className="text-[9px] text-slate-500">Confidence</p>
+                          <p className={`text-lg font-bold font-mono ${matched ? iconColor : 'text-slate-300'}`}>
+                            {lastMatch.conf}
                           </p>
-                          <p className="text-sm font-bold text-white truncate">{lastMatch.label}</p>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[9px] text-slate-500">Confidence</p>
-                        <p className={`text-lg font-bold font-mono ${lastMatch.studentId ? 'text-emerald-400' : 'text-slate-300'}`}>
-                          {lastMatch.conf}
-                        </p>
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
           </div>
 
@@ -510,7 +521,10 @@ export default function ClassroomAttendancePage() {
             <div className="max-h-[600px] overflow-y-auto divide-y divide-slate-800">
               {students.map(s => {
                 const sid = s.studentId || s.id;
-                const isSlotPresent = s[`${activeClassSlot}Attendance`] === 'present';
+                const slotStatus = s[`${activeClassSlot}Attendance`]; // present | late | absent
+                const isSlotPresent = slotStatus === 'present';
+                const isSlotLate = slotStatus === 'late';
+                const attended = isSlotPresent || isSlotLate;
                 return (
                   <div key={sid} className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-900/40 transition">
                     <img
@@ -525,7 +539,7 @@ export default function ClassroomAttendancePage() {
                     <div className="shrink-0 flex items-center gap-1.5">
                       <button
                         onClick={() => {
-                          if (isSlotPresent) {
+                          if (attended) {
                             markStudentAbsent(sid, { slot: activeClassSlot });
                           } else {
                             markStudentPresent(sid, null, { slot: activeClassSlot, manual: true });
@@ -534,6 +548,8 @@ export default function ClassroomAttendancePage() {
                         className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold font-mono transition cursor-pointer border ${
                           isSlotPresent
                             ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25'
+                            : isSlotLate
+                            ? 'bg-amber-500/15 border-amber-500/30 text-amber-400 hover:bg-amber-500/25'
                             : 'bg-slate-900 border-slate-800 text-slate-500 hover:border-slate-700 hover:text-slate-400'
                         }`}
                         title="Click to toggle attendance in DB"
@@ -542,6 +558,11 @@ export default function ClassroomAttendancePage() {
                           <>
                             <Check className="w-3 h-3" />
                             <span>PRESENT</span>
+                          </>
+                        ) : isSlotLate ? (
+                          <>
+                            <Clock3 className="w-3 h-3" />
+                            <span>LATE</span>
                           </>
                         ) : (
                           <>

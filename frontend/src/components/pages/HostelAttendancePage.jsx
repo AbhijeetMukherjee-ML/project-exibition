@@ -497,29 +497,41 @@ export default function HostelAttendancePage() {
               )}
 
               {/* Live recognition match card */}
-              {webcamOn && !webcamError && running && lastMatch && (
-                <div className="absolute left-4 right-4 bottom-16 z-20">
-                  <div className={`rounded-xl border backdrop-blur-md shadow-2xl p-3 ${lastMatch.studentId ? 'bg-emerald-950/80 border-emerald-500/40' : 'bg-slate-950/85 border-slate-700'}`}>
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${lastMatch.studentId ? 'bg-emerald-500/20' : 'bg-slate-800'}`}>
-                          {lastMatch.studentId ? <ShieldCheck className="w-5 h-5 text-emerald-400" /> : <ScanFace className="w-5 h-5 text-slate-400" />}
+              {webcamOn && !webcamError && running && lastMatch && (() => {
+                const isLate = lastMatch.status === 'late';
+                const matched = Boolean(lastMatch.studentId);
+                const accent = !matched ? 'slate' : isLate ? 'amber' : 'emerald';
+                const box = accent === 'emerald'
+                  ? 'bg-emerald-950/80 border-emerald-500/40'
+                  : accent === 'amber'
+                  ? 'bg-amber-950/80 border-amber-500/40'
+                  : 'bg-slate-950/85 border-slate-700';
+                const iconBg = accent === 'emerald' ? 'bg-emerald-500/20' : accent === 'amber' ? 'bg-amber-500/20' : 'bg-slate-800';
+                const iconColor = accent === 'emerald' ? 'text-emerald-400' : accent === 'amber' ? 'text-amber-400' : 'text-slate-400';
+                return (
+                  <div className="absolute left-4 right-4 bottom-16 z-20">
+                    <div className={`rounded-xl border backdrop-blur-md shadow-2xl p-3 ${box}`}>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${iconBg}`}>
+                            {matched ? <ShieldCheck className={`w-5 h-5 ${iconColor}`} /> : <ScanFace className="w-5 h-5 text-slate-400" />}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-[9px] uppercase tracking-wider font-bold text-slate-400">
+                              {matched ? (isLate ? 'Marked LATE at hostel gate ⏰' : 'Marked Present at hostel gate ✓') : 'Unknown Face'}
+                            </p>
+                            <p className="text-sm font-bold text-white truncate">{lastMatch.label}</p>
+                          </div>
                         </div>
-                        <div className="min-w-0">
-                          <p className="text-[9px] uppercase tracking-wider font-bold text-slate-400">
-                            {lastMatch.studentId ? 'Hostel Attendance Marked Present ✓' : 'Unknown Face'}
-                          </p>
-                          <p className="text-sm font-bold text-white truncate">{lastMatch.label}</p>
+                        <div className="text-right">
+                          <p className="text-[9px] text-slate-400">Confidence</p>
+                          <p className={`text-lg font-bold font-mono ${iconColor}`}>{lastMatch.conf}</p>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[9px] text-slate-400">Confidence</p>
-                        <p className={`text-lg font-bold font-mono ${lastMatch.studentId ? 'text-emerald-400' : 'text-slate-300'}`}>{lastMatch.conf}</p>
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
           ) : (
             /* GRID VIEW — all 8 blocks */

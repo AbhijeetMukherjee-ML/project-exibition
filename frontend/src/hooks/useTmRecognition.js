@@ -3,14 +3,18 @@ import { io } from 'socket.io-client';
 import { useApp } from '../context/AppContext';
 import { getSocketURL, apiGetCurrentDetections } from '../services/api';
 
-// How long after marking a student present before they can be re-marked.
-const RE_MARK_COOLDOWN_MS = 8000;
-// Drop a tracked box if no fresh detection has arrived within this window.
-const STALE_MS = 3500;
+// Drop a tracked box from the display if no detection arrived within this window.
+const STALE_MS = 2500;
+// Only mark attendance from boxes seen within this window — never from the
+// lingering box of someone who has already walked away.
+const FRESH_MS = 1200;
 // Minimum gap between recognition sweeps (keeps CPU sane with many crops).
 const SWEEP_INTERVAL_MS = 250;
 // TM image models are trained on 224×224 inputs.
 const TM_INPUT = 224;
+// Default grace window: students recognized after this many seconds from when
+// the scan started are marked "late" instead of "present".
+const DEFAULT_LATE_AFTER_SECONDS = 30;
 // Class labels that represent "no person" and must never become DB students.
 const NON_PERSON_LABELS = new Set([
   'background', 'none', 'nobody', 'no one', 'noone', 'empty',
@@ -29,10 +33,12 @@ const NON_PERSON_LABELS = new Set([
  * changed at any time and is shared across pages.
  *
  * @param {object}   opts
- * @param {string}   opts.slot          Attendance slot to mark (e.g. 'hostel', 'class1').
+ * @param {string}   opts.slot              Attendance slot to mark (e.g. 'hostel', 'class1').
  * @param {React.RefObject<HTMLImageElement>} opts.streamImgRef  The live MJPEG <img>.
+ * @param {number}   [opts.lateAfterSeconds] Grace window from scan start; recognitions
+ *                                           after it are marked "late". Default 30s.
  */
-export function useTmRecognition({ slot, streamImgRef }) {
+export function useTmRecognition({ slot, streamImgRef, lateAfterSeconds = DEFAULT_LATE_AFTER_SECONDS }) {
   const {
     students,
     tmModelURL,
@@ -55,7 +61,8 @@ export function useTmRecognition({ slot, streamImgRef }) {
   const modelRef = useRef(null);
   const timerRef = useRef(null);
   const runningRef = useRef(false);
-  const cooldownRef = useRef({});
+  const markedRef = useRef(new Set()); // `${slot}:${studentId}` already marked this scan
+  const scanStartRef = useRef(0);
   const cropCanvasRef = useRef(null);
   const sweepingRef = useRef(false);
 
@@ -63,12 +70,14 @@ export function useTmRecognition({ slot, streamImgRef }) {
   const mappingsRef = useRef(classMappings);
   const slotRef = useRef(slot);
   const studentsRef = useRef(students);
+  const lateAfterMsRef = useRef(lateAfterSeconds * 1000);
   const detectionsRef = useRef({}); // mirror of liveDetections for the sweep loop
 
   useEffect(() => { thresholdRef.current = threshold; }, [threshold]);
   useEffect(() => { mappingsRef.current = classMappings; }, [classMappings]);
   useEffect(() => { slotRef.current = slot; }, [slot]);
   useEffect(() => { studentsRef.current = students; }, [students]);
+  useEffect(() => { lateAfterMsRef.current = lateAfterSeconds * 1000; }, [lateAfterSeconds]);
   useEffect(() => { detectionsRef.current = liveDetections; }, [liveDetections]);
 
   // ── Live YOLO boxes over Socket.IO ──────────────────────────────────────
@@ -211,10 +220,17 @@ export function useTmRecognition({ slot, streamImgRef }) {
       }
       const ctx = canvas.getContext('2d');
 
-      const dets = Object.values(detectionsRef.current);
+      // Only consider boxes seen just now — never a box left behind by someone
+      // who already walked away (that was the "keeps marking the first student"
+      // bug). Each live person is classified from the current frame crop.
+      const now = Date.now();
+      const slotNow = slotRef.current;
+      const dets = Object.values(detectionsRef.current).filter(
+        d => d.boundingBox && now - (d.receivedAt || 0) <= FRESH_MS
+      );
+
       for (const d of dets) {
         const bb = d.boundingBox;
-        if (!bb) continue;
 
         // Clamp the crop rectangle to the frame bounds.
         const sx = Math.max(0, Math.min(Number(bb.x), nW - 1));
@@ -241,9 +257,10 @@ export function useTmRecognition({ slot, streamImgRef }) {
         if (!top) continue;
         const conf = top.probability;
         const confident = conf >= thresholdRef.current;
-        const studentId = mappingsRef.current[top.className];
+        const studentId = confident ? mappingsRef.current[top.className] : null;
 
-        // Reflect the identity on the box for on-feed display.
+        // Reflect the CURRENT prediction on the box for on-feed display — this
+        // box shows whoever is in front of it right now, not a past identity.
         setLiveDetections(prev => {
           const existing = prev[d.trackId];
           if (!existing) return prev;
@@ -251,21 +268,34 @@ export function useTmRecognition({ slot, streamImgRef }) {
             ...prev,
             [d.trackId]: {
               ...existing,
-              identity: confident ? top.className : existing.identity,
-              identityConfidence: conf,
+              identity: confident ? top.className : null,
+              identityConfidence: confident ? conf : 0,
             },
           };
         });
 
-        if (confident && studentId) {
-          setLastMatch({ label: top.className, studentId, conf: `${(conf * 100).toFixed(1)}%` });
-          const now = Date.now();
-          const last = cooldownRef.current[studentId] || 0;
-          if (now - last > RE_MARK_COOLDOWN_MS) {
-            cooldownRef.current[studentId] = now;
-            markStudentPresent(studentId, `${(conf * 100).toFixed(1)}%`, { slot: slotRef.current });
-          }
+        if (!confident || !studentId) continue;
+
+        // Mark each student once per scan session (per slot). Prevents the
+        // re-marking loop and lets a newly-arrived person be marked instead.
+        const key = `${slotNow}:${studentId}`;
+        if (markedRef.current.has(key)) continue;
+
+        // Skip if the DB already has this student present/late for this slot today.
+        const existingStudent = studentsRef.current.find(
+          s => s.id === studentId || s.studentId === studentId
+        );
+        const already = existingStudent?.[`${slotNow}Attendance`];
+        if (already === 'present' || already === 'late') {
+          markedRef.current.add(key);
+          continue;
         }
+
+        markedRef.current.add(key);
+        const late = now - scanStartRef.current > lateAfterMsRef.current;
+        const pct = `${(conf * 100).toFixed(1)}%`;
+        setLastMatch({ label: top.className, studentId, conf: pct, status: late ? 'late' : 'present' });
+        markStudentPresent(studentId, pct, { slot: slotNow, status: late ? 'late' : 'present' });
       }
     } finally {
       sweepingRef.current = false;
@@ -285,6 +315,9 @@ export function useTmRecognition({ slot, streamImgRef }) {
       return false;
     }
     if (runningRef.current) return true;
+    // Fresh session: clear who has been marked and start the on-time clock.
+    markedRef.current = new Set();
+    scanStartRef.current = Date.now();
     runningRef.current = true;
     setRunning(true);
     tick();

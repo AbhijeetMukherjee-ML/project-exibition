@@ -361,10 +361,21 @@ export const AppProvider = ({ children }) => {
   ======================================================= */
 
   const markStudentPresent = async (studentId, confidence = null, options = {}) => {
-    const { slot = activeClassSlot || 'class1', manual = false, date = getToday() } = options;
+    const {
+      slot = activeClassSlot || 'class1',
+      manual = false,
+      date = getToday(),
+      status: requestedStatus = 'present'
+    } = options;
 
     const student = students.find(item => item.id === studentId || item.studentId === studentId);
     if (!student) return false;
+
+    // After-hours hostel entries are curfew violations (counted as late).
+    const currentHour = new Date().getHours();
+    const isCurfew = slot === 'hostel' && (currentHour >= 22 || currentHour < 6);
+    const effectiveStatus = requestedStatus === 'late' || isCurfew ? 'late' : 'present';
+    const isLate = effectiveStatus === 'late';
 
     try {
       const updatedRecord = await apiMarkAttendance({
@@ -372,7 +383,7 @@ export const AppProvider = ({ children }) => {
         name: student.name,
         date,
         slot,
-        status: 'present',
+        status: effectiveStatus,
         confidence: confidence || (manual ? 'Manual' : 'AI Match'),
         method: manual ? 'Manual Override (Admin)' : 'AI Facial Recognition'
       });
@@ -382,10 +393,6 @@ export const AppProvider = ({ children }) => {
         ...prev,
         [studentId]: updatedRecord
       }));
-
-      // Log event
-      const currentHour = new Date().getHours();
-      const isCurfew = slot === 'hostel' && (currentHour >= 22 || currentHour < 6);
 
       const newLog = {
         id: generateLogId(),
@@ -397,12 +404,18 @@ export const AppProvider = ({ children }) => {
         timestamp: getTimestamp(),
         gate: slot === 'hostel' ? 'Hostel Entry Gate' : `Classroom (${slot.toUpperCase()})`,
         method: manual ? 'Manual Admin Entry' : 'AI Facial Recognition',
-        status: isCurfew ? 'Curfew Violation' : `Present (${slot.toUpperCase()})`,
+        status: isCurfew
+          ? 'Curfew Violation'
+          : isLate
+          ? `Late (${slot.toUpperCase()})`
+          : `Present (${slot.toUpperCase()})`,
         curfewAlert: isCurfew,
         remarks: manual
-          ? `Marked present manually in ${slot}`
+          ? `Marked ${effectiveStatus} manually in ${slot}`
           : isCurfew
           ? 'Curfew breach detected'
+          : isLate
+          ? `Recognized late for ${slot} attendance`
           : `Recognized for ${slot} attendance`,
         confidence: confidence || (manual ? 'Manual' : '98.5%')
       };
@@ -417,7 +430,7 @@ export const AppProvider = ({ children }) => {
         status: isCurfew ? 'CURFEW_ALERT' : 'AUTHORIZED'
       });
 
-      if (!manual) {
+      if (!manual && !isLate) {
         confetti({
           particleCount: 50,
           spread: 70,
@@ -426,9 +439,9 @@ export const AppProvider = ({ children }) => {
       }
 
       showToast(
-        `✅ Present: ${student.name}`,
-        `${student.name} marked present for ${slot.toUpperCase()} in database.`,
-        'success'
+        isLate ? `⏰ Late: ${student.name}` : `✅ Present: ${student.name}`,
+        `${student.name} marked ${effectiveStatus} for ${slot.toUpperCase()} in database.`,
+        isLate ? 'warning' : 'success'
       );
 
       return true;
