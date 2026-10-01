@@ -19,11 +19,11 @@ export default function ClassMappingEditor({ labels = [], accent = 'blue' }) {
 
   const focusRing =
     accent === 'violet'
-      ? 'focus:border-violet-500 focus:ring-violet-500/20'
-      : 'focus:border-blue-500 focus:ring-blue-500/20';
+      ? 'focus:border-emerald-500 focus:ring-emerald-500/20'
+      : 'focus:border-emerald-500 focus:ring-emerald-500/20';
 
   return (
-    <div className="mt-3 border-t border-slate-800 pt-3">
+    <div className="mt-3 border-t border-slate-200 pt-3">
       <div className="flex items-center justify-between mb-2">
         <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
           <Link2 className="w-3.5 h-3.5" />
@@ -48,14 +48,14 @@ export default function ClassMappingEditor({ labels = [], accent = 'blue' }) {
                 ) : (
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                 )}
-                <span className="text-xs font-semibold text-slate-200 truncate" title={label}>
+                <span className="text-xs font-semibold text-slate-700 truncate" title={label}>
                   {label}
                 </span>
               </div>
               <select
                 value={mappedId}
                 onChange={e => setClassMapping(label, e.target.value || null)}
-                className={`flex-1 min-w-0 px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-xs text-slate-100 cursor-pointer focus:outline-none focus:ring-1 ${focusRing}`}
+                className={`flex-1 min-w-0 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 cursor-pointer focus:outline-none focus:ring-1 ${focusRing}`}
               >
                 <option value="">— not mapped (ignore) —</option>
                 {students.map(s => (

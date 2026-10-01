@@ -210,10 +210,10 @@ export default function HostelAttendancePage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5 mb-1">
-            <div className="w-9 h-9 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-violet-400" />
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+              <Building2 className="w-5 h-5 text-emerald-500" />
             </div>
-            <h2 className="text-xl font-bold text-white">Hostel Curfew Attendance</h2>
+            <h2 className="text-xl font-bold text-slate-900">Hostel Curfew Attendance</h2>
             {isCurfewTime && (
               <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border bg-amber-500/10 border-amber-500/20 text-amber-400 text-[10px] font-bold font-mono">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
@@ -227,7 +227,7 @@ export default function HostelAttendancePage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <button onClick={exportCSV} className="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-slate-700 bg-slate-900 text-slate-300 hover:bg-slate-800 cursor-pointer transition">
+          <button onClick={exportCSV} className="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-slate-200 bg-slate-100 text-slate-600 hover:bg-slate-50 cursor-pointer transition">
             <Download className="w-3.5 h-3.5" />
             Export Log
           </button>
@@ -235,7 +235,7 @@ export default function HostelAttendancePage() {
             onClick={handleToggleFeed}
             disabled={isStartingStream}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer border transition ${
-              webcamOn ? 'bg-emerald-600 border-emerald-500 text-white' : 'bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800'
+              webcamOn ? 'bg-emerald-600 border-emerald-500 text-white' : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-50'
             } ${isStartingStream ? 'opacity-70 cursor-wait' : ''}`}
           >
             {isStartingStream ? (
@@ -250,7 +250,7 @@ export default function HostelAttendancePage() {
           {!running ? (
             <button
               onClick={startRecognition}
-              className="px-4 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-sm transition"
+              className="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-sm transition"
             >
               <Play className="w-3.5 h-3.5" />
               Start Scan
@@ -266,7 +266,7 @@ export default function HostelAttendancePage() {
           )}
           <button
             onClick={triggerSimulatedScan}
-            className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:bg-slate-800 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition"
+            className="px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition"
           >
             <Zap className="w-3.5 h-3.5" />
             Simulate
@@ -279,17 +279,17 @@ export default function HostelAttendancePage() {
         <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
           <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-bold text-amber-300">Curfew is Active — {now.toLocaleTimeString()}</p>
-            <p className="text-xs text-amber-400/70 mt-0.5">
+            <p className="text-sm font-bold text-amber-700">Curfew is Active — {now.toLocaleTimeString()}</p>
+            <p className="text-xs text-amber-600/80 mt-0.5">
               AI is monitoring the hostel gate. Any student entering after 10 PM is automatically flagged as a curfew violation.
             </p>
           </div>
         </div>
       ) : (
-        <div className="flex items-start gap-3 p-4 rounded-xl bg-slate-800/40 border border-slate-700">
+        <div className="flex items-start gap-3 p-4 rounded-xl bg-slate-100 border border-slate-200">
           <Clock3 className="w-5 h-5 text-slate-500 shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-semibold text-slate-300">Curfew starts at 10:00 PM</p>
+            <p className="text-sm font-semibold text-slate-700">Curfew starts at 10:00 PM</p>
             <p className="text-xs text-slate-500 mt-0.5">
               Current time: {now.toLocaleTimeString()}. Hostel gate monitoring will auto-activate when curfew begins.
             </p>
@@ -311,13 +311,13 @@ export default function HostelAttendancePage() {
         <div className="space-y-3">
 
           {/* AI Recognition Model (Teachable Machine) — changeable link */}
-          <div className="bg-[#0b1320] border border-slate-800 rounded-xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+            <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Cpu className="w-4 h-4 text-slate-400" />
-                <span className="text-xs font-bold text-slate-200">Face Recognition Model</span>
+                <span className="text-xs font-bold text-slate-800">Face Recognition Model</span>
               </div>
-              <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded border ${modelStatus === 'ready' ? 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5' : modelStatus === 'error' ? 'text-rose-400 border-rose-500/20 bg-rose-500/5' : 'text-slate-400 border-slate-700 bg-slate-800'}`}>
+              <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded border ${modelStatus === 'ready' ? 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5' : modelStatus === 'error' ? 'text-rose-400 border-rose-500/20 bg-rose-500/5' : 'text-slate-500 border-slate-200 bg-slate-100'}`}>
                 {modelStatus === 'ready' ? `${labels.length} CLASSES` : modelStatus === 'loading' ? 'LOADING…' : modelStatus === 'error' ? 'ERROR' : 'NOT LOADED'}
               </span>
             </div>
@@ -330,13 +330,13 @@ export default function HostelAttendancePage() {
                     value={urlInput}
                     onChange={e => setUrlInput(e.target.value)}
                     placeholder="https://teachablemachine.withgoogle.com/models/XXXXXXXX/"
-                    className="w-full pl-9 pr-3 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-xs font-mono text-slate-100 placeholder-slate-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500/20"
+                    className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-lg text-xs font-mono text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20"
                   />
                 </div>
                 <button
                   onClick={() => loadModel(urlInput)}
                   disabled={modelStatus === 'loading'}
-                  className="sm:w-32 px-4 py-2.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer disabled:opacity-60"
+                  className="sm:w-32 px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer disabled:opacity-60"
                 >
                   {modelStatus === 'loading' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ScanFace className="w-3.5 h-3.5" />}
                   {modelStatus === 'loading' ? 'Loading…' : 'Load Model'}
@@ -365,7 +365,7 @@ export default function HostelAttendancePage() {
 
           {/* Hostel Block selector */}
           <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2 p-2 rounded-xl bg-[#0b1320] border border-slate-800">
+            <div className="flex flex-wrap items-center gap-2 p-2 rounded-xl bg-white border border-slate-200">
               <div className="px-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-1.5">
                 <Building2 className="w-3.5 h-3.5" />
                 Hostel Blocks
@@ -376,7 +376,7 @@ export default function HostelAttendancePage() {
                   <button
                     key={blk.id}
                     onClick={() => setActiveBlockId(blk.id)}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${selected ? 'bg-violet-600 text-white shadow-md' : 'bg-slate-900 border border-slate-700 text-slate-300 hover:bg-slate-800'}`}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${selected ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-100 border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
                   >
                     <span className={`w-1.5 h-1.5 rounded-full ${selected ? 'bg-white' : 'bg-emerald-500'}`} />
                     {blk.name}
@@ -386,7 +386,7 @@ export default function HostelAttendancePage() {
               })}
               <button
                 onClick={() => setIsGridMode(!isGridMode)}
-                className="ml-auto px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:bg-slate-800 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                className="ml-auto px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
               >
                 {isGridMode ? <Square className="w-3.5 h-3.5" /> : <Grid className="w-3.5 h-3.5" />}
                 {isGridMode ? 'Single' : 'Grid'}
@@ -395,8 +395,8 @@ export default function HostelAttendancePage() {
 
             {/* Active block info pill */}
             {activeBlock && (
-              <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-[#0b1320] border border-slate-800 text-[10px] font-mono text-slate-400">
-                <span className="font-bold text-violet-400">{activeBlock.name}</span>
+              <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white border border-slate-200 text-[10px] font-mono text-slate-400">
+                <span className="font-bold text-emerald-500">{activeBlock.name}</span>
                 <span className="text-slate-600">·</span>
                 <span>{activeBlock.label}</span>
                 <span className="text-slate-600">·</span>
@@ -413,7 +413,7 @@ export default function HostelAttendancePage() {
 
           {!isGridMode ? (
             /* SINGLE VIEW */
-            <div ref={viewportRef} className="relative aspect-video rounded-2xl overflow-hidden bg-black border border-slate-800 shadow-2xl">
+            <div ref={viewportRef} className="relative aspect-video rounded-2xl overflow-hidden bg-black border border-slate-200 shadow-2xl">
               {webcamOn ? (
                 <img
                   key={streamKey}
@@ -435,7 +435,7 @@ export default function HostelAttendancePage() {
                 </div>
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black">
-                  <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center">
                     <VideoOff className="w-7 h-7 text-slate-600" />
                   </div>
                   <p className="text-xs font-semibold text-slate-500">AI Feed Offline</p>
@@ -473,7 +473,7 @@ export default function HostelAttendancePage() {
                         <span className="text-slate-300">{activeBlock?.label}</span>
                       </div>
                       <div className="hidden sm:flex px-3 py-2 rounded-lg bg-black/75 backdrop-blur-md border border-white/10 text-white font-mono text-[11px] items-center gap-2">
-                        <Clock3 className="w-3 h-3 text-violet-400" />
+                        <Clock3 className="w-3 h-3 text-emerald-500" />
                         {now.toLocaleTimeString()}
                       </div>
                     </div>
@@ -488,7 +488,7 @@ export default function HostelAttendancePage() {
                     <div className="px-3 py-2 rounded-lg bg-black/75 backdrop-blur-md border border-white/10 text-[10px] font-mono text-slate-300">
                       {activeBlock?.name} · {activeBlock?.label} · ENCRYPTED
                     </div>
-                    <div className={`px-3 py-2 rounded-lg backdrop-blur-md border text-[10px] font-mono font-bold ${running ? 'bg-emerald-950/80 border-emerald-500/30 text-emerald-400' : detectionIsAlert ? 'bg-red-950/80 border-red-500/30 text-red-400' : 'bg-violet-950/80 border-violet-500/30 text-violet-400'}`}>
+                    <div className={`px-3 py-2 rounded-lg backdrop-blur-md border text-[10px] font-mono font-bold ${running ? 'bg-emerald-950/80 border-emerald-500/30 text-emerald-400' : detectionIsAlert ? 'bg-red-950/80 border-red-500/30 text-red-400' : 'bg-emerald-950/80 border-emerald-500/30 text-emerald-500'}`}>
                       <span className="inline-block w-1.5 h-1.5 rounded-full bg-current mr-1.5 animate-pulse" />
                       {running ? 'RECOGNIZING' : detectionIsAlert ? 'CURFEW VIOLATION' : 'HOSTEL AI ACTIVE'}
                     </div>
@@ -505,7 +505,7 @@ export default function HostelAttendancePage() {
                   ? 'bg-emerald-950/80 border-emerald-500/40'
                   : accent === 'amber'
                   ? 'bg-amber-950/80 border-amber-500/40'
-                  : 'bg-slate-950/85 border-slate-700';
+                  : 'bg-slate-950/85 border-slate-200';
                 const iconBg = accent === 'emerald' ? 'bg-emerald-500/20' : accent === 'amber' ? 'bg-amber-500/20' : 'bg-slate-800';
                 const iconColor = accent === 'emerald' ? 'text-emerald-400' : accent === 'amber' ? 'text-amber-400' : 'text-slate-400';
                 return (
@@ -540,7 +540,7 @@ export default function HostelAttendancePage() {
                 <div
                   key={blk.id}
                   onClick={() => { setActiveBlockId(blk.id); setIsGridMode(false); }}
-                  className="relative aspect-video overflow-hidden rounded-xl bg-black border border-slate-800 shadow-lg group cursor-pointer"
+                  className="relative aspect-video overflow-hidden rounded-xl bg-black border border-slate-200 shadow-lg group cursor-pointer"
                 >
                   {webcamOn && !webcamError ? (
                     <img
@@ -550,7 +550,7 @@ export default function HostelAttendancePage() {
                       className={`w-full h-full object-cover group-hover:brightness-110 transition-all ${nightVision ? 'brightness-125 contrast-125 saturate-50 hue-rotate-90' : ''}`}
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-slate-950">
+                    <div className="w-full h-full flex items-center justify-center bg-white">
                       <VideoOff className="w-6 h-6 text-slate-700" />
                     </div>
                   )}
@@ -569,14 +569,14 @@ export default function HostelAttendancePage() {
           )}
 
           {/* AI Controls */}
-          <div className="flex items-center gap-3 p-3 bg-[#0b1320] border border-slate-800 rounded-xl">
+          <div className="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl">
             <ToggleSwitch
               label="AI Detection Overlay"
               enabled={aiOverlayEnabled}
               onToggle={() => setAiOverlayEnabled(!aiOverlayEnabled)}
               icon={Eye}
             />
-            <div className="w-px h-6 bg-slate-800" />
+            <div className="w-px h-6 bg-slate-200" />
             <ToggleSwitch
               label="IR Night Vision"
               enabled={nightVision}
@@ -593,10 +593,10 @@ export default function HostelAttendancePage() {
 
           {/* Live recognized persons (YOLO box + Teachable Machine identity) */}
           {webcamOn && recognizedDetections.length > 0 && (
-            <div className="bg-[#0b1320] border border-slate-800 rounded-xl p-3">
+            <div className="bg-white border border-slate-200 rounded-xl p-3">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <Users className="w-3.5 h-3.5 text-violet-400" />
+                  <Users className="w-3.5 h-3.5 text-emerald-500" />
                   Live Tracked Persons ({recognizedDetections.length})
                 </span>
                 <span className="text-[9px] font-mono text-emerald-400">REAL-TIME</span>
@@ -609,10 +609,10 @@ export default function HostelAttendancePage() {
                     <div
                       key={d.trackId}
                       className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-mono ${
-                        hasId ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-violet-500/10 border-violet-500/30 text-violet-300'
+                        hasId ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700'
                       }`}
                     >
-                      <span className={`w-1.5 h-1.5 rounded-full ${hasId ? 'bg-emerald-400' : 'bg-violet-400'}`} />
+                      <span className={`w-1.5 h-1.5 rounded-full ${hasId ? 'bg-emerald-400' : 'bg-emerald-500'}`} />
                       <span>{name}</span>
                       <span className="text-[10px] opacity-70">
                         {d.identityConfidence > 0
@@ -629,12 +629,12 @@ export default function HostelAttendancePage() {
 
         {/* RIGHT — Curfew log */}
         <div className="space-y-3">
-          <div className="bg-[#0b1320] border border-slate-800 rounded-xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-200">After-Hours Log</span>
+          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+            <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-800">After-Hours Log</span>
               <span className="text-[9px] font-mono text-slate-500">{hostelLogs.length} EVENTS</span>
             </div>
-            <div className="max-h-[520px] overflow-y-auto divide-y divide-slate-800">
+            <div className="max-h-[520px] overflow-y-auto divide-y divide-slate-100">
               {hostelLogs.length === 0 && (
                 <div className="py-12 text-center">
                   <Building2 className="w-8 h-8 text-slate-700 mx-auto mb-3" />
@@ -643,10 +643,10 @@ export default function HostelAttendancePage() {
               )}
               {hostelLogs.map(log => (
                 <div key={log.id} className={`flex items-start gap-3 px-4 py-3 ${log.curfewAlert ? 'bg-rose-500/[0.03]' : ''}`}>
-                  <img src={log.avatar} alt={log.studentName} className="w-8 h-8 rounded-lg object-cover border border-slate-700 shrink-0 mt-0.5" />
+                  <img src={log.avatar} alt={log.studentName} className="w-8 h-8 rounded-lg object-cover border border-slate-200 shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="text-xs font-semibold text-slate-200 truncate">{log.studentName}</p>
+                      <p className="text-xs font-semibold text-slate-800 truncate">{log.studentName}</p>
                       {log.curfewAlert && (
                         <span className="inline-flex items-center gap-1 text-[8px] font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-1.5 py-0.5 rounded">
                           VIOLATION
@@ -672,18 +672,25 @@ export default function HostelAttendancePage() {
 }
 
 function StatCard({ label, value, icon: Icon, accent = 'slate' }) {
-  const colors = {
-    emerald: 'text-emerald-400 border-emerald-900/40',
-    rose: 'text-rose-400 border-rose-900/40',
-    slate: 'text-slate-400 border-slate-800'
+  const iconBox = {
+    emerald: 'bg-emerald-50 text-emerald-600',
+    rose: 'bg-rose-50 text-rose-600',
+    slate: 'bg-slate-100 text-slate-500'
+  };
+  const valueColor = {
+    emerald: 'text-emerald-600',
+    rose: 'text-rose-600',
+    slate: 'text-slate-900'
   };
   return (
-    <div className={`p-4 bg-[#0b1320] border rounded-xl ${colors[accent]}`}>
+    <div className="p-4 bg-white border border-slate-200 rounded-xl card-soft">
       <div className="flex items-center justify-between mb-2">
         <span className="text-[10px] uppercase tracking-wider font-bold text-slate-500">{label}</span>
-        <Icon className={`w-3.5 h-3.5 ${accent === 'emerald' ? 'text-emerald-500' : accent === 'rose' ? 'text-rose-500' : 'text-slate-500'}`} />
+        <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${iconBox[accent] || iconBox.slate}`}>
+          <Icon className="w-3.5 h-3.5" />
+        </div>
       </div>
-      <p className={`text-2xl font-bold font-mono ${accent === 'emerald' ? 'text-emerald-400' : accent === 'rose' ? 'text-rose-400' : 'text-white'}`}>
+      <p className={`text-2xl font-bold font-mono ${valueColor[accent] || valueColor.slate}`}>
         {value}
       </p>
     </div>
@@ -693,9 +700,9 @@ function StatCard({ label, value, icon: Icon, accent = 'slate' }) {
 function ToggleSwitch({ label, enabled, onToggle, icon: Icon }) {
   return (
     <button onClick={onToggle} className="flex items-center gap-2 cursor-pointer group">
-      <Icon className={`w-3.5 h-3.5 ${enabled ? 'text-violet-400' : 'text-slate-500'}`} />
-      <span className="text-xs text-slate-400 group-hover:text-slate-200 transition">{label}</span>
-      <div className={`relative w-8 h-4 rounded-full transition-colors ${enabled ? 'bg-violet-600' : 'bg-slate-700'}`}>
+      <Icon className={`w-3.5 h-3.5 ${enabled ? 'text-emerald-500' : 'text-slate-500'}`} />
+      <span className="text-xs text-slate-500 group-hover:text-slate-900 transition">{label}</span>
+      <div className={`relative w-8 h-4 rounded-full transition-colors ${enabled ? 'bg-emerald-600' : 'bg-slate-300'}`}>
         <div className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white shadow transition-transform ${enabled ? 'translate-x-4' : ''}`} />
       </div>
     </button>

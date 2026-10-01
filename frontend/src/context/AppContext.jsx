@@ -116,7 +116,7 @@ export const AppProvider = ({ children }) => {
   ======================================================= */
 
   const [theme, setTheme] = useState(() => {
-    return getStoredString(STORAGE_KEYS.THEME, 'dark');
+    return getStoredString(STORAGE_KEYS.THEME, 'light');
   });
 
   const toggleTheme = () => {
