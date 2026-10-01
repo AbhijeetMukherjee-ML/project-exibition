@@ -93,12 +93,8 @@ export const AppProvider = ({ children }) => {
       : 'database';
   });
 
-  const [currentView, setCurrentView] = useState(() => {
-    return getStoredString(
-      STORAGE_KEYS.CURRENT_VIEW,
-      'home'
-    );
-  });
+  // Always start on the landing page — never restore a saved portal session on boot.
+  const [currentView, setCurrentView] = useState('home');
 
   const [userRole, setUserRole] = useState(() => {
     return getStoredString(
