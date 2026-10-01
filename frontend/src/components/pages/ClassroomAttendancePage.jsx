@@ -30,6 +30,7 @@ import {
   apiGetCameraStreamStatus,
 } from '../../services/api';
 import { useTmRecognition } from '../../hooks/useTmRecognition';
+import ClassMappingEditor from '../common/ClassMappingEditor';
 
 const CLASS_SLOTS = [
   { id: 'class1', label: 'Class 1', time: '09:00 - 09:50', subject: 'Data Structures' },
@@ -340,6 +341,7 @@ export default function ClassroomAttendancePage() {
                   {modelError}
                 </p>
               )}
+              <ClassMappingEditor labels={labels} accent="blue" />
             </div>
           </div>
 

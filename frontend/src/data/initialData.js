@@ -14,7 +14,7 @@ export const INITIAL_STUDENTS = [];
 // ============================================================
 
 export const DEFAULT_TM_MODEL_URL =
-  "https://teachablemachine.withgoogle.com/models/Vxw4jMg7l/";
+  "https://teachablemachine.withgoogle.com/models/sQZC8dlTS/";
 
 export const DEFAULT_TM_MAPPINGS = {
   "Adarsh Tiwari": "STU-2026-009",

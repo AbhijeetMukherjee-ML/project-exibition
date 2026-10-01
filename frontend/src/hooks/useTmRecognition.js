@@ -11,6 +11,11 @@ const STALE_MS = 3500;
 const SWEEP_INTERVAL_MS = 250;
 // TM image models are trained on 224×224 inputs.
 const TM_INPUT = 224;
+// Class labels that represent "no person" and must never become DB students.
+const NON_PERSON_LABELS = new Set([
+  'background', 'none', 'nobody', 'no one', 'noone', 'empty',
+  'unknown', 'other', 'others', 'na', 'n/a', 'nothing',
+]);
 
 /**
  * Shared Teachable Machine recognition over the live YOLO feed.
@@ -35,6 +40,7 @@ export function useTmRecognition({ slot, streamImgRef }) {
     classMappings,
     setClassMapping,
     markStudentPresent,
+    addStudent,
     showToast,
   } = useApp();
 
@@ -142,26 +148,48 @@ export function useTmRecognition({ slot, streamImgRef }) {
       const classLabels = model.getClassLabels();
       setLabels(classLabels);
       setTmModelURL(base);
-      // Auto-map TM class labels to registered students by name / id.
-      classLabels.forEach(label => {
-        if (mappingsRef.current[label]) return;
+
+      // Link each TM class to a DB student. Match by name/id; otherwise auto-
+      // create a new student for that class so recognition can mark them present.
+      // Placeholder/non-person classes are skipped (never become students).
+      let created = 0;
+      for (const label of classLabels) {
+        if (mappingsRef.current[label]) continue;
         const norm = label.trim().toLowerCase();
         const match = studentsRef.current.find(s =>
           (s.name || '').toLowerCase() === norm ||
           (s.id || '').toLowerCase() === norm ||
           (s.studentId || '').toLowerCase() === norm
         );
-        if (match) setClassMapping(label, match.id);
-      });
+        if (match) {
+          setClassMapping(label, match.id);
+          continue;
+        }
+        if (NON_PERSON_LABELS.has(norm)) continue;
+        try {
+          const newStudent = await addStudent({ name: label.trim() });
+          if (newStudent) {
+            setClassMapping(label, newStudent.studentId || newStudent._id);
+            created += 1;
+          }
+        } catch (err) {
+          console.warn(`Could not auto-create student for class "${label}":`, err?.message || err);
+        }
+      }
+
       setModelStatus('ready');
-      showToast('Model Loaded', `${classLabels.length} identity classes ready.`, 'success');
+      showToast(
+        'Model Loaded',
+        `${classLabels.length} identity classes ready${created ? ` · ${created} new student${created > 1 ? 's' : ''} created` : ''}.`,
+        'success'
+      );
     } catch (err) {
       console.error(err);
       setModelStatus('error');
       setModelError('Could not load model. Check the URL and that sharing is public.');
       showToast('Model Error', 'Could not load the Teachable Machine model.', 'error');
     }
-  }, [tmModelURL, setTmModelURL, setClassMapping, showToast]);
+  }, [tmModelURL, setTmModelURL, setClassMapping, addStudent, showToast]);
 
   // ── Recognition sweep: crop each YOLO box and classify it ───────────────
   const sweep = useCallback(async () => {

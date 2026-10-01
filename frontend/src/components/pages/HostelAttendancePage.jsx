@@ -36,6 +36,7 @@ import {
   apiGetCameraStreamStatus,
 } from '../../services/api';
 import { useTmRecognition } from '../../hooks/useTmRecognition';
+import ClassMappingEditor from '../common/ClassMappingEditor';
 
 // Live AI MJPEG stream served by the Python YOLO detector (same feed as Classroom)
 const AI_STREAM_URL = 'http://localhost:5001/video';
@@ -358,6 +359,7 @@ export default function HostelAttendancePage() {
                   Paste your Teachable Machine model link, then Start Scan — recognized students are marked present at the hostel gate. You can change this link anytime.
                 </p>
               )}
+              <ClassMappingEditor labels={labels} accent="violet" />
             </div>
           </div>
 
