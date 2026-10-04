@@ -23,13 +23,13 @@ export default function ClassMappingEditor({ labels = [], accent = 'blue' }) {
       : 'focus:border-emerald-500 focus:ring-emerald-500/20';
 
   return (
-    <div className="mt-3 border-t border-slate-200 pt-3">
+    <div className="border-slate-200 dark:border-slate-800 border-t mt-3 pt-3">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-          <Link2 className="w-3.5 h-3.5" />
+        <span className="flex font-bold gap-1.5 items-center text-[10px] text-slate-400 tracking-wider uppercase">
+          <Link2 className="h-3.5 w-3.5" />
           Map Classes → Students
         </span>
-        <span className="text-[9px] font-mono text-slate-500">
+        <span className="dark:text-slate-400 font-mono text-[9px] text-slate-500">
           {labels.filter(l => classMappings[l]).length}/{labels.length} mapped
         </span>
       </div>
@@ -41,21 +41,21 @@ export default function ClassMappingEditor({ labels = [], accent = 'blue' }) {
             s => s.id === mappedId || s.studentId === mappedId
           );
           return (
-            <div key={label} className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 min-w-0 flex-1">
+            <div key={label} className="flex gap-2 items-center">
+              <div className="flex flex-1 gap-1.5 items-center min-w-0">
                 {mappedStudent ? (
-                  <UserCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <UserCheck className="h-3.5 shrink-0 text-emerald-400 w-3.5" />
                 ) : (
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <AlertTriangle className="h-3.5 shrink-0 text-amber-400 w-3.5" />
                 )}
-                <span className="text-xs font-semibold text-slate-700 truncate" title={label}>
+                <span className="dark:text-slate-300 font-semibold text-slate-700 text-xs truncate" title={label}>
                   {label}
                 </span>
               </div>
               <select
                 value={mappedId}
                 onChange={e => setClassMapping(label, e.target.value || null)}
-                className={`flex-1 min-w-0 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 cursor-pointer focus:outline-none focus:ring-1 ${focusRing}`}
+                className={`flex-1 min-w-0 px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-800 dark:text-slate-200 cursor-pointer focus:outline-none focus:ring-1 ${focusRing}`}
               >
                 <option value="">— not mapped (ignore) —</option>
                 {students.map(s => (
@@ -69,7 +69,7 @@ export default function ClassMappingEditor({ labels = [], accent = 'blue' }) {
         })}
       </div>
 
-      <p className="mt-2 text-[10px] text-slate-500">
+      <p className="dark:text-slate-400 mt-2 text-[10px] text-slate-500">
         Pick the student each class represents. Leave a class (e.g. “Background”) unmapped to ignore it. Saved automatically.
       </p>
     </div>

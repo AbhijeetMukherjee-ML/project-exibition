@@ -207,68 +207,66 @@ export default function HostelAttendancePage() {
     <div className="space-y-5">
 
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col gap-4 justify-between sm:flex-row sm:items-center">
         <div>
-          <div className="flex items-center gap-2.5 mb-1">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-emerald-500" />
+          <div className="flex gap-2.5 items-center mb-1">
+            <div className="bg-emerald-500/10 border border-emerald-500/20 flex h-9 items-center justify-center rounded-xl w-9">
+              <Building2 className="h-5 text-emerald-500 w-5" />
             </div>
-            <h2 className="text-xl font-bold text-slate-900">Hostel Curfew Attendance</h2>
+            <h2 className="dark:text-white font-bold text-slate-900 text-xl">Hostel Curfew Attendance</h2>
             {isCurfewTime && (
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border bg-amber-500/10 border-amber-500/20 text-amber-400 text-[10px] font-bold font-mono">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+              <span className="bg-amber-500/10 border border-amber-500/20 font-bold font-mono gap-1.5 inline-flex items-center px-2 py-0.5 rounded-md text-[10px] text-amber-400">
+                <span className="animate-pulse bg-amber-400 h-1.5 rounded-full w-1.5" />
                 CURFEW ACTIVE
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-500">
+          <p className="dark:text-slate-400 text-slate-500 text-xs">
             After curfew time (10 PM – 6 AM), AI camera marks hostel gate attendance and flags late arrivals.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <button onClick={exportCSV} className="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-slate-200 bg-slate-100 text-slate-600 hover:bg-slate-50 cursor-pointer transition">
-            <Download className="w-3.5 h-3.5" />
+        <div className="flex flex-wrap gap-2 items-center">
+          <button onClick={exportCSV} className="bg-slate-100 border border-slate-200 dark:border-slate-800 cursor-pointer dark:hover:bg-slate-800 dark:text-slate-400 flex font-semibold gap-1.5 hover:bg-slate-50 dark:hover:bg-slate-800 items-center px-3 py-1.5 rounded-lg text-slate-600 text-xs transition">
+            <Download className="h-3.5 w-3.5" />
             Export Log
           </button>
           <button
             onClick={handleToggleFeed}
             disabled={isStartingStream}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer border transition ${
-              webcamOn ? 'bg-emerald-600 border-emerald-500 text-white' : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-50'
-            } ${isStartingStream ? 'opacity-70 cursor-wait' : ''}`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer border transition ${ webcamOn ? 'bg-emerald-600 border-emerald-500 text-white' : 'bg-slate-100 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 dark:hover:bg-slate-800' } ${isStartingStream ? 'opacity-70 cursor-wait' : ''}`}
           >
             {isStartingStream ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-400" />
+              <Loader2 className="animate-spin h-3.5 text-indigo-400 w-3.5" />
             ) : webcamOn ? (
-              <Video className="w-3.5 h-3.5" />
+              <Video className="h-3.5 w-3.5" />
             ) : (
-              <VideoOff className="w-3.5 h-3.5" />
+              <VideoOff className="h-3.5 w-3.5" />
             )}
             {isStartingStream ? 'Starting AI...' : webcamOn ? 'AI Feed Active' : 'Enable AI Feed'}
           </button>
           {!running ? (
             <button
               onClick={startRecognition}
-              className="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-sm transition"
+              className="bg-emerald-600 cursor-pointer flex font-semibold gap-1.5 hover:bg-emerald-500 items-center px-4 py-1.5 rounded-lg shadow-sm text-white text-xs transition"
             >
-              <Play className="w-3.5 h-3.5" />
+              <Play className="h-3.5 w-3.5" />
               Start Scan
             </button>
           ) : (
             <button
               onClick={stopRecognition}
-              className="px-4 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-sm transition"
+              className="bg-rose-600 cursor-pointer flex font-semibold gap-1.5 hover:bg-rose-500 items-center px-4 py-1.5 rounded-lg shadow-sm text-white text-xs transition"
             >
-              <Square className="w-3.5 h-3.5" />
+              <Square className="h-3.5 w-3.5" />
               Stop Scan
             </button>
           )}
           <button
             onClick={triggerSimulatedScan}
-            className="px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition"
+            className="bg-slate-100 border border-slate-200 dark:border-slate-800 cursor-pointer dark:hover:bg-slate-800 dark:text-slate-400 flex font-semibold gap-1.5 hover:bg-slate-50 dark:hover:bg-slate-800 items-center px-3 py-1.5 rounded-lg text-slate-600 text-xs transition"
           >
-            <Zap className="w-3.5 h-3.5" />
+            <Zap className="h-3.5 w-3.5" />
             Simulate
           </button>
         </div>
@@ -276,21 +274,21 @@ export default function HostelAttendancePage() {
 
       {/* Curfew time banner */}
       {isCurfewTime ? (
-        <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
-          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+        <div className="bg-amber-500/5 border border-amber-500/20 flex gap-3 items-start p-4 rounded-xl">
+          <AlertTriangle className="h-5 mt-0.5 shrink-0 text-amber-400 w-5" />
           <div>
-            <p className="text-sm font-bold text-amber-700">Curfew is Active — {now.toLocaleTimeString()}</p>
-            <p className="text-xs text-amber-600/80 mt-0.5">
+            <p className="font-bold text-amber-700 text-sm">Curfew is Active — {now.toLocaleTimeString()}</p>
+            <p className="mt-0.5 text-amber-600/80 text-xs">
               AI is monitoring the hostel gate. Any student entering after 10 PM is automatically flagged as a curfew violation.
             </p>
           </div>
         </div>
       ) : (
-        <div className="flex items-start gap-3 p-4 rounded-xl bg-slate-100 border border-slate-200">
-          <Clock3 className="w-5 h-5 text-slate-500 shrink-0 mt-0.5" />
+        <div className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-800 flex gap-3 items-start p-4 rounded-xl">
+          <Clock3 className="dark:text-slate-400 h-5 mt-0.5 shrink-0 text-slate-500 w-5" />
           <div>
-            <p className="text-sm font-semibold text-slate-700">Curfew starts at 10:00 PM</p>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="dark:text-slate-300 font-semibold text-slate-700 text-sm">Curfew starts at 10:00 PM</p>
+            <p className="dark:text-slate-400 mt-0.5 text-slate-500 text-xs">
               Current time: {now.toLocaleTimeString()}. Hostel gate monitoring will auto-activate when curfew begins.
             </p>
           </div>
@@ -298,64 +296,64 @@ export default function HostelAttendancePage() {
       )}
 
       {/* STATS */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="gap-3 grid grid-cols-3">
         <StatCard label="Entries After Hours" value={totalIn} icon={ArrowDownLeft} accent="emerald" />
         <StatCard label="Exits After Hours" value={totalOut} icon={ArrowUpRight} />
         <StatCard label="Curfew Violations" value={violations} icon={AlertTriangle} accent={violations > 0 ? 'rose' : 'slate'} />
       </div>
 
       {/* CAMERA + LOG */}
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-5">
+      <div className="gap-5 grid grid-cols-1 xl:grid-cols-[1fr_340px]">
 
         {/* CAMERA FEED */}
         <div className="space-y-3">
 
           {/* AI Recognition Model (Teachable Machine) — changeable link */}
-          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Cpu className="w-4 h-4 text-slate-400" />
-                <span className="text-xs font-bold text-slate-800">Face Recognition Model</span>
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden rounded-xl">
+            <div className="border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 py-3">
+              <div className="flex gap-2 items-center">
+                <Cpu className="dark:text-slate-400 h-4 text-slate-500 w-4" />
+                <span className="dark:text-slate-200 font-bold text-slate-800 text-xs">Face Recognition Model</span>
               </div>
-              <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded border ${modelStatus === 'ready' ? 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5' : modelStatus === 'error' ? 'text-rose-400 border-rose-500/20 bg-rose-500/5' : 'text-slate-500 border-slate-200 bg-slate-100'}`}>
+              <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded border ${modelStatus === 'ready' ? 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5' : modelStatus === 'error' ? 'text-rose-400 border-rose-500/20 bg-rose-500/5' : 'text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800'}`}>
                 {modelStatus === 'ready' ? `${labels.length} CLASSES` : modelStatus === 'loading' ? 'LOADING…' : modelStatus === 'error' ? 'ERROR' : 'NOT LOADED'}
               </span>
             </div>
             <div className="p-4">
-              <div className="flex flex-col sm:flex-row gap-2">
-                <div className="relative flex-1">
-                  <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <div className="flex-1 relative">
+                  <Link2 className="-translate-y-1/2 absolute dark:text-slate-400 h-3.5 left-3 text-slate-500 top-1/2 w-3.5" />
                   <input
                     type="text"
                     value={urlInput}
                     onChange={e => setUrlInput(e.target.value)}
                     placeholder="https://teachablemachine.withgoogle.com/models/XXXXXXXX/"
-                    className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-lg text-xs font-mono text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20"
+                    className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 dark:placeholder-slate-500 dark:text-slate-200 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/20 font-mono pl-9 placeholder-slate-400 pr-3 py-2.5 rounded-lg text-slate-800 text-xs w-full"
                   />
                 </div>
                 <button
                   onClick={() => loadModel(urlInput)}
                   disabled={modelStatus === 'loading'}
-                  className="sm:w-32 px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer disabled:opacity-60"
+                  className="bg-emerald-600 cursor-pointer disabled:opacity-60 flex font-semibold gap-1.5 hover:bg-emerald-500 items-center justify-center px-4 py-2.5 rounded-lg sm:w-32 text-white text-xs transition"
                 >
-                  {modelStatus === 'loading' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ScanFace className="w-3.5 h-3.5" />}
+                  {modelStatus === 'loading' ? <Loader2 className="animate-spin h-3.5 w-3.5" /> : <ScanFace className="h-3.5 w-3.5" />}
                   {modelStatus === 'loading' ? 'Loading…' : 'Load Model'}
                 </button>
               </div>
               {modelStatus === 'ready' && (
-                <p className="mt-2 text-[11px] text-emerald-400 flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
+                <p className="flex gap-1.5 items-center mt-2 text-[11px] text-emerald-400">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
                   Model connected — {labels.length} classes, {mappedCount} mapped to DB students
                 </p>
               )}
               {modelStatus === 'error' && (
-                <p className="mt-2 text-[11px] text-rose-400 flex items-center gap-1.5">
-                  <AlertTriangle className="w-3.5 h-3.5" />
+                <p className="flex gap-1.5 items-center mt-2 text-[11px] text-rose-400">
+                  <AlertTriangle className="h-3.5 w-3.5" />
                   {modelError}
                 </p>
               )}
               {modelStatus !== 'ready' && modelStatus !== 'error' && (
-                <p className="mt-2 text-[11px] text-slate-500">
+                <p className="dark:text-slate-400 mt-2 text-[11px] text-slate-500">
                   Paste your Teachable Machine model link, then Start Scan — recognized students are marked present at the hostel gate. You can change this link anytime.
                 </p>
               )}
@@ -365,9 +363,9 @@ export default function HostelAttendancePage() {
 
           {/* Hostel Block selector */}
           <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2 p-2 rounded-xl bg-white border border-slate-200">
-              <div className="px-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-1.5">
-                <Building2 className="w-3.5 h-3.5" />
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-wrap gap-2 items-center p-2 rounded-xl">
+              <div className="dark:text-slate-400 flex font-bold gap-1.5 items-center px-2 text-[10px] text-slate-500 tracking-widest uppercase">
+                <Building2 className="h-3.5 w-3.5" />
                 Hostel Blocks
               </div>
               {HOSTEL_BLOCKS.map(blk => {
@@ -376,34 +374,34 @@ export default function HostelAttendancePage() {
                   <button
                     key={blk.id}
                     onClick={() => setActiveBlockId(blk.id)}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${selected ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-100 border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${selected ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-100 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 dark:hover:bg-slate-800'}`}
                   >
-                    <span className={`w-1.5 h-1.5 rounded-full ${selected ? 'bg-white' : 'bg-emerald-500'}`} />
+                    <span className={`w-1.5 h-1.5 rounded-full ${selected ? 'bg-white dark:bg-slate-900' : 'bg-emerald-500'}`} />
                     {blk.name}
-                    <span className="hidden sm:inline text-xs opacity-80">{blk.label}</span>
+                    <span className="hidden opacity-80 sm:inline text-xs">{blk.label}</span>
                   </button>
                 );
               })}
               <button
                 onClick={() => setIsGridMode(!isGridMode)}
-                className="ml-auto px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                className="bg-slate-100 border border-slate-200 dark:border-slate-800 cursor-pointer dark:hover:bg-slate-800 dark:text-slate-400 flex font-semibold gap-1.5 hover:bg-slate-50 dark:hover:bg-slate-800 items-center ml-auto px-3 py-1.5 rounded-lg text-slate-600 text-xs"
               >
-                {isGridMode ? <Square className="w-3.5 h-3.5" /> : <Grid className="w-3.5 h-3.5" />}
+                {isGridMode ? <Square className="h-3.5 w-3.5" /> : <Grid className="h-3.5 w-3.5" />}
                 {isGridMode ? 'Single' : 'Grid'}
               </button>
             </div>
 
             {/* Active block info pill */}
             {activeBlock && (
-              <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white border border-slate-200 text-[10px] font-mono text-slate-400">
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex font-mono gap-3 items-center px-3 py-2 rounded-lg text-[10px] text-slate-400">
                 <span className="font-bold text-emerald-500">{activeBlock.name}</span>
-                <span className="text-slate-600">·</span>
+                <span className="dark:text-slate-400 text-slate-600">·</span>
                 <span>{activeBlock.label}</span>
-                <span className="text-slate-600">·</span>
+                <span className="dark:text-slate-400 text-slate-600">·</span>
                 <span>{activeBlock.gender}</span>
-                <span className="text-slate-600">·</span>
+                <span className="dark:text-slate-400 text-slate-600">·</span>
                 <span>{activeBlock.floors} Floors</span>
-                <span className={`ml-auto flex items-center gap-1.5 ${webcamOn && !webcamError ? 'text-emerald-400' : 'text-slate-500'}`}>
+                <span className={`ml-auto flex items-center gap-1.5 ${webcamOn && !webcamError ? 'text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
                   <span className={`w-1.5 h-1.5 rounded-full ${webcamOn && !webcamError ? 'bg-emerald-500 animate-pulse' : 'bg-slate-600'}`} />
                   {webcamOn && !webcamError ? 'ONLINE' : 'OFFLINE'}
                 </span>
@@ -413,7 +411,7 @@ export default function HostelAttendancePage() {
 
           {!isGridMode ? (
             /* SINGLE VIEW */
-            <div ref={viewportRef} className="relative aspect-video rounded-2xl overflow-hidden bg-black border border-slate-200 shadow-2xl">
+            <div ref={viewportRef} className="aspect-video bg-black border border-slate-200 dark:border-slate-800 overflow-hidden relative rounded-2xl shadow-2xl">
               {webcamOn ? (
                 <img
                   key={streamKey}
@@ -426,70 +424,70 @@ export default function HostelAttendancePage() {
                   onError={() => setWebcamError(`AI video stream unavailable at ${AI_STREAM_URL}. Ensure the Python YOLO detector is running on port 5001.`)}
                 />
               ) : isStartingStream ? (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black">
-                  <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
-                    <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+                <div className="absolute bg-black flex flex-col gap-3 inset-0 items-center justify-center">
+                  <div className="bg-indigo-500/10 border border-indigo-500/20 flex h-16 items-center justify-center rounded-2xl w-16">
+                    <Loader2 className="animate-spin h-8 text-indigo-400 w-8" />
                   </div>
-                  <p className="text-xs font-semibold text-slate-200">Starting AI Camera Process...</p>
-                  <p className="text-[10px] text-slate-500 font-mono">Launching YOLO detector via backend service</p>
+                  <p className="font-semibold text-slate-200 text-xs">Starting AI Camera Process...</p>
+                  <p className="dark:text-slate-400 font-mono text-[10px] text-slate-500">Launching YOLO detector via backend service</p>
                 </div>
               ) : (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black">
-                  <div className="w-16 h-16 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center">
-                    <VideoOff className="w-7 h-7 text-slate-600" />
+                <div className="absolute bg-black flex flex-col gap-3 inset-0 items-center justify-center">
+                  <div className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-800 flex h-16 items-center justify-center rounded-2xl w-16">
+                    <VideoOff className="dark:text-slate-400 h-7 text-slate-600 w-7" />
                   </div>
-                  <p className="text-xs font-semibold text-slate-500">AI Feed Offline</p>
-                  <p className="text-[10px] text-slate-600">Enable AI feed to launch the hostel gate camera</p>
+                  <p className="dark:text-slate-400 font-semibold text-slate-500 text-xs">AI Feed Offline</p>
+                  <p className="dark:text-slate-400 text-[10px] text-slate-600">Enable AI feed to launch the hostel gate camera</p>
                 </div>
               )}
 
               {/* Feed error overlay */}
               {webcamOn && webcamError && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-slate-950/90 text-center gap-2 z-30">
-                  <AlertTriangle className="w-8 h-8 text-amber-400 mb-1" />
-                  <p className="text-sm font-semibold text-slate-200">AI Camera Feed Offline</p>
-                  <p className="text-xs text-slate-400 max-w-sm">{webcamError}</p>
-                  <p className="text-[10px] font-mono text-slate-500 mt-2">Expected stream: {AI_STREAM_URL}</p>
+                <div className="absolute bg-slate-950/90 flex flex-col gap-2 inset-0 items-center justify-center p-6 text-center z-30">
+                  <AlertTriangle className="h-8 mb-1 text-amber-400 w-8" />
+                  <p className="font-semibold text-slate-200 text-sm">AI Camera Feed Offline</p>
+                  <p className="max-w-sm text-slate-400 text-xs">{webcamError}</p>
+                  <p className="dark:text-slate-400 font-mono mt-2 text-[10px] text-slate-500">Expected stream: {AI_STREAM_URL}</p>
                 </div>
               )}
 
               {/* Overlay gradient */}
-              <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/70 pointer-events-none" />
+              <div className="absolute bg-gradient-to-b from-black/50 inset-0 pointer-events-none to-black/70 via-transparent" />
 
               {/* Scanlines */}
-              <div className="absolute inset-0 pointer-events-none opacity-[0.06]"
+              <div className="absolute inset-0 opacity-[0.06] pointer-events-none"
                 style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,.4) 4px)' }}
               />
 
               {aiOverlayEnabled && webcamOn && !webcamError && (
                 <>
                   {/* Top HUD */}
-                  <div className="absolute top-4 left-4 right-4 flex items-start justify-between">
+                  <div className="absolute flex items-start justify-between left-4 right-4 top-4">
                     <div className="flex gap-2">
-                      <div className="px-3 py-2 rounded-lg bg-black/75 backdrop-blur-md border border-white/10 text-white font-mono text-[11px] flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                      <div className="backdrop-blur-md bg-black/75 border border-white/10 flex font-mono gap-2 items-center px-3 py-2 rounded-lg text-[11px] text-white">
+                        <span className="animate-pulse bg-red-500 h-2 rounded-full w-2" />
                         <span className="font-bold">{activeBlock?.name}</span>
-                        <span className="text-slate-400">/</span>
-                        <span className="text-slate-300">{activeBlock?.label}</span>
+                        <span className="dark:text-slate-400 text-slate-500">/</span>
+                        <span className="dark:text-slate-300 text-slate-700">{activeBlock?.label}</span>
                       </div>
-                      <div className="hidden sm:flex px-3 py-2 rounded-lg bg-black/75 backdrop-blur-md border border-white/10 text-white font-mono text-[11px] items-center gap-2">
-                        <Clock3 className="w-3 h-3 text-emerald-500" />
+                      <div className="backdrop-blur-md bg-black/75 border border-white/10 font-mono gap-2 hidden items-center px-3 py-2 rounded-lg sm:flex text-[11px] text-white">
+                        <Clock3 className="h-3 text-emerald-500 w-3" />
                         {now.toLocaleTimeString()}
                       </div>
                     </div>
-                    <div className="px-3 py-2 rounded-lg bg-black/75 backdrop-blur-md border border-white/10 text-[10px] font-mono text-emerald-400 flex items-center gap-1.5">
-                      <Wifi className="w-3 h-3" />
+                    <div className="backdrop-blur-md bg-black/75 border border-white/10 flex font-mono gap-1.5 items-center px-3 py-2 rounded-lg text-[10px] text-emerald-400">
+                      <Wifi className="h-3 w-3" />
                       1080P / 30FPS
                     </div>
                   </div>
 
                   {/* Bottom HUD */}
-                  <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
-                    <div className="px-3 py-2 rounded-lg bg-black/75 backdrop-blur-md border border-white/10 text-[10px] font-mono text-slate-300">
+                  <div className="absolute bottom-4 flex items-end justify-between left-4 right-4">
+                    <div className="backdrop-blur-md bg-black/75 border border-white/10 font-mono px-3 py-2 rounded-lg text-[10px] text-slate-300">
                       {activeBlock?.name} · {activeBlock?.label} · ENCRYPTED
                     </div>
-                    <div className={`px-3 py-2 rounded-lg backdrop-blur-md border text-[10px] font-mono font-bold ${running ? 'bg-emerald-950/80 border-emerald-500/30 text-emerald-400' : detectionIsAlert ? 'bg-red-950/80 border-red-500/30 text-red-400' : 'bg-emerald-950/80 border-emerald-500/30 text-emerald-500'}`}>
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-current mr-1.5 animate-pulse" />
+                    <div className={`px-3 py-2 rounded-lg backdrop-blur-md border text-[10px] font-mono font-bold ${running ? 'bg-emerald-950/80 border-emerald-500/30 text-emerald-400' : detectionIsAlert ? 'bg-red-950/80 border-red-500/30 text-red-400' : 'text-emerald-500'}`}>
+                      <span className="animate-pulse bg-current h-1.5 inline-block mr-1.5 rounded-full w-1.5" />
                       {running ? 'RECOGNIZING' : detectionIsAlert ? 'CURFEW VIOLATION' : 'HOSTEL AI ACTIVE'}
                     </div>
                   </div>
@@ -505,22 +503,22 @@ export default function HostelAttendancePage() {
                   ? 'bg-emerald-950/80 border-emerald-500/40'
                   : accent === 'amber'
                   ? 'bg-amber-950/80 border-amber-500/40'
-                  : 'bg-slate-950/85 border-slate-200';
+                  : 'bg-slate-950/85 border-slate-200 dark:border-slate-800';
                 const iconBg = accent === 'emerald' ? 'bg-emerald-500/20' : accent === 'amber' ? 'bg-amber-500/20' : 'bg-slate-800';
                 const iconColor = accent === 'emerald' ? 'text-emerald-400' : accent === 'amber' ? 'text-amber-400' : 'text-slate-400';
                 return (
-                  <div className="absolute left-4 right-4 bottom-16 z-20">
+                  <div className="absolute bottom-16 left-4 right-4 z-20">
                     <div className={`rounded-xl border backdrop-blur-md shadow-2xl p-3 ${box}`}>
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex gap-3 items-center justify-between">
+                        <div className="flex gap-3 items-center min-w-0">
                           <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${iconBg}`}>
-                            {matched ? <ShieldCheck className={`w-5 h-5 ${iconColor}`} /> : <ScanFace className="w-5 h-5 text-slate-400" />}
+                            {matched ? <ShieldCheck className={`w-5 h-5 ${iconColor}`} /> : <ScanFace className="dark:text-slate-400 h-5 text-slate-500 w-5" />}
                           </div>
                           <div className="min-w-0">
-                            <p className="text-[9px] uppercase tracking-wider font-bold text-slate-400">
+                            <p className="font-bold text-[9px] text-slate-400 tracking-wider uppercase">
                               {matched ? (isLate ? 'Marked LATE at hostel gate ⏰' : 'Marked Present at hostel gate ✓') : 'Unknown Face'}
                             </p>
-                            <p className="text-sm font-bold text-white truncate">{lastMatch.label}</p>
+                            <p className="font-bold text-sm text-white truncate">{lastMatch.label}</p>
                           </div>
                         </div>
                         <div className="text-right">
@@ -535,12 +533,12 @@ export default function HostelAttendancePage() {
             </div>
           ) : (
             /* GRID VIEW — all 8 blocks */
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="gap-3 grid grid-cols-2 md:grid-cols-4">
               {HOSTEL_BLOCKS.map(blk => (
                 <div
                   key={blk.id}
                   onClick={() => { setActiveBlockId(blk.id); setIsGridMode(false); }}
-                  className="relative aspect-video overflow-hidden rounded-xl bg-black border border-slate-200 shadow-lg group cursor-pointer"
+                  className="aspect-video bg-black border border-slate-200 dark:border-slate-800 cursor-pointer group overflow-hidden relative rounded-xl shadow-lg"
                 >
                   {webcamOn && !webcamError ? (
                     <img
@@ -550,18 +548,18 @@ export default function HostelAttendancePage() {
                       className={`w-full h-full object-cover group-hover:brightness-110 transition-all ${nightVision ? 'brightness-125 contrast-125 saturate-50 hue-rotate-90' : ''}`}
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-white">
-                      <VideoOff className="w-6 h-6 text-slate-700" />
+                    <div className="bg-white dark:bg-slate-900 flex h-full items-center justify-center w-full">
+                      <VideoOff className="dark:text-slate-300 h-6 text-slate-700 w-6" />
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/60" />
-                  <div className="absolute top-2 left-2 flex items-center gap-1.5 px-2 py-1 rounded-md bg-black/70 border border-white/10 font-mono text-[10px] text-white">
+                  <div className="absolute bg-gradient-to-b from-black/40 inset-0 to-black/60" />
+                  <div className="absolute bg-black/70 border border-white/10 flex font-mono gap-1.5 items-center left-2 px-2 py-1 rounded-md text-[10px] text-white top-2">
                     <span className={`w-1.5 h-1.5 rounded-full ${webcamOn && !webcamError ? 'bg-emerald-500 animate-pulse' : 'bg-slate-600'}`} />
                     {blk.name}
                   </div>
                   <div className="absolute bottom-2 left-2 right-2">
-                    <p className="text-white text-[11px] font-semibold truncate">{blk.label}</p>
-                    <p className="text-slate-400 text-[9px] font-mono">{blk.gender} · {blk.floors}F</p>
+                    <p className="font-semibold text-[11px] text-white truncate">{blk.label}</p>
+                    <p className="font-mono text-[9px] text-slate-400">{blk.gender} · {blk.floors}F</p>
                   </div>
                 </div>
               ))}
@@ -569,14 +567,14 @@ export default function HostelAttendancePage() {
           )}
 
           {/* AI Controls */}
-          <div className="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex gap-3 items-center p-3 rounded-xl">
             <ToggleSwitch
               label="AI Detection Overlay"
               enabled={aiOverlayEnabled}
               onToggle={() => setAiOverlayEnabled(!aiOverlayEnabled)}
               icon={Eye}
             />
-            <div className="w-px h-6 bg-slate-200" />
+            <div className="bg-slate-200 dark:bg-slate-700 h-6 w-px" />
             <ToggleSwitch
               label="IR Night Vision"
               enabled={nightVision}
@@ -584,8 +582,8 @@ export default function HostelAttendancePage() {
               icon={Moon}
             />
             {running && (
-              <span className="ml-auto flex items-center gap-1.5 px-2 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-mono text-emerald-400 font-bold">
-                <CircleDot className="w-2.5 h-2.5 animate-pulse" />
+              <span className="bg-emerald-500/10 border border-emerald-500/20 flex font-bold font-mono gap-1.5 items-center ml-auto px-2 py-1 rounded-md text-[9px] text-emerald-400">
+                <CircleDot className="animate-pulse h-2.5 w-2.5" />
                 TM RECOGNITION LIVE
               </span>
             )}
@@ -593,13 +591,13 @@ export default function HostelAttendancePage() {
 
           {/* Live recognized persons (YOLO box + Teachable Machine identity) */}
           {webcamOn && recognizedDetections.length > 0 && (
-            <div className="bg-white border border-slate-200 rounded-xl p-3">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-xl">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <Users className="w-3.5 h-3.5 text-emerald-500" />
+                <span className="flex font-bold gap-1.5 items-center text-[10px] text-slate-400 tracking-wider uppercase">
+                  <Users className="h-3.5 text-emerald-500 w-3.5" />
                   Live Tracked Persons ({recognizedDetections.length})
                 </span>
-                <span className="text-[9px] font-mono text-emerald-400">REAL-TIME</span>
+                <span className="font-mono text-[9px] text-emerald-400">REAL-TIME</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 {recognizedDetections.map(d => {
@@ -608,13 +606,11 @@ export default function HostelAttendancePage() {
                   return (
                     <div
                       key={d.trackId}
-                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-mono ${
-                        hasId ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700'
-                      }`}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-mono ${ hasId ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700' : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400' }`}
                     >
                       <span className={`w-1.5 h-1.5 rounded-full ${hasId ? 'bg-emerald-400' : 'bg-emerald-500'}`} />
                       <span>{name}</span>
-                      <span className="text-[10px] opacity-70">
+                      <span className="opacity-70 text-[10px]">
                         {d.identityConfidence > 0
                           ? `${Math.round(d.identityConfidence * 100)}%`
                           : `${Math.round((d.detectionConfidence || 0) * 100)}%`}
@@ -629,36 +625,36 @@ export default function HostelAttendancePage() {
 
         {/* RIGHT — Curfew log */}
         <div className="space-y-3">
-          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-800">After-Hours Log</span>
-              <span className="text-[9px] font-mono text-slate-500">{hostelLogs.length} EVENTS</span>
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden rounded-xl">
+            <div className="border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 py-3">
+              <span className="dark:text-slate-200 font-bold text-slate-800 text-xs">After-Hours Log</span>
+              <span className="dark:text-slate-400 font-mono text-[9px] text-slate-500">{hostelLogs.length} EVENTS</span>
             </div>
-            <div className="max-h-[520px] overflow-y-auto divide-y divide-slate-100">
+            <div className="divide-slate-100 divide-y max-h-[520px] overflow-y-auto">
               {hostelLogs.length === 0 && (
                 <div className="py-12 text-center">
-                  <Building2 className="w-8 h-8 text-slate-700 mx-auto mb-3" />
-                  <p className="text-xs text-slate-500">No after-hours activity recorded</p>
+                  <Building2 className="dark:text-slate-300 h-8 mb-3 mx-auto text-slate-700 w-8" />
+                  <p className="dark:text-slate-400 text-slate-500 text-xs">No after-hours activity recorded</p>
                 </div>
               )}
               {hostelLogs.map(log => (
                 <div key={log.id} className={`flex items-start gap-3 px-4 py-3 ${log.curfewAlert ? 'bg-rose-500/[0.03]' : ''}`}>
-                  <img src={log.avatar} alt={log.studentName} className="w-8 h-8 rounded-lg object-cover border border-slate-200 shrink-0 mt-0.5" />
+                  <img src={log.avatar} alt={log.studentName} className="border border-slate-200 dark:border-slate-800 h-8 mt-0.5 object-cover rounded-lg shrink-0 w-8" />
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs font-semibold text-slate-800 truncate">{log.studentName}</p>
+                    <div className="flex gap-2 items-center">
+                      <p className="dark:text-slate-200 font-semibold text-slate-800 text-xs truncate">{log.studentName}</p>
                       {log.curfewAlert && (
-                        <span className="inline-flex items-center gap-1 text-[8px] font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-1.5 py-0.5 rounded">
+                        <span className="bg-rose-500/10 border border-rose-500/20 font-bold gap-1 inline-flex items-center px-1.5 py-0.5 rounded text-[8px] text-rose-400">
                           VIOLATION
                         </span>
                       )}
                     </div>
-                    <p className="text-[9px] font-mono text-slate-600 mt-0.5">{log.studentId} · R{log.room}</p>
-                    <div className="flex items-center gap-2 mt-1">
+                    <p className="dark:text-slate-400 font-mono mt-0.5 text-[9px] text-slate-600">{log.studentId} · R{log.room}</p>
+                    <div className="flex gap-2 items-center mt-1">
                       <span className={`text-[9px] font-bold font-mono ${log.direction === 'IN' ? 'text-emerald-400' : 'text-slate-400'}`}>
                         {log.direction === 'IN' ? '↙ IN' : '↗ OUT'}
                       </span>
-                      <span className="text-[9px] text-slate-600">{log.timestamp?.split(' ')[1] || ''}</span>
+                      <span className="dark:text-slate-400 text-[9px] text-slate-600">{log.timestamp?.split(' ')[1] || ''}</span>
                     </div>
                   </div>
                 </div>
@@ -675,19 +671,19 @@ function StatCard({ label, value, icon: Icon, accent = 'slate' }) {
   const iconBox = {
     emerald: 'bg-emerald-50 text-emerald-600',
     rose: 'bg-rose-50 text-rose-600',
-    slate: 'bg-slate-100 text-slate-500'
+    slate: 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
   };
   const valueColor = {
     emerald: 'text-emerald-600',
     rose: 'text-rose-600',
-    slate: 'text-slate-900'
+    slate: 'text-slate-900 dark:text-white'
   };
   return (
-    <div className="p-4 bg-white border border-slate-200 rounded-xl card-soft">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 card-soft p-4 rounded-xl">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[10px] uppercase tracking-wider font-bold text-slate-500">{label}</span>
+        <span className="dark:text-slate-400 font-bold text-[10px] text-slate-500 tracking-wider uppercase">{label}</span>
         <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${iconBox[accent] || iconBox.slate}`}>
-          <Icon className="w-3.5 h-3.5" />
+          <Icon className="h-3.5 w-3.5" />
         </div>
       </div>
       <p className={`text-2xl font-bold font-mono ${valueColor[accent] || valueColor.slate}`}>
@@ -699,11 +695,11 @@ function StatCard({ label, value, icon: Icon, accent = 'slate' }) {
 
 function ToggleSwitch({ label, enabled, onToggle, icon: Icon }) {
   return (
-    <button onClick={onToggle} className="flex items-center gap-2 cursor-pointer group">
-      <Icon className={`w-3.5 h-3.5 ${enabled ? 'text-emerald-500' : 'text-slate-500'}`} />
-      <span className="text-xs text-slate-500 group-hover:text-slate-900 transition">{label}</span>
+    <button onClick={onToggle} className="cursor-pointer flex gap-2 group items-center">
+      <Icon className={`w-3.5 h-3.5 ${enabled ? 'text-emerald-500' : 'text-slate-500 dark:text-slate-400'}`} />
+      <span className="dark:text-white group-hover:text-slate-900 text-slate-500 text-xs transition">{label}</span>
       <div className={`relative w-8 h-4 rounded-full transition-colors ${enabled ? 'bg-emerald-600' : 'bg-slate-300'}`}>
-        <div className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white shadow transition-transform ${enabled ? 'translate-x-4' : ''}`} />
+        <div className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white dark:bg-slate-900 shadow transition-transform ${enabled ? 'translate-x-4' : ''}`} />
       </div>
     </button>
   );

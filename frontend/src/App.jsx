@@ -10,9 +10,10 @@ import ClassroomAttendancePage from './components/pages/ClassroomAttendancePage'
 import HostelAttendancePage from './components/pages/HostelAttendancePage';
 import DisciplinaryPage from './components/pages/DisciplinaryPage';
 import StudentsPage from './components/pages/StudentsPage';
+import StudentDashboard from './components/pages/StudentDashboard';
 
 export default function App() {
-  const { currentView, activeTab, setActiveTab } = useApp();
+  const { currentView, activeTab, setActiveTab, userRole } = useApp();
 
   // ── HOME ──────────────────────────────────────────────────
   if (currentView === 'home') {
@@ -26,6 +27,7 @@ export default function App() {
 
   // ── PORTAL ────────────────────────────────────────────────
   const renderPage = () => {
+    if (userRole === 'student') return <StudentDashboard />;
     switch (activeTab) {
       case 'classroom':   return <ClassroomAttendancePage />;
       case 'hostel':      return <HostelAttendancePage />;
@@ -36,9 +38,9 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col">
+    <div className="bg-slate-50 dark:bg-slate-950 flex flex-col font-sans min-h-screen text-slate-900 dark:text-white">
       <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="flex-1 lg:px-8 max-w-7xl mx-auto px-4 py-6 sm:px-6 w-full">
         {renderPage()}
       </main>
       <ToastContainer />

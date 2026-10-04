@@ -69,41 +69,41 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#060b14] text-slate-100 font-sans">
+    <div className="bg-slate-50 dark:bg-slate-950 font-sans min-h-screen text-slate-900 dark:text-white">
 
       {/* NAVBAR */}
-      <header className="sticky top-0 z-50 bg-[#070d18]/90 backdrop-blur-xl border-b border-slate-800/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <header className="bg-white/90 dark:bg-[#070d18]/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/80 sticky top-0 z-50">
+        <div className="flex h-16 items-center justify-between max-w-7xl mx-auto px-4 sm:px-6">
 
-          <div className="flex items-center gap-3">
-            <div className="relative w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center">
-              <Shield className="w-5 h-5 text-white" />
-              <span className="absolute -right-1 -top-1 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#070d18]" />
+          <div className="flex gap-3 items-center">
+            <div className="bg-blue-600 flex h-9 items-center justify-center relative rounded-lg w-9">
+              <Shield className="dark:text-white h-5 text-slate-900 w-5" />
+              <span className="-right-1 -top-1 absolute bg-emerald-400 border-2 border-[#070d18] h-2.5 rounded-full w-2.5" />
             </div>
             <div>
               <span className="font-bold text-sm tracking-tight">Sentinel AI</span>
-              <p className="hidden sm:block text-[10px] text-slate-500 mt-0.5">
+              <p className="dark:text-slate-400 hidden mt-0.5 sm:block text-[10px] text-slate-500">
                 Campus Intelligence System
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex gap-2 items-center">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-800 transition cursor-pointer"
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-slate-800 p-2 rounded-lg transition"
             >
               {theme === 'dark'
-                ? <Sun className="w-4 h-4 text-amber-400" />
-                : <Moon className="w-4 h-4 text-slate-300" />
+                ? <Sun className="h-4 text-amber-400 w-4" />
+                : <Moon className="dark:text-slate-300 h-4 text-slate-700 w-4" />
               }
             </button>
 
             <button
               onClick={() => openLogin('admin')}
-              className="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-semibold flex items-center gap-2 transition cursor-pointer"
+              className="bg-blue-600 cursor-pointer flex font-semibold gap-2 hover:bg-blue-500 items-center px-3.5 py-2 rounded-lg text-xs transition"
             >
-              <Lock className="w-3.5 h-3.5" />
+              <Lock className="h-3.5 w-3.5" />
               Enter Console
             </button>
           </div>
@@ -111,27 +111,27 @@ export default function HomePage() {
       </header>
 
       {/* HERO */}
-      <section className="relative overflow-hidden border-b border-slate-800/80">
+      <section className="bg-slate-50 dark:bg-[#080e18] border-b border-slate-200 dark:border-slate-800/80 overflow-hidden relative">
 
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-blue-600/10 blur-[120px]" />
+          <div className="-translate-x-1/2 absolute bg-blue-600/10 blur-[120px] h-[400px] left-1/2 top-0 w-[700px]" />
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-28 relative">
+        <div className="max-w-7xl mx-auto px-4 py-20 relative sm:px-6 sm:py-28">
           <div className="max-w-3xl">
 
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 text-[10px] font-mono font-bold mb-7">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <div className="bg-emerald-500/5 border border-emerald-500/20 font-bold font-mono gap-2 inline-flex items-center mb-7 px-3 py-1.5 rounded-md text-[10px] text-emerald-400">
+              <span className="animate-pulse bg-emerald-400 h-1.5 rounded-full w-1.5" />
               AI CAMERAS ONLINE
             </div>
 
-            <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-[1.05]">
+            <h1 className="font-black leading-[1.05] sm:text-6xl text-4xl tracking-tight">
               AI-Powered
               <span className="text-blue-500"> Attendance </span>
               & Campus Safety.
             </h1>
 
-            <p className="mt-6 max-w-xl text-sm sm:text-base leading-7 text-slate-400">
+            <p className="leading-7 max-w-xl mt-6 sm:text-base text-slate-400 text-sm">
               Live camera feeds automatically mark classroom attendance, track hostel curfew check-in,
               and detect any indisciplinary activity — all powered by AI.
             </p>
@@ -139,36 +139,36 @@ export default function HomePage() {
             <div className="flex flex-wrap gap-3 mt-8">
               <button
                 onClick={() => openLogin('admin')}
-                className="px-5 py-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-sm font-semibold flex items-center gap-2 transition shadow-lg shadow-blue-600/10 cursor-pointer"
+                className="bg-blue-600 cursor-pointer flex font-semibold gap-2 hover:bg-blue-500 items-center px-5 py-3 rounded-lg shadow-blue-600/10 shadow-lg text-sm transition"
               >
-                <Shield className="w-4 h-4" />
+                <Shield className="h-4 w-4" />
                 Admin Console
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="h-4 w-4" />
               </button>
 
               <button
                 onClick={() => openLogin('student')}
-                className="px-5 py-3 rounded-lg border border-slate-700 bg-slate-900 hover:bg-slate-800 text-sm font-semibold text-slate-200 flex items-center gap-2 transition cursor-pointer"
+                className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 cursor-pointer flex font-semibold gap-2 hover:bg-slate-800 items-center px-5 py-3 rounded-lg text-slate-200 text-sm transition"
               >
-                <Users className="w-4 h-4" />
+                <Users className="h-4 w-4" />
                 Student View
               </button>
             </div>
           </div>
 
           {/* STATUS */}
-          <div className="mt-14 border border-slate-800 rounded-xl bg-[#0a111d]/90 overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4 text-blue-400" />
-                <span className="text-xs font-semibold">SYSTEM STATUS</span>
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 mt-14 overflow-hidden rounded-xl">
+            <div className="border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 py-3">
+              <div className="flex gap-2 items-center">
+                <Activity className="h-4 text-blue-400 w-4" />
+                <span className="font-semibold text-xs">SYSTEM STATUS</span>
               </div>
-              <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+              <span className="flex font-mono gap-1.5 items-center text-[9px] text-emerald-400">
+                <span className="animate-pulse bg-emerald-400 h-1.5 rounded-full w-1.5" />
                 OPERATIONAL
               </span>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-slate-800">
+            <div className="divide-slate-800 divide-x divide-y grid grid-cols-2 md:divide-y-0 md:grid-cols-4">
               <StatBox icon={Camera} label="CAMERAS" value="04" sub="CONNECTED" />
               <StatBox icon={ScanFace} label="AI ENGINE" value="ONLINE" sub="FACE DETECTION" />
               <StatBox icon={Users} label="STUDENTS" value={students.length} sub="REGISTERED" />
@@ -179,22 +179,22 @@ export default function HomePage() {
       </section>
 
       {/* 3 CORE FEATURES */}
-      <section className="py-20 border-b border-slate-800/80 bg-[#080e18]">
+      <section className="bg-slate-50 dark:bg-[#080e18] border-b border-slate-200 dark:border-slate-800/80 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
           <div className="mb-12">
-            <p className="text-[10px] font-mono font-bold tracking-[0.2em] text-blue-400 mb-3">
+            <p className="font-bold font-mono mb-3 text-[10px] text-blue-400 tracking-[0.2em]">
               CORE FEATURES
             </p>
-            <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
+            <h2 className="font-black sm:text-3xl text-2xl tracking-tight">
               Three things. Done automatically.
             </h2>
-            <p className="mt-3 text-sm text-slate-500 max-w-xl">
+            <p className="dark:text-slate-400 max-w-xl mt-3 text-slate-500 text-sm">
               Point a camera at a classroom or hostel gate — the AI handles the rest.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-5">
+          <div className="gap-5 grid md:grid-cols-3">
             {features.map((f, i) => {
               const Icon = f.icon;
               const colorMap = {
@@ -220,7 +220,7 @@ export default function HomePage() {
               const c = colorMap[f.color];
 
               return (
-                <div key={i} className={`border border-slate-800 bg-[#0b1320] ${c.hover} transition rounded-xl p-6`}>
+                <div key={i} className={`border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 ${c.hover} transition rounded-xl p-6`}>
                   <div className="flex items-start justify-between mb-5">
                     <div className={`w-11 h-11 rounded-xl ${c.bg} border flex items-center justify-center`}>
                       <Icon className={`w-5 h-5 ${c.icon}`} />
@@ -230,13 +230,13 @@ export default function HomePage() {
                     </span>
                   </div>
 
-                  <h3 className="text-base font-bold mb-2">{f.title}</h3>
-                  <p className="text-xs text-slate-500 leading-6">{f.desc}</p>
+                  <h3 className="font-bold mb-2 text-base">{f.title}</h3>
+                  <p className="dark:text-slate-400 leading-6 text-slate-500 text-xs">{f.desc}</p>
 
-                  <div className="mt-5 pt-4 border-t border-slate-800 space-y-2">
+                  <div className="border-slate-200 dark:border-slate-800 border-t mt-5 pt-4 space-y-2">
                     {f.points.map((pt, j) => (
-                      <div key={j} className="flex items-center gap-2 text-[11px] text-slate-400">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                      <div key={j} className="flex gap-2 items-center text-[11px] text-slate-400">
+                        <CheckCircle2 className="h-3.5 shrink-0 text-emerald-500 w-3.5" />
                         {pt}
                       </div>
                     ))}
@@ -249,68 +249,68 @@ export default function HomePage() {
       </section>
 
       {/* ACCESS */}
-      <section className="py-20 bg-[#080e18]">
+      <section className="bg-slate-50 dark:bg-[#080e18] py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
 
           <div className="mb-12 text-center">
-            <p className="text-[10px] font-mono font-bold tracking-[0.2em] text-blue-400 mb-3">ACCESS</p>
-            <h2 className="text-2xl sm:text-3xl font-black tracking-tight">Choose your interface</h2>
+            <p className="font-bold font-mono mb-3 text-[10px] text-blue-400 tracking-[0.2em]">ACCESS</p>
+            <h2 className="font-black sm:text-3xl text-2xl tracking-tight">Choose your interface</h2>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-5">
+          <div className="gap-5 grid md:grid-cols-2">
             {/* Admin */}
-            <div className="border border-slate-800 bg-[#0b1320] rounded-xl p-6">
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-11 h-11 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-                  <Shield className="w-5 h-5 text-blue-400" />
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-xl">
+              <div className="flex gap-3 items-center mb-5">
+                <div className="bg-blue-500/10 border border-blue-500/20 flex h-11 items-center justify-center rounded-xl w-11">
+                  <Shield className="h-5 text-blue-400 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold">Admin Console</p>
-                  <p className="text-[10px] text-slate-500 font-mono">WARDEN / ADMIN</p>
+                  <p className="font-bold text-sm">Admin Console</p>
+                  <p className="dark:text-slate-400 font-mono text-[10px] text-slate-500">WARDEN / ADMIN</p>
                 </div>
               </div>
-              <p className="text-xs text-slate-500 leading-6 mb-6">
+              <p className="dark:text-slate-400 leading-6 mb-6 text-slate-500 text-xs">
                 Monitor live camera feeds, review AI-detected attendance, check hostel curfew records and manage disciplinary incidents.
               </p>
               <button
                 onClick={() => openLogin('admin')}
-                className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition"
+                className="bg-blue-600 cursor-pointer flex font-semibold gap-2 hover:bg-blue-500 items-center justify-center py-2.5 rounded-lg text-xs transition w-full"
               >
-                <Lock className="w-3.5 h-3.5" />
+                <Lock className="h-3.5 w-3.5" />
                 Open Admin Console
               </button>
               <button
                 onClick={loginAsAdmin}
-                className="mt-2 w-full py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-[10px] text-slate-500 hover:text-slate-300 cursor-pointer transition"
+                className="bg-white dark:bg-slate-900 cursor-pointer dark:text-slate-400 hover:bg-slate-800 hover:text-slate-300 mt-2 py-2 rounded-lg text-[10px] text-slate-500 transition w-full"
               >
                 Launch Demo
               </button>
             </div>
 
             {/* Student */}
-            <div className="border border-slate-800 bg-[#0b1320] rounded-xl p-6">
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                  <GraduationCap className="w-5 h-5 text-emerald-400" />
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-xl">
+              <div className="flex gap-3 items-center mb-5">
+                <div className="bg-emerald-500/10 border border-emerald-500/20 flex h-11 items-center justify-center rounded-xl w-11">
+                  <GraduationCap className="h-5 text-emerald-400 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold">Student Portal</p>
-                  <p className="text-[10px] text-slate-500 font-mono">STUDENT</p>
+                  <p className="font-bold text-sm">Student Portal</p>
+                  <p className="dark:text-slate-400 font-mono text-[10px] text-slate-500">STUDENT</p>
                 </div>
               </div>
-              <p className="text-xs text-slate-500 leading-6 mb-6">
+              <p className="dark:text-slate-400 leading-6 mb-6 text-slate-500 text-xs">
                 View your personal attendance record, hostel entry history, and any disciplinary notices issued.
               </p>
               <button
                 onClick={() => openLogin('student')}
-                className="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition"
+                className="bg-emerald-600 cursor-pointer flex font-semibold gap-2 hover:bg-emerald-500 items-center justify-center py-2.5 rounded-lg text-xs transition w-full"
               >
-                <Lock className="w-3.5 h-3.5" />
+                <Lock className="h-3.5 w-3.5" />
                 Open Student Portal
               </button>
               <button
                 onClick={() => loginAsStudent(students[0]?.id || 'STU-2026-001')}
-                className="mt-2 w-full py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-[10px] text-slate-500 hover:text-slate-300 cursor-pointer transition"
+                className="bg-white dark:bg-slate-900 cursor-pointer dark:text-slate-400 hover:bg-slate-800 hover:text-slate-300 mt-2 py-2 rounded-lg text-[10px] text-slate-500 transition w-full"
               >
                 Launch Demo
               </button>
@@ -320,13 +320,13 @@ export default function HomePage() {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-slate-800 py-6 bg-[#050a12]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-blue-500" />
-            <span className="text-xs font-semibold text-slate-300">Sentinel AI</span>
+      <footer className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 border-t py-6">
+        <div className="flex flex-col gap-3 items-center justify-between max-w-7xl mx-auto px-4 sm:flex-row sm:px-6">
+          <div className="flex gap-2 items-center">
+            <Shield className="h-4 text-blue-500 w-4" />
+            <span className="font-semibold text-slate-300 text-xs">Sentinel AI</span>
           </div>
-          <span className="text-[10px] text-slate-600 font-mono">
+          <span className="dark:text-slate-400 font-mono text-[10px] text-slate-600">
             CLASSROOM ATTENDANCE • HOSTEL CURFEW • DISCIPLINARY AI
           </span>
         </div>
@@ -344,14 +344,14 @@ export default function HomePage() {
 function StatBox({ icon: Icon, label, value, sub, danger }) {
   return (
     <div className="p-4">
-      <div className="flex items-center gap-2 text-[9px] font-mono text-slate-500">
+      <div className="dark:text-slate-400 flex font-mono gap-2 items-center text-[9px] text-slate-500">
         <Icon className={`w-3.5 h-3.5 ${danger ? 'text-rose-400' : 'text-blue-400'}`} />
         {label}
       </div>
       <div className={`mt-2 text-lg font-bold font-mono ${danger ? 'text-rose-400' : 'text-slate-100'}`}>
         {value}
       </div>
-      <div className="text-[8px] text-slate-600 font-mono mt-1">{sub}</div>
+      <div className="dark:text-slate-400 font-mono mt-1 text-[8px] text-slate-600">{sub}</div>
     </div>
   );
 }

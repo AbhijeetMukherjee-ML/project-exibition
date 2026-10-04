@@ -52,31 +52,31 @@ export default function AddStudentModal({ onClose }) {
   };
 
   const inputClass =
-    'w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all';
+    'w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all';
 
   const labelClass =
     'text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1.5 block';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-150">
+    <div className="animate-in backdrop-blur-md bg-black/70 duration-150 fade-in fixed flex inset-0 items-center justify-center p-4 z-50">
 
-      <div className="bg-white dark:bg-slate-900 w-full max-w-3xl rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 max-w-3xl overflow-hidden rounded-2xl shadow-2xl w-full">
 
         {/* ================= HEADER ================= */}
-        <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800">
+        <div className="border-b border-slate-200 dark:border-slate-800 px-6 py-5">
           <div className="flex items-start justify-between">
 
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/20">
-                <UserPlus className="w-5 h-5" />
+            <div className="flex gap-3 items-center">
+              <div className="bg-blue-600 dark:text-white flex h-11 items-center justify-center rounded-xl shadow-blue-600/20 shadow-lg text-slate-900 w-11">
+                <UserPlus className="h-5 w-5" />
               </div>
 
               <div>
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                <h2 className="dark:text-white font-bold text-lg text-slate-900">
                   Enroll New Student
                 </h2>
 
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                <p className="dark:text-slate-400 mt-0.5 text-slate-500 text-xs">
                   Register resident identity, accommodation and emergency details
                 </p>
               </div>
@@ -84,9 +84,9 @@ export default function AddStudentModal({ onClose }) {
 
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="cursor-pointer dark:bg-slate-800 dark:hover:bg-slate-800 dark:hover:text-white dark:text-slate-400 flex h-8 hover:bg-slate-100 hover:text-slate-700 items-center justify-center rounded-lg text-slate-500 transition-colors w-8"
             >
-              <X className="w-5 h-5" />
+              <X className="h-5 w-5" />
             </button>
 
           </div>
@@ -99,25 +99,25 @@ export default function AddStudentModal({ onClose }) {
         >
 
           {/* ================= STUDENT IDENTITY ================= */}
-          <section className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <section className="border border-slate-200 dark:border-slate-800 overflow-hidden rounded-xl">
 
-            <div className="px-4 py-3 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800">
-              <div className="flex items-center gap-2">
-                <UserRound className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <div className="bg-slate-50 border-b border-slate-200 dark:border-slate-800 dark:bg-slate-800 px-4 py-3">
+              <div className="flex gap-2 items-center">
+                <UserRound className="dark:text-blue-400 h-4 text-blue-600 w-4" />
 
                 <div>
-                  <h3 className="text-xs font-bold text-slate-900 dark:text-white">
+                  <h3 className="dark:text-white font-bold text-slate-900 text-xs">
                     Student Identity
                   </h3>
 
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                  <p className="dark:text-slate-400 text-[10px] text-slate-500">
                     Basic resident information
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="gap-4 grid grid-cols-1 p-4 sm:grid-cols-2">
 
               <div>
                 <label className={labelClass}>
@@ -140,7 +140,7 @@ export default function AddStudentModal({ onClose }) {
                 </label>
 
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Mail className="-translate-y-1/2 absolute dark:text-slate-400 h-4 left-3 text-slate-500 top-1/2 w-4" />
 
                   <input
                     type="email"
@@ -158,7 +158,7 @@ export default function AddStudentModal({ onClose }) {
                 </label>
 
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Phone className="-translate-y-1/2 absolute dark:text-slate-400 h-4 left-3 text-slate-500 top-1/2 w-4" />
 
                   <input
                     type="tel"
@@ -216,25 +216,25 @@ export default function AddStudentModal({ onClose }) {
 
 
           {/* ================= HOSTEL ALLOCATION ================= */}
-          <section className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <section className="border border-slate-200 dark:border-slate-800 overflow-hidden rounded-xl">
 
-            <div className="px-4 py-3 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800">
-              <div className="flex items-center gap-2">
-                <Home className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <div className="bg-slate-50 border-b border-slate-200 dark:border-slate-800 dark:bg-slate-800 px-4 py-3">
+              <div className="flex gap-2 items-center">
+                <Home className="dark:text-emerald-400 h-4 text-emerald-600 w-4" />
 
                 <div>
-                  <h3 className="text-xs font-bold text-slate-900 dark:text-white">
+                  <h3 className="dark:text-white font-bold text-slate-900 text-xs">
                     Hostel Allocation
                   </h3>
 
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                  <p className="dark:text-slate-400 text-[10px] text-slate-500">
                     Assign block, room and academic year
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="gap-4 grid grid-cols-1 p-4 sm:grid-cols-3">
 
               <div>
                 <label className={labelClass}>
@@ -273,7 +273,7 @@ export default function AddStudentModal({ onClose }) {
                 </label>
 
                 <div className="relative">
-                  <BedDouble className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <BedDouble className="-translate-y-1/2 absolute dark:text-slate-400 h-4 left-3 text-slate-500 top-1/2 w-4" />
 
                   <select
                     value={formData.bed}
@@ -300,11 +300,7 @@ export default function AddStudentModal({ onClose }) {
                       key={year}
                       type="button"
                       onClick={() => updateField('year', year)}
-                      className={`flex-1 py-2 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
-                        formData.year === year
-                          ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                          : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-blue-400'
-                      }`}
+                      className={`flex-1 py-2 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${ formData.year === year ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-blue-400' }`}
                     >
                       {year}
                     </button>
@@ -318,29 +314,29 @@ export default function AddStudentModal({ onClose }) {
 
 
           {/* ================= BIOMETRIC STATUS ================= */}
-          <section className="rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/50 dark:bg-blue-950/20 p-4">
+          <section className="bg-blue-50/50 border border-blue-200 dark:bg-blue-950/20 dark:border-blue-900/60 p-4 rounded-xl">
 
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex gap-4 items-center justify-between">
 
-              <div className="flex items-center gap-3">
+              <div className="flex gap-3 items-center">
 
-                <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
-                  <ShieldCheck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <div className="bg-blue-100 dark:bg-blue-900/50 flex h-10 items-center justify-center rounded-lg w-10">
+                  <ShieldCheck className="dark:text-blue-400 h-5 text-blue-600 w-5" />
                 </div>
 
                 <div>
-                  <h3 className="text-xs font-bold text-slate-900 dark:text-white">
+                  <h3 className="dark:text-white font-bold text-slate-900 text-xs">
                     Biometric Enrollment
                   </h3>
 
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  <p className="dark:text-slate-400 mt-0.5 text-[10px] text-slate-500">
                     Facial recognition profile can be enrolled after registration.
                   </p>
                 </div>
 
               </div>
 
-              <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-md bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+              <span className="bg-amber-100 border border-amber-200 dark:bg-amber-950/60 dark:border-amber-800 dark:text-amber-400 font-bold font-mono px-2.5 py-1 rounded-md text-[10px] text-amber-700">
                 PENDING
               </span>
 
@@ -350,25 +346,25 @@ export default function AddStudentModal({ onClose }) {
 
 
           {/* ================= GUARDIAN ================= */}
-          <section className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <section className="border border-slate-200 dark:border-slate-800 overflow-hidden rounded-xl">
 
-            <div className="px-4 py-3 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800">
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+            <div className="bg-slate-50 border-b border-slate-200 dark:border-slate-800 dark:bg-slate-800 px-4 py-3">
+              <div className="flex gap-2 items-center">
+                <Phone className="dark:text-amber-400 h-4 text-amber-600 w-4" />
 
                 <div>
-                  <h3 className="text-xs font-bold text-slate-900 dark:text-white">
+                  <h3 className="dark:text-white font-bold text-slate-900 text-xs">
                     Emergency / Guardian Contact
                   </h3>
 
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                  <p className="dark:text-slate-400 text-[10px] text-slate-500">
                     Used for emergency communication and alerts
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="gap-4 grid grid-cols-1 p-4 sm:grid-cols-3">
 
               <div>
                 <label className={labelClass}>
@@ -422,18 +418,18 @@ export default function AddStudentModal({ onClose }) {
         </form>
 
         {/* ================= FOOTER ================= */}
-        <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/50 flex items-center justify-between">
+        <div className="bg-slate-50 border-slate-200 dark:border-slate-800 border-t dark:bg-slate-950/50 flex items-center justify-between px-6 py-4">
 
           <p className="hidden sm:block text-[10px] text-slate-400">
             <span className="text-rose-500">*</span> Required fields
           </p>
 
-          <div className="flex items-center gap-2 ml-auto">
+          <div className="flex gap-2 items-center ml-auto">
 
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+              className="bg-white border border-slate-200 cursor-pointer dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-100 px-4 py-2.5 rounded-lg text-slate-700 text-xs transition-colors"
             >
               Cancel
             </button>
@@ -441,9 +437,9 @@ export default function AddStudentModal({ onClose }) {
             <button
               type="submit"
               onClick={handleSubmit}
-              className="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-sm shadow-blue-600/20 transition-colors flex items-center gap-2 cursor-pointer"
+              className="bg-blue-600 cursor-pointer flex font-bold gap-2 hover:bg-blue-500 items-center px-5 py-2.5 rounded-lg shadow-blue-600/20 shadow-sm text-white text-xs transition-colors"
             >
-              <UserPlus className="w-3.5 h-3.5" />
+              <UserPlus className="h-3.5 w-3.5" />
               Register & Enroll
             </button>
 

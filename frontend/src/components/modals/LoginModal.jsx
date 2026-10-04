@@ -92,45 +92,95 @@ export default function LoginModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md animate-in fade-in duration-200"
+      className="animate-in backdrop-blur-md bg-slate-950/75 duration-200 fade-in fixed flex inset-0 items-center justify-center p-4 z-50"
       onClick={onClose}
     >
+
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-2xl"
+        className="animate-in bg-white border border-slate-200 dark:border-slate-800 dark:bg-slate-950 duration-200 fade-in flex flex-col max-w-[1400px] md:flex-row min-h-[750px] overflow-hidden relative rounded-2xl shadow-2xl w-full z-10 zoom-in-95"
       >
+        {/* ================= LEFT INFO PANEL (60%) ================= */}
+        <div className="bg-slate-50 border-r border-slate-200 dark:border-slate-800 dark:bg-slate-900 flex-col hidden justify-between md:flex md:w-[60%] p-16 w-full">
+          <div>
+            <div className="flex gap-3 items-center mb-8">
+              <div className="bg-blue-600 flex h-16 items-center justify-center rounded-2xl shadow-blue-600/20 shadow-lg w-16">
+                <ShieldCheck className="dark:text-white h-8 text-slate-900 w-8" />
+              </div>
+              <div>
+                <h1 className="dark:text-white font-black text-3xl text-slate-900 tracking-tight">Sentinel AI</h1>
+                <p className="dark:text-slate-400 font-mono mt-1 text-slate-500 text-sm tracking-wider">SECURE ACCESS GATEWAY</p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-white border-2 border-slate-200 dark:border-slate-800 dark:bg-slate-950 p-8 rounded-xl shadow-sm">
+                <div className="flex gap-3 items-center mb-2">
+                  <div className="bg-blue-100 dark:bg-blue-900/50 dark:text-blue-400 flex h-12 items-center justify-center rounded-xl text-blue-600 w-12">
+                    <Shield className="h-6 w-6" />
+                  </div>
+                  <h3 className="dark:text-white font-bold text-slate-900 text-xl">Administrator Access</h3>
+                </div>
+                <p className="dark:text-slate-400 leading-relaxed ml-16 mt-2 text-base text-slate-500">
+                  Full command over the Smart Hostel ecosystem. View live AI camera feeds, manage student registries, monitor real-time classroom attendance, issue disciplinary notices, and override curfew violations. Intended only for Wardens, Proctors, and System Admins.
+                </p>
+              </div>
+
+              <div className="bg-white border-2 border-slate-200 dark:border-slate-800 dark:bg-slate-950 p-8 rounded-xl shadow-sm">
+                <div className="flex gap-3 items-center mb-2">
+                  <div className="bg-emerald-100 dark:bg-emerald-900/50 dark:text-emerald-400 flex h-12 items-center justify-center rounded-xl text-emerald-600 w-12">
+                    <GraduationCap className="h-6 w-6" />
+                  </div>
+                  <h3 className="dark:text-white font-bold text-slate-900 text-xl">Student Access</h3>
+                </div>
+                <p className="dark:text-slate-400 leading-relaxed ml-16 mt-2 text-base text-slate-500">
+                  Personalized dashboard for residents. Check your daily classroom attendance percentages, review your hostel entry/exit logs recorded by the AI gates, and track any outstanding disciplinary fines or curfew alerts issued against your profile.
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="dark:text-slate-400 flex font-mono gap-3 items-center mt-12 text-slate-500 text-sm">
+            <Lock className="h-3 w-3" />
+            End-to-End Encrypted Verification
+          </div>
+        </div>
+
+        {/* ================= RIGHT LOGIN FORM (40%) ================= */}
+        <div className="flex flex-col md:w-[40%] relative w-full">
+
 
         {/* ================= TOP BRAND STRIP ================= */}
-        <div className="h-1 bg-gradient-to-r from-blue-600 via-indigo-500 to-emerald-500" />
+        <div className="bg-gradient-to-r from-blue-600 h-1 to-emerald-500 via-indigo-500" />
 
         {/* ================= HEADER ================= */}
-        <div className="px-6 pt-6 pb-5">
+        <div className="pb-5 pt-6 px-6">
 
           <div className="flex items-start justify-between">
 
-            <div className="flex items-center gap-3.5">
+            <div className="flex gap-3.5 items-center">
 
               <div className="relative">
-                <div className="w-11 h-11 rounded-xl bg-slate-900 dark:bg-white flex items-center justify-center shadow-lg">
-                  <ShieldCheck className="w-5 h-5 text-white dark:text-slate-900" />
+                <div className="bg-white dark:bg-white flex h-11 items-center justify-center rounded-xl shadow-lg w-11">
+                  <ShieldCheck className="dark:text-white h-5 text-slate-900 w-5" />
                 </div>
 
-                <span className="absolute -right-1 -bottom-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-950" />
+                <span className="-bottom-1 -right-1 absolute bg-emerald-500 border-2 border-white dark:border-slate-950 h-4 rounded-full w-4" />
               </div>
 
               <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                <div className="flex gap-2 items-center">
+                  <h2 className="dark:text-white font-bold text-lg text-slate-900">
                     Secure Portal Access
                   </h2>
 
-                  <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 text-[9px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span className="bg-emerald-50 border border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-900 dark:text-emerald-400 font-bold gap-1 hidden items-center px-2 py-0.5 rounded-full sm:inline-flex text-[9px] text-emerald-600 tracking-wider uppercase">
+                    <span className="bg-emerald-500 h-1.5 rounded-full w-1.5" />
                     Secure
                   </span>
                 </div>
 
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                <p className="dark:text-slate-400 mt-1 text-slate-500 text-sm">
                   Hostel Intelligence & Management System
                 </p>
               </div>
@@ -139,9 +189,9 @@ export default function LoginModal({
 
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="cursor-pointer dark:hover:bg-slate-800 dark:hover:text-white flex h-12 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 items-center justify-center rounded-xl text-slate-500 transition-colors w-12"
             >
-              <X className="w-4 h-4" />
+              <X className="h-4 w-4" />
             </button>
 
           </div>
@@ -151,39 +201,31 @@ export default function LoginModal({
         {/* ================= ROLE SELECTOR ================= */}
         <div className="px-6">
 
-          <div className="grid grid-cols-2 gap-2 p-1.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <div className="bg-slate-100 border border-slate-200 dark:border-slate-800 dark:bg-slate-900 gap-2 grid grid-cols-2 p-1.5 rounded-xl">
 
             <button
               type="button"
               onClick={() => switchRole('admin')}
-              className={`relative flex items-center justify-center gap-2.5 py-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                selectedRole === 'admin'
-                  ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm border border-slate-200 dark:border-slate-700'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-              }`}
+              className={`relative flex items-center justify-center gap-2.5 py-3 rounded-lg text-base font-bold transition-all cursor-pointer ${ selectedRole === 'admin' ? 'bg-white dark:bg-slate-800 text-blue-600 shadow-sm border border-slate-200 dark:border-slate-700' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200' }`}
             >
-              <ShieldCheck className="w-4 h-4" />
+              <ShieldCheck className="h-4 w-4" />
               Admin Console
 
               {selectedRole === 'admin' && (
-                <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-blue-500" />
+                <span className="absolute bg-blue-500 h-1.5 right-1.5 rounded-full top-1.5 w-1.5" />
               )}
             </button>
 
             <button
               type="button"
               onClick={() => switchRole('student')}
-              className={`relative flex items-center justify-center gap-2.5 py-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                selectedRole === 'student'
-                  ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-sm border border-slate-200 dark:border-slate-700'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-              }`}
+              className={`relative flex items-center justify-center gap-2.5 py-3 rounded-lg text-base font-bold transition-all cursor-pointer ${ selectedRole === 'student' ? 'bg-white dark:bg-slate-800 text-emerald-600 shadow-sm border border-slate-200 dark:border-slate-700' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200' }`}
             >
-              <GraduationCap className="w-4 h-4" />
+              <GraduationCap className="h-6 w-6" />
               Student Portal
 
               {selectedRole === 'student' && (
-                <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span className="absolute bg-emerald-500 h-1.5 right-1.5 rounded-full top-1.5 w-1.5" />
               )}
             </button>
 
@@ -192,7 +234,7 @@ export default function LoginModal({
         </div>
 
         {/* ================= FORM AREA ================= */}
-        <div className="px-6 pt-5 pb-6">
+        <div className="pb-6 pt-5 px-6">
 
           {selectedRole === 'admin' ? (
 
@@ -201,24 +243,24 @@ export default function LoginModal({
             =================================================== */
             <form
               onSubmit={handleAdminSubmit}
-              className="space-y-4"
+              className="space-y-6"
             >
 
               {/* Access Information */}
-              <div className="rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50/70 dark:bg-blue-950/30 p-4">
+              <div className="bg-blue-50/70 border border-blue-200 dark:bg-blue-950/30 dark:border-blue-900/50 p-4 rounded-xl">
 
                 <div className="flex gap-3">
 
-                  <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0">
-                    <Building2 className="w-4 h-4" />
+                  <div className="bg-blue-100 dark:bg-blue-900/50 dark:text-blue-400 flex flex-shrink-0 h-9 items-center justify-center rounded-lg text-blue-600 w-9">
+                    <Building2 className="h-4 w-4" />
                   </div>
 
                   <div>
-                    <p className="text-xs font-bold text-blue-900 dark:text-blue-300">
+                    <p className="dark:text-blue-300 font-bold text-base text-blue-900">
                       Administrator Authorization
                     </p>
 
-                    <p className="text-[10px] leading-relaxed text-blue-700 dark:text-blue-400 mt-1">
+                    <p className="dark:text-blue-400 leading-relaxed mt-1 text-blue-700 text-sm">
                       Authorized personnel can access surveillance,
                       biometric verification, resident records, movement
                       logs and disciplinary controls.
@@ -229,13 +271,13 @@ export default function LoginModal({
 
                 <div className="flex flex-wrap gap-2 mt-3">
 
-                  <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-blue-700 dark:text-blue-400 bg-white/70 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-900 px-2 py-1 rounded-md">
-                    <Fingerprint className="w-3 h-3" />
+                  <span className="bg-white border border-blue-200 dark:bg-blue-950/60 dark:border-blue-900 dark:text-blue-400 font-semibold gap-1 inline-flex items-center px-2 py-1 rounded-md text-[9px] text-blue-700">
+                    <Fingerprint className="h-3 w-3" />
                     AI Verification
                   </span>
 
-                  <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-blue-700 dark:text-blue-400 bg-white/70 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-900 px-2 py-1 rounded-md">
-                    <Shield className="w-3 h-3" />
+                  <span className="bg-white border border-blue-200 dark:bg-blue-950/60 dark:border-blue-900 dark:text-blue-400 font-semibold gap-1 inline-flex items-center px-2 py-1 rounded-md text-[9px] text-blue-700">
+                    <Shield className="h-3 w-3" />
                     Restricted Access
                   </span>
 
@@ -246,13 +288,13 @@ export default function LoginModal({
               {/* Email */}
               <div className="space-y-1.5">
 
-                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <label className="dark:text-slate-400 font-bold text-slate-500 text-sm tracking-wider uppercase">
                   Administrator ID
                 </label>
 
                 <div className="relative">
 
-                  <UserRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <UserRound className="-translate-y-1/2 absolute dark:text-slate-400 h-5 left-4 text-slate-500 top-1/2 w-5" />
 
                   <input
                     type="text"
@@ -260,7 +302,7 @@ export default function LoginModal({
                     onChange={(e) => setAdminEmail(e.target.value)}
                     required
                     placeholder="admin@hostel.edu"
-                    className="w-full pl-10 pr-3 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    className="bg-slate-50 border border-slate-200 dark:bg-slate-900 dark:border-slate-700 dark:text-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 pl-12 placeholder:text-slate-400 pr-4 py-4 rounded-2xl text-slate-900 text-xs transition-all w-full"
                   />
 
                 </div>
@@ -270,13 +312,13 @@ export default function LoginModal({
               {/* Password */}
               <div className="space-y-1.5">
 
-                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <label className="dark:text-slate-400 font-bold text-slate-500 text-sm tracking-wider uppercase">
                   Security Password
                 </label>
 
                 <div className="relative">
 
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Lock className="-translate-y-1/2 absolute dark:text-slate-400 h-5 left-4 text-slate-500 top-1/2 w-5" />
 
                   <input
                     type={showAdminPassword ? 'text' : 'password'}
@@ -284,18 +326,18 @@ export default function LoginModal({
                     onChange={(e) => setAdminPassword(e.target.value)}
                     required
                     placeholder="Enter security password"
-                    className="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    className="bg-slate-50 border border-slate-200 dark:bg-slate-900 dark:border-slate-700 dark:text-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 pl-12 placeholder:text-slate-400 pr-12 py-4 rounded-2xl text-slate-900 text-xs transition-all w-full"
                   />
 
                   <button
                     type="button"
                     onClick={() => setShowAdminPassword(!showAdminPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer"
+                    className="-translate-y-1/2 absolute cursor-pointer dark:hover:text-white hover:text-slate-700 dark:hover:text-slate-300 right-4 text-slate-500 top-1/2"
                   >
                     {showAdminPassword ? (
-                      <EyeOff className="w-4 h-4" />
+                      <EyeOff className="h-4 w-4" />
                     ) : (
-                      <Eye className="w-4 h-4" />
+                      <Eye className="h-4 w-4" />
                     )}
                   </button>
 
@@ -307,15 +349,15 @@ export default function LoginModal({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-70 text-white text-xs font-bold shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="bg-blue-600 cursor-pointer disabled:opacity-70 flex font-bold gap-2 hover:bg-blue-500 items-center justify-center px-4 py-3 rounded-xl shadow-blue-600/20 shadow-lg text-base text-white transition-all w-full"
               >
                 {loading ? (
-                  <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                  <div className="animate-spin border-2 border-t-white border-white/40 h-4 rounded-full w-4" />
                 ) : (
                   <>
-                    <ShieldCheck className="w-4 h-4" />
+                    <ShieldCheck className="h-4 w-4" />
                     Enter Administrator Console
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="h-4 w-4" />
                   </>
                 )}
               </button>
@@ -327,7 +369,7 @@ export default function LoginModal({
                   loginAsAdmin();
                   onClose();
                 }}
-                className="w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-[10px] font-semibold text-slate-500 dark:text-slate-400 transition-colors cursor-pointer"
+                className="bg-slate-50 border border-slate-200 dark:border-slate-800 cursor-pointer dark:hover:bg-slate-800 dark:text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 py-4 rounded-2xl text-slate-500 text-sm transition-colors w-full"
               >
                 ⚡ Launch Demo Administrator Session
               </button>
@@ -341,24 +383,24 @@ export default function LoginModal({
             =================================================== */
             <form
               onSubmit={handleStudentSubmit}
-              className="space-y-4"
+              className="space-y-6"
             >
 
               {/* Student Access Information */}
-              <div className="rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/70 dark:bg-emerald-950/30 p-4">
+              <div className="bg-emerald-50/70 border border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-900/50 p-4 rounded-xl">
 
                 <div className="flex gap-3">
 
-                  <div className="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
-                    <GraduationCap className="w-4 h-4" />
+                  <div className="bg-emerald-100 dark:bg-emerald-900/50 dark:text-emerald-400 flex flex-shrink-0 h-9 items-center justify-center rounded-lg text-emerald-600 w-9">
+                    <GraduationCap className="h-6 w-6" />
                   </div>
 
                   <div>
-                    <p className="text-xs font-bold text-emerald-900 dark:text-emerald-300">
+                    <p className="dark:text-emerald-300 font-bold text-base text-emerald-900">
                       Resident Student Access
                     </p>
 
-                    <p className="text-[10px] leading-relaxed text-emerald-700 dark:text-emerald-400 mt-1">
+                    <p className="dark:text-emerald-400 leading-relaxed mt-1 text-emerald-700 text-sm">
                       View your hostel movements, attendance, curfew
                       records, disciplinary notices and outstanding fines.
                     </p>
@@ -366,8 +408,8 @@ export default function LoginModal({
 
                 </div>
 
-                <div className="flex items-center gap-2 mt-3 text-[9px] font-semibold text-emerald-700 dark:text-emerald-400">
-                  <CheckCircle2 className="w-3 h-3" />
+                <div className="dark:text-emerald-400 flex font-semibold gap-2 items-center mt-3 text-[9px] text-emerald-700">
+                  <CheckCircle2 className="h-3 w-3" />
                   Registered resident profiles only
                 </div>
 
@@ -376,18 +418,18 @@ export default function LoginModal({
               {/* Student Selection */}
               <div className="space-y-1.5">
 
-                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <label className="dark:text-slate-400 font-bold text-slate-500 text-sm tracking-wider uppercase">
                   Resident Profile
                 </label>
 
                 <div className="relative">
 
-                  <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  <GraduationCap className="-translate-y-1/2 absolute dark:text-slate-400 h-5 left-4 pointer-events-none text-slate-500 top-1/2 w-5" />
 
                   <select
                     value={selectedStudentId}
                     onChange={(e) => setSelectedStudentId(e.target.value)}
-                    className="w-full pl-10 pr-3 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all cursor-pointer"
+                    className="bg-slate-50 border border-slate-200 cursor-pointer dark:bg-slate-900 dark:border-slate-700 dark:text-white focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 font-medium pl-12 pr-4 py-4 rounded-2xl text-base text-slate-900 transition-all w-full"
                   >
                     {students.map((student) => (
                       <option
@@ -405,25 +447,25 @@ export default function LoginModal({
 
               {/* Selected Student Preview */}
               {selectedStudent && (
-                <div className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
+                <div className="bg-slate-50 border border-slate-200 dark:border-slate-800 dark:bg-slate-900 flex gap-3 items-center p-3 rounded-xl">
 
                   <img
                     src={selectedStudent.avatar}
                     alt={selectedStudent.name}
-                    className="w-10 h-10 rounded-lg object-cover border border-slate-200 dark:border-slate-700"
+                    className="border border-slate-200 dark:border-slate-700 h-10 object-cover rounded-lg w-10"
                   />
 
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                  <div className="flex-1 min-w-0">
+                    <p className="dark:text-white font-bold text-base text-slate-900 truncate">
                       {selectedStudent.name}
                     </p>
 
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                    <p className="dark:text-slate-400 mt-0.5 text-[10px] text-slate-500 truncate">
                       {selectedStudent.department} • {selectedStudent.year}
                     </p>
                   </div>
 
-                  <span className="text-[9px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                  <span className="dark:text-emerald-400 font-bold font-mono text-[9px] text-emerald-600">
                     {selectedStudent.id}
                   </span>
 
@@ -433,13 +475,13 @@ export default function LoginModal({
               {/* PIN */}
               <div className="space-y-1.5">
 
-                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <label className="dark:text-slate-400 font-bold text-slate-500 text-sm tracking-wider uppercase">
                   Student Security PIN
                 </label>
 
                 <div className="relative">
 
-                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <KeyRound className="-translate-y-1/2 absolute dark:text-slate-400 h-5 left-4 text-slate-500 top-1/2 w-5" />
 
                   <input
                     type={showStudentPin ? 'text' : 'password'}
@@ -448,18 +490,18 @@ export default function LoginModal({
                     required
                     maxLength={8}
                     placeholder="Enter PIN"
-                    className="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-mono text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                    className="bg-slate-50 border border-slate-200 dark:bg-slate-900 dark:border-slate-700 dark:text-white focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 font-mono pl-12 placeholder:text-slate-400 pr-12 py-4 rounded-2xl text-base text-slate-900 transition-all w-full"
                   />
 
                   <button
                     type="button"
                     onClick={() => setShowStudentPin(!showStudentPin)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer"
+                    className="-translate-y-1/2 absolute cursor-pointer dark:hover:text-white hover:text-slate-700 dark:hover:text-slate-300 right-4 text-slate-500 top-1/2"
                   >
                     {showStudentPin ? (
-                      <EyeOff className="w-4 h-4" />
+                      <EyeOff className="h-4 w-4" />
                     ) : (
-                      <Eye className="w-4 h-4" />
+                      <Eye className="h-4 w-4" />
                     )}
                   </button>
 
@@ -471,15 +513,15 @@ export default function LoginModal({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-70 text-white text-xs font-bold shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="bg-emerald-600 cursor-pointer disabled:opacity-70 flex font-bold gap-2 hover:bg-emerald-500 items-center justify-center px-4 py-3 rounded-xl shadow-emerald-600/20 shadow-lg text-base text-white transition-all w-full"
               >
                 {loading ? (
-                  <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                  <div className="animate-spin border-2 border-t-white border-white/40 h-4 rounded-full w-4" />
                 ) : (
                   <>
-                    <Lock className="w-4 h-4" />
+                    <Lock className="h-4 w-4" />
                     Open Student Dashboard
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="h-4 w-4" />
                   </>
                 )}
               </button>
@@ -491,7 +533,7 @@ export default function LoginModal({
                   loginAsStudent(selectedStudentId);
                   onClose();
                 }}
-                className="w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-[10px] font-semibold text-slate-500 dark:text-slate-400 transition-colors cursor-pointer"
+                className="bg-slate-50 border border-slate-200 dark:border-slate-800 cursor-pointer dark:hover:bg-slate-800 dark:text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 py-4 rounded-2xl text-slate-500 text-sm transition-colors w-full"
               >
                 ⚡ Launch Demo Student Session
               </button>
@@ -502,20 +544,21 @@ export default function LoginModal({
         </div>
 
         {/* ================= FOOTER ================= */}
-        <div className="px-6 py-3.5 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between">
+        <div className="bg-slate-50 border-slate-200 dark:border-slate-800 border-t dark:bg-slate-900/60 flex items-center justify-between px-6 py-3.5">
 
-          <div className="flex items-center gap-1.5 text-[9px] text-slate-400 dark:text-slate-500">
-            <Lock className="w-3 h-3" />
+          <div className="dark:text-slate-400 flex gap-1.5 items-center text-[9px] text-slate-400">
+            <Lock className="h-3 w-3" />
             Protected institutional access
           </div>
 
-          <div className="flex items-center gap-1.5 text-[9px] text-slate-400 dark:text-slate-500">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+          <div className="dark:text-slate-400 flex gap-1.5 items-center text-[9px] text-slate-400">
+            <span className="bg-emerald-500 h-1.5 rounded-full w-1.5" />
             System Online
           </div>
 
         </div>
 
+        </div>
       </div>
     </div>
   );

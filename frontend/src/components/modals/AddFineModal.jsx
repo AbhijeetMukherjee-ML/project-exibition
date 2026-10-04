@@ -129,40 +129,40 @@ export default function AddFineModal({ onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="animate-in backdrop-blur-md bg-slate-950/80 duration-200 fade-in fixed flex inset-0 items-center justify-center p-3 sm:p-5 z-50">
 
-      <div className="relative w-full max-w-3xl max-h-[94vh] overflow-hidden rounded-2xl bg-white dark:bg-[#0b1220] border border-slate-200 dark:border-slate-800 shadow-2xl">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 max-h-[94vh] max-w-3xl overflow-hidden relative rounded-2xl shadow-2xl w-full">
 
         {/* =========================================================
             HEADER
         ========================================================= */}
-        <div className="px-5 sm:px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-[#0e1728]">
-          <div className="flex items-start justify-between gap-4">
+        <div className="bg-slate-50 border-b border-slate-200 dark:border-slate-800 dark:bg-slate-800/80 px-5 py-4 sm:px-6">
+          <div className="flex gap-4 items-start justify-between">
 
-            <div className="flex items-center gap-3">
+            <div className="flex gap-3 items-center">
               <div className="relative">
-                <div className="w-10 h-10 rounded-xl bg-rose-600 flex items-center justify-center shadow-lg shadow-rose-600/20">
-                  <Scale className="w-5 h-5 text-white" />
+                <div className="bg-rose-600 flex h-10 items-center justify-center rounded-xl shadow-lg shadow-rose-600/20 w-10">
+                  <Scale className="dark:text-white h-5 text-slate-900 w-5" />
                 </div>
 
-                <span className="absolute -right-1 -bottom-1 w-4 h-4 rounded-full bg-slate-900 dark:bg-slate-800 border-2 border-white dark:border-[#0e1728] flex items-center justify-center">
-                  <ShieldAlert className="w-2.5 h-2.5 text-rose-400" />
+                <span className="-bottom-1 -right-1 absolute bg-white border-2 border-white dark:bg-slate-800 dark:border-[#0e1728] flex h-4 items-center justify-center rounded-full w-4">
+                  <ShieldAlert className="h-2.5 text-rose-400 w-2.5" />
                 </span>
               </div>
 
               <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                <div className="flex gap-2 items-center">
+                  <h3 className="dark:text-white font-bold sm:text-lg text-base text-slate-900">
                     Issue Disciplinary Notice
                   </h3>
 
-                  <span className="hidden sm:inline-flex items-center gap-1 text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800">
-                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                  <span className="bg-rose-50 border border-rose-200 dark:bg-rose-950/50 dark:border-rose-800 dark:text-rose-400 font-bold gap-1 hidden items-center px-2 py-0.5 rounded-full sm:inline-flex text-[9px] text-rose-600 tracking-wider uppercase">
+                    <span className="bg-rose-500 h-1.5 rounded-full w-1.5" />
                     Enforcement
                   </span>
                 </div>
 
-                <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                <p className="dark:text-slate-400 mt-0.5 sm:text-xs text-[11px] text-slate-500">
                   Record violation, assign penalty and preserve supporting evidence.
                 </p>
               </div>
@@ -170,10 +170,10 @@ export default function AddFineModal({ onClose }) {
 
             <button
               onClick={onClose}
-              className="p-2 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="cursor-pointer dark:bg-slate-700 dark:hover:bg-slate-800 dark:hover:text-white dark:text-white hover:bg-slate-200 hover:text-slate-900 p-2 rounded-lg text-slate-500 transition-colors"
               title="Close"
             >
-              <X className="w-5 h-5" />
+              <X className="h-5 w-5" />
             </button>
           </div>
         </div>
@@ -183,7 +183,7 @@ export default function AddFineModal({ onClose }) {
         ========================================================= */}
         <form
           onSubmit={handleSubmit}
-          className="overflow-y-auto max-h-[calc(94vh-145px)]"
+          className="max-h-[calc(94vh-145px)] overflow-y-auto"
         >
           <div className="p-5 sm:p-6 space-y-6">
 
@@ -193,23 +193,23 @@ export default function AddFineModal({ onClose }) {
             <section>
               <div className="flex items-center justify-between mb-2.5">
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500">
+                  <p className="dark:text-slate-500 font-bold text-[10px] text-slate-400 tracking-wider uppercase">
                     Step 01
                   </p>
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                  <h4 className="dark:text-white font-bold text-slate-900 text-sm">
                     Select Resident
                   </h4>
                 </div>
 
-                <User className="w-4 h-4 text-slate-400" />
+                <User className="dark:text-slate-400 h-4 text-slate-500 w-4" />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3">
+              <div className="gap-3 grid grid-cols-1 md:grid-cols-[1fr_auto]">
 
                 <select
                   value={selectedStudentId}
                   onChange={(e) => setSelectedStudentId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 cursor-pointer"
+                  className="bg-slate-50 border border-slate-200 cursor-pointer dark:bg-slate-800 dark:border-slate-700 dark:text-white focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 px-3.5 py-2.5 rounded-xl text-slate-900 text-xs w-full"
                 >
                   {students.map((student) => (
                     <option
@@ -223,20 +223,20 @@ export default function AddFineModal({ onClose }) {
                 </select>
 
                 {selectedStudent && (
-                  <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 min-w-[210px]">
+                  <div className="bg-slate-50 border border-slate-200 dark:border-slate-800 dark:bg-slate-800 flex gap-2.5 items-center min-w-[210px] px-3 py-2 rounded-xl">
                     <img
                       src={selectedStudent.avatar}
                       alt={selectedStudent.name}
-                      className="w-8 h-8 rounded-lg object-cover border border-slate-200 dark:border-slate-700"
+                      className="border border-slate-200 dark:border-slate-700 h-8 object-cover rounded-lg w-8"
                     />
 
                     <div className="min-w-0">
-                      <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                      <p className="dark:text-white font-bold text-slate-900 text-xs truncate">
                         {selectedStudent.name}
                       </p>
 
-                      <p className="text-[10px] font-mono text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                        <Home className="w-3 h-3" />
+                      <p className="dark:text-slate-400 flex font-mono gap-1 items-center text-[10px] text-slate-500">
+                        <Home className="h-3 w-3" />
                         {selectedStudent.room} • {selectedStudent.block}
                       </p>
                     </div>
@@ -251,18 +251,18 @@ export default function AddFineModal({ onClose }) {
             <section>
               <div className="flex items-center justify-between mb-2.5">
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500">
+                  <p className="dark:text-slate-500 font-bold text-[10px] text-slate-400 tracking-wider uppercase">
                     Step 02
                   </p>
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                  <h4 className="dark:text-white font-bold text-slate-900 text-sm">
                     Select Violation
                   </h4>
                 </div>
 
-                <FileWarning className="w-4 h-4 text-slate-400" />
+                <FileWarning className="dark:text-slate-400 h-4 text-slate-500 w-4" />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              <div className="gap-2 grid grid-cols-1 lg:grid-cols-3 sm:grid-cols-2">
                 {infractionPresets.map((preset) => {
                   const active = infraction === preset.title;
 
@@ -271,34 +271,26 @@ export default function AddFineModal({ onClose }) {
                       key={preset.title}
                       type="button"
                       onClick={() => handlePresetSelect(preset)}
-                      className={`text-left p-3 rounded-xl border transition-all cursor-pointer ${
-                        active
-                          ? 'border-rose-500 bg-rose-50 dark:bg-rose-950/30 shadow-sm'
-                          : 'border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/50 hover:border-slate-300 dark:hover:border-slate-700'
-                      }`}
+                      className={`text-left p-3 rounded-xl border transition-all cursor-pointer ${ active ? 'border-rose-500 bg-rose-50 shadow-sm' : 'border-slate-200 bg-slate-50 dark:bg-slate-950/50 hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-700' }`}
                     >
-                      <div className="flex items-start justify-between gap-2">
+                      <div className="flex gap-2 items-start justify-between">
                         <span
-                          className={`text-[11px] font-semibold leading-tight ${
-                            active
-                              ? 'text-rose-700 dark:text-rose-300'
-                              : 'text-slate-700 dark:text-slate-300'
-                          }`}
+                          className={`text-[11px] font-semibold leading-tight ${ active ? 'text-rose-700' : 'text-slate-700 dark:text-slate-300' }`}
                         >
                           {preset.shortTitle}
                         </span>
 
                         {active && (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-rose-500 flex-shrink-0" />
+                          <CheckCircle2 className="flex-shrink-0 h-3.5 text-rose-500 w-3.5" />
                         )}
                       </div>
 
                       <div className="flex items-center justify-between mt-2">
-                        <span className="text-[10px] font-mono text-slate-400">
+                        <span className="font-mono text-[10px] text-slate-400">
                           {preset.severity}
                         </span>
 
-                        <span className="text-[11px] font-bold font-mono text-slate-900 dark:text-white">
+                        <span className="dark:text-white font-bold font-mono text-[11px] text-slate-900">
                           ₹{preset.amount.toLocaleString()}
                         </span>
                       </div>
@@ -311,20 +303,20 @@ export default function AddFineModal({ onClose }) {
             {/* =====================================================
                 PENALTY DETAILS
             ===================================================== */}
-            <section className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+            <section className="border border-slate-200 dark:border-slate-800 overflow-hidden rounded-2xl">
 
-              <div className="px-4 py-3 bg-slate-50 dark:bg-slate-950/70 border-b border-slate-200 dark:border-slate-800">
+              <div className="bg-slate-50 border-b border-slate-200 dark:border-slate-800 dark:bg-slate-950/70 px-4 py-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500">
+                    <p className="dark:text-slate-500 font-bold text-[10px] text-slate-400 tracking-wider uppercase">
                       Step 03
                     </p>
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                    <h4 className="dark:text-white font-bold text-slate-900 text-sm">
                       Penalty Configuration
                     </h4>
                   </div>
 
-                  <AlertTriangle className="w-4 h-4 text-amber-500" />
+                  <AlertTriangle className="h-4 text-amber-500 w-4" />
                 </div>
               </div>
 
@@ -332,7 +324,7 @@ export default function AddFineModal({ onClose }) {
 
                 {/* Infraction */}
                 <div>
-                  <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">
+                  <label className="block dark:text-slate-300 font-semibold mb-1.5 text-[11px] text-slate-700">
                     Infraction Description
                   </label>
 
@@ -341,19 +333,19 @@ export default function AddFineModal({ onClose }) {
                     required
                     value={infraction}
                     onChange={(e) => setInfraction(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white focus:outline-none focus:border-rose-500"
+                    className="bg-white border border-slate-200 dark:bg-slate-950 dark:border-slate-700 dark:text-white focus:border-rose-500 focus:outline-none px-3 py-2.5 rounded-lg text-slate-900 text-xs w-full"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="gap-4 grid grid-cols-1 sm:grid-cols-2">
 
                   {/* Severity */}
                   <div>
-                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">
+                    <label className="block dark:text-slate-300 font-semibold mb-1.5 text-[11px] text-slate-700">
                       Severity Level
                     </label>
 
-                    <div className="grid grid-cols-4 gap-1.5">
+                    <div className="gap-1.5 grid grid-cols-4">
                       {['Low', 'Medium', 'High', 'Critical'].map((level) => {
                         const style = severityStyles[level];
                         const active = severity === level;
@@ -363,11 +355,7 @@ export default function AddFineModal({ onClose }) {
                             key={level}
                             type="button"
                             onClick={() => setSeverity(level)}
-                            className={`py-2 rounded-lg border text-[10px] font-bold transition-all cursor-pointer ${
-                              active
-                                ? style.active
-                                : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-300'
-                            }`}
+                            className={`py-2 rounded-lg border text-[10px] font-bold transition-all cursor-pointer ${ active ? style.active : 'bg-slate-50 dark:bg-slate-950 border-slate-200 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:border-slate-700' }`}
                           >
                             <span
                               className={`inline-block w-1.5 h-1.5 rounded-full mr-1 ${style.dot}`}
@@ -381,12 +369,12 @@ export default function AddFineModal({ onClose }) {
 
                   {/* Amount */}
                   <div>
-                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">
+                    <label className="block dark:text-slate-300 font-semibold mb-1.5 text-[11px] text-slate-700">
                       Fine Amount
                     </label>
 
                     <div className="relative">
-                      <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <IndianRupee className="-translate-y-1/2 absolute dark:text-slate-400 h-4 left-3 text-slate-500 top-1/2 w-4" />
 
                       <input
                         type="number"
@@ -395,7 +383,7 @@ export default function AddFineModal({ onClose }) {
                         required
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-bold font-mono text-slate-900 dark:text-white focus:outline-none focus:border-rose-500"
+                        className="bg-white border border-slate-200 dark:bg-slate-950 dark:border-slate-700 dark:text-white focus:border-rose-500 focus:outline-none font-bold font-mono pl-9 pr-3 py-2.5 rounded-lg text-slate-900 text-sm w-full"
                       />
                     </div>
                   </div>
@@ -403,7 +391,7 @@ export default function AddFineModal({ onClose }) {
 
                 {/* Action */}
                 <div>
-                  <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">
+                  <label className="block dark:text-slate-300 font-semibold mb-1.5 text-[11px] text-slate-700">
                     Prescribed Disciplinary Action
                   </label>
 
@@ -412,7 +400,7 @@ export default function AddFineModal({ onClose }) {
                     required
                     value={disciplinaryAction}
                     onChange={(e) => setDisciplinaryAction(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white resize-none focus:outline-none focus:border-rose-500"
+                    className="bg-white border border-slate-200 dark:bg-slate-950 dark:border-slate-700 dark:text-white focus:border-rose-500 focus:outline-none px-3 py-2.5 resize-none rounded-lg text-slate-900 text-xs w-full"
                   />
                 </div>
               </div>
@@ -422,32 +410,32 @@ export default function AddFineModal({ onClose }) {
                 EVIDENCE
             ===================================================== */}
             <section>
-              <div className="flex items-center gap-2 mb-2.5">
-                <Camera className="w-4 h-4 text-slate-400" />
+              <div className="flex gap-2 items-center mb-2.5">
+                <Camera className="dark:text-slate-400 h-4 text-slate-500 w-4" />
 
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500">
+                  <p className="dark:text-slate-500 font-bold text-[10px] text-slate-400 tracking-wider uppercase">
                     Step 04
                   </p>
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                  <h4 className="dark:text-white font-bold text-slate-900 text-sm">
                     Evidence Reference
                   </h4>
                 </div>
               </div>
 
               <div className="relative">
-                <Camera className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Camera className="-translate-y-1/2 absolute dark:text-slate-400 h-4 left-3 text-slate-500 top-1/2 w-4" />
 
                 <input
                   type="text"
                   value={evidence}
                   onChange={(e) => setEvidence(e.target.value)}
                   placeholder="e.g. CAM-01 • 23:40 • AI detection event"
-                  className="w-full pl-9 pr-3 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white focus:outline-none focus:border-rose-500"
+                  className="bg-slate-50 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-white focus:border-rose-500 focus:outline-none pl-9 pr-3 py-2.5 rounded-lg text-slate-900 text-xs w-full"
                 />
               </div>
 
-              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5">
+              <p className="dark:text-slate-500 mt-1.5 text-[10px] text-slate-400">
                 Reference the CCTV channel, timestamp or biometric event supporting this notice.
               </p>
             </section>
@@ -457,30 +445,30 @@ export default function AddFineModal({ onClose }) {
           {/* =======================================================
               FOOTER
           ======================================================= */}
-          <div className="sticky bottom-0 px-5 sm:px-6 py-3.5 bg-white/95 dark:bg-[#0b1220]/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="backdrop-blur-md bg-white border-slate-200 dark:border-slate-800 border-t bottom-0 dark:bg-slate-900/95 flex flex-col gap-3 items-center justify-between px-5 py-3.5 sm:flex-row sm:px-6 sticky">
 
-            <div className="flex items-center gap-2 text-[10px] text-slate-400 dark:text-slate-500">
-              <ShieldAlert className="w-3.5 h-3.5 text-rose-500" />
+            <div className="dark:text-slate-500 flex gap-2 items-center text-[10px] text-slate-400">
+              <ShieldAlert className="h-3.5 text-rose-500 w-3.5" />
               <span>
                 This action will be recorded in the resident's disciplinary history.
               </span>
             </div>
 
-            <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="flex gap-2 items-center sm:w-auto w-full">
 
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 sm:flex-none px-4 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
+                className="bg-slate-100 cursor-pointer dark:hover:bg-slate-700 dark:text-slate-300 flex-1 font-semibold hover:bg-slate-200 dark:bg-slate-700 px-4 py-2.5 rounded-lg sm:flex-none text-slate-700 text-xs transition-colors"
               >
                 Cancel
               </button>
 
               <button
                 type="submit"
-                className="flex-1 sm:flex-none px-5 py-2.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-lg shadow-rose-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="bg-rose-600 cursor-pointer flex flex-1 font-bold gap-2 hover:bg-rose-500 items-center justify-center px-5 py-2.5 rounded-lg shadow-lg shadow-rose-600/20 sm:flex-none text-white text-xs transition-all"
               >
-                <Scale className="w-4 h-4" />
+                <Scale className="h-4 w-4" />
                 Issue Notice
               </button>
 

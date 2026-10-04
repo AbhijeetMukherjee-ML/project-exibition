@@ -3,6 +3,7 @@ import confetti from 'canvas-confetti';
 
 import {
   INITIAL_LOGS,
+  INITIAL_STUDENTS,
   INITIAL_FINES,
   CAMERAS,
   DEFAULT_TM_MODEL_URL,
@@ -166,7 +167,7 @@ export const AppProvider = ({ children }) => {
       const [studentsRes, attendanceRes] = await Promise.all([
         apiGetStudents().catch(err => {
           console.warn('Could not load students from DB:', err.message);
-          return [];
+          return INITIAL_STUDENTS;
         }),
         apiGetAttendance({ date: getToday() }).catch(err => {
           console.warn('Could not load attendance from DB:', err.message);
@@ -174,7 +175,12 @@ export const AppProvider = ({ children }) => {
         })
       ]);
 
-      setDbStudents(Array.isArray(studentsRes) ? studentsRes : []);
+            let finalStudents = Array.isArray(studentsRes) ? studentsRes : [];
+      if (finalStudents.length === 0) {
+        console.warn('Database is empty! Falling back to INITIAL_STUDENTS for demo purposes.');
+        finalStudents = INITIAL_STUDENTS;
+      }
+      setDbStudents(finalStudents);
 
       const attMap = {};
       if (Array.isArray(attendanceRes)) {

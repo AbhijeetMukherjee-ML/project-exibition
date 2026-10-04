@@ -63,27 +63,27 @@ export default function StudentsPage() {
   return (
     <div className="space-y-5">
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col gap-4 justify-between sm:flex-row sm:items-center">
         <div>
-          <div className="flex items-center gap-2.5 mb-1">
-            <div className="w-9 h-9 rounded-xl bg-slate-700/50 border border-slate-700 flex items-center justify-center">
-              <Users className="w-5 h-5 text-slate-300" />
+          <div className="flex gap-2.5 items-center mb-1">
+            <div className="bg-slate-700/50 border border-slate-300 dark:border-slate-700 flex h-9 items-center justify-center rounded-xl w-9">
+              <Users className="h-5 text-slate-800 dark:text-slate-200 w-5" />
             </div>
-            <h2 className="text-xl font-bold text-white">Student Registry & Attendance DB</h2>
-            <span className="px-2 py-0.5 rounded border bg-slate-800 border-slate-700 text-slate-400 text-[9px] font-mono">
+            <h2 className="dark:text-white font-bold text-slate-900 text-xl">Student Registry & Attendance DB</h2>
+            <span className="bg-slate-800 border border-slate-300 dark:border-slate-700 font-mono px-2 py-0.5 rounded text-[9px] text-slate-400">
               {students.length} IN MONGODB
             </span>
           </div>
-          <p className="text-xs text-slate-500">
+          <p className="dark:text-slate-400 text-slate-500 text-xs">
             Day-wise attendance records stored in database across Class 1-4 and Hostel roll call. Click any cell to toggle.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex gap-2 items-center">
           <button
             onClick={refreshDataFromDB}
             disabled={isLoadingStudents}
-            className="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition disabled:opacity-50"
+            className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 cursor-pointer disabled:opacity-50 flex font-semibold gap-1.5 hover:bg-slate-800 items-center px-3 py-1.5 rounded-lg text-slate-800 dark:text-slate-200 text-xs transition"
             title="Refresh from MongoDB"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoadingStudents ? 'animate-spin' : ''}`} />
@@ -91,30 +91,30 @@ export default function StudentsPage() {
           </button>
           <button
             onClick={() => setIsAddOpen(true)}
-            className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-sm transition"
+            className="bg-blue-600 cursor-pointer dark:text-white flex font-semibold gap-1.5 hover:bg-blue-500 items-center px-4 py-1.5 rounded-lg shadow-sm text-slate-900 text-xs transition"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="h-3.5 w-3.5" />
             Add Student
           </button>
         </div>
       </div>
 
       {/* STATS */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="gap-3 grid grid-cols-3">
         <StatCard label="Registered Students" value={students.length} icon={Users} />
         <StatCard label="Present Today (Any)" value={presentCount} icon={UserCheck} accent="emerald" />
         <StatCard label="Absent Today" value={students.length - presentCount} icon={UserX} />
       </div>
 
       {/* FILTER */}
-      <div className="flex flex-col sm:flex-row gap-2 p-3 bg-[#0b1320] border border-slate-800 rounded-xl">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-600" />
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col gap-2 p-3 rounded-xl sm:flex-row">
+        <div className="flex-1 relative">
+          <Search className="-translate-y-1/2 absolute dark:text-slate-400 h-3.5 left-3 text-slate-600 top-1/2 w-3.5" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search by name, ID or room…"
-            className="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs text-slate-200 placeholder:text-slate-600 outline-none focus:border-blue-500/40 transition"
+            className="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 dark:placeholder:text-slate-600 dark:placeholder:text-slate-400 focus:border-blue-500/40 outline-none pl-9 placeholder:text-slate-400 pr-3 py-2 rounded-lg text-slate-900 dark:text-white text-xs transition w-full"
           />
         </div>
 
@@ -133,46 +133,46 @@ export default function StudentsPage() {
       </div>
 
       {/* TABLE */}
-      <div className="bg-[#0b1320] border border-slate-800 rounded-xl overflow-hidden">
-        <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Users className="w-3.5 h-3.5 text-slate-400" />
-            <span className="text-xs font-bold text-slate-200">STUDENT ATTENDANCE DATABASE</span>
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden rounded-xl">
+        <div className="border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 py-3">
+          <div className="flex gap-2 items-center">
+            <Users className="dark:text-slate-400 h-3.5 text-slate-500 w-3.5" />
+            <span className="font-bold text-slate-900 dark:text-white text-xs">STUDENT ATTENDANCE DATABASE</span>
           </div>
-          <span className="text-[9px] font-mono text-slate-600">{filtered.length} SHOWN</span>
+          <span className="dark:text-slate-400 font-mono text-[9px] text-slate-600">{filtered.length} SHOWN</span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-slate-950 border-b border-slate-800">
+          <table className="text-left w-full">
+            <thead className="bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800">
               <tr>
-                <th className="px-4 py-3 text-[8px] font-mono font-semibold tracking-wider text-slate-600 whitespace-nowrap">STUDENT</th>
-                <th className="px-3 py-3 text-[8px] font-mono font-semibold tracking-wider text-slate-600 whitespace-nowrap">ID</th>
-                <th className="px-3 py-3 text-[8px] font-mono font-semibold tracking-wider text-slate-600 whitespace-nowrap">ROOM / BLOCK</th>
-                <th className="px-3 py-3 text-[8px] font-mono font-semibold tracking-wider text-slate-400 whitespace-nowrap text-center">CLASS 1</th>
-                <th className="px-3 py-3 text-[8px] font-mono font-semibold tracking-wider text-slate-400 whitespace-nowrap text-center">CLASS 2</th>
-                <th className="px-3 py-3 text-[8px] font-mono font-semibold tracking-wider text-slate-400 whitespace-nowrap text-center">CLASS 3</th>
-                <th className="px-3 py-3 text-[8px] font-mono font-semibold tracking-wider text-slate-400 whitespace-nowrap text-center">CLASS 4</th>
-                <th className="px-3 py-3 text-[8px] font-mono font-semibold tracking-wider text-indigo-400 whitespace-nowrap text-center">HOSTEL ATTENDANCE</th>
-                <th className="px-4 py-3 text-[8px] font-mono font-semibold tracking-wider text-slate-600 whitespace-nowrap text-right">ACTIONS</th>
+                <th className="dark:text-slate-400 font-mono font-semibold px-4 py-3 text-[8px] text-slate-600 tracking-wider whitespace-nowrap">STUDENT</th>
+                <th className="dark:text-slate-400 font-mono font-semibold px-3 py-3 text-[8px] text-slate-600 tracking-wider whitespace-nowrap">ID</th>
+                <th className="dark:text-slate-400 font-mono font-semibold px-3 py-3 text-[8px] text-slate-600 tracking-wider whitespace-nowrap">ROOM / BLOCK</th>
+                <th className="font-mono font-semibold px-3 py-3 text-[8px] text-center text-slate-400 tracking-wider whitespace-nowrap">CLASS 1</th>
+                <th className="font-mono font-semibold px-3 py-3 text-[8px] text-center text-slate-400 tracking-wider whitespace-nowrap">CLASS 2</th>
+                <th className="font-mono font-semibold px-3 py-3 text-[8px] text-center text-slate-400 tracking-wider whitespace-nowrap">CLASS 3</th>
+                <th className="font-mono font-semibold px-3 py-3 text-[8px] text-center text-slate-400 tracking-wider whitespace-nowrap">CLASS 4</th>
+                <th className="font-mono font-semibold px-3 py-3 text-[8px] text-center text-indigo-400 tracking-wider whitespace-nowrap">HOSTEL ATTENDANCE</th>
+                <th className="dark:text-slate-400 font-mono font-semibold px-4 py-3 text-[8px] text-right text-slate-600 tracking-wider whitespace-nowrap">ACTIONS</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800">
+            <tbody className="divide-slate-800 divide-y">
               {filtered.map(s => {
                 const sid = s.studentId || s.id;
                 return (
                   <tr key={sid} className="hover:bg-blue-500/[0.025] transition">
                     {/* STUDENT */}
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
+                      <div className="flex gap-3 items-center">
                         <img
                           src={s.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=2563eb&color=fff&size=256&bold=true`}
                           alt={s.name}
-                          className="w-9 h-9 rounded-xl object-cover border border-slate-700"
+                          className="border border-slate-300 dark:border-slate-700 h-9 object-cover rounded-xl w-9"
                         />
                         <div>
-                          <p className="text-xs font-bold text-slate-200">{s.name}</p>
-                          <p className="text-[9px] text-slate-600 mt-0.5">{s.department || `Year ${s.year || '—'}`}</p>
+                          <p className="font-bold text-slate-900 dark:text-white text-xs">{s.name}</p>
+                          <p className="dark:text-slate-400 mt-0.5 text-[9px] text-slate-600">{s.department || `Year ${s.year || '—'}`}</p>
                         </div>
                       </div>
                     </td>
@@ -184,11 +184,11 @@ export default function StudentsPage() {
 
                     {/* ROOM / BLOCK */}
                     <td className="px-3 py-3">
-                      <div className="flex items-center gap-1.5">
-                        <Building2 className="w-3 h-3 text-slate-600" />
-                        <span className="text-xs text-slate-300">R{s.room}</span>
+                      <div className="flex gap-1.5 items-center">
+                        <Building2 className="dark:text-slate-400 h-3 text-slate-600 w-3" />
+                        <span className="text-slate-800 dark:text-slate-200 text-xs">R{s.room}</span>
                       </div>
-                      <p className="text-[9px] text-slate-600 mt-0.5">{s.block}</p>
+                      <p className="dark:text-slate-400 mt-0.5 text-[9px] text-slate-600">{s.block}</p>
                     </td>
 
                     {/* CLASS 1 */}
@@ -234,21 +234,21 @@ export default function StudentsPage() {
 
                     {/* ACTIONS */}
                     <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
+                      <div className="flex gap-1.5 items-center justify-end">
                         <button
                           onClick={() => setSelectedStudent(s)}
-                          className="p-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white cursor-pointer transition"
+                          className="bg-slate-800 cursor-pointer dark:text-white hover:bg-slate-700 hover:text-slate-900 p-1.5 rounded-md text-slate-500 transition"
                           title="View Profile"
                         >
-                          <Eye className="w-3.5 h-3.5" />
+                          <Eye className="h-3.5 w-3.5" />
                         </button>
 
                         <button
                           onClick={() => deleteStudent(sid)}
-                          className="p-1.5 rounded-md bg-slate-800 hover:bg-rose-500/20 text-slate-600 hover:text-rose-400 cursor-pointer transition"
+                          className="bg-slate-800 cursor-pointer dark:text-slate-400 hover:bg-rose-500/20 hover:text-rose-400 p-1.5 rounded-md text-slate-600 transition"
                           title="Delete from DB"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     </td>
@@ -261,8 +261,8 @@ export default function StudentsPage() {
 
         {filtered.length === 0 && (
           <div className="py-16 text-center">
-            <Users className="w-7 h-7 text-slate-700 mx-auto" />
-            <p className="text-xs text-slate-500 mt-3">No students found.</p>
+            <Users className="dark:text-slate-200 h-7 mx-auto text-slate-700 w-7" />
+            <p className="dark:text-slate-400 mt-3 text-slate-500 text-xs">No students found.</p>
           </div>
         )}
       </div>
@@ -279,22 +279,16 @@ function AttendanceSlotButton({ status, onClick, isHostel = false }) {
     <button
       onClick={onClick}
       title={`Click to mark ${isPresent ? 'absent' : 'present'} in DB`}
-      className={`inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold font-mono transition cursor-pointer border ${
-        isPresent
-          ? isHostel
-            ? 'bg-indigo-500/15 border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/25'
-            : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25'
-          : 'bg-slate-900 border-slate-800 text-slate-500 hover:border-slate-700 hover:text-slate-400'
-      }`}
+      className={`inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold font-mono transition cursor-pointer border ${ isPresent ? (isHostel ? 'bg-indigo-500/15 border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/25' : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25') : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:border-slate-700' }`}
     >
       {isPresent ? (
         <>
-          <Check className="w-3 h-3" />
+          <Check className="h-3 w-3" />
           <span>PRESENT</span>
         </>
       ) : (
         <>
-          <X className="w-3 h-3 opacity-50" />
+          <X className="h-3 opacity-50 w-3" />
           <span>ABSENT</span>
         </>
       )}
@@ -304,23 +298,23 @@ function AttendanceSlotButton({ status, onClick, isHostel = false }) {
 
 function StatCard({ label, value, icon: Icon, accent = 'slate' }) {
   return (
-    <div className="p-4 bg-[#0b1320] border border-slate-800 rounded-xl">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-xl">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[10px] uppercase tracking-wider font-bold text-slate-500">{label}</span>
-        <Icon className={`w-3.5 h-3.5 ${accent === 'emerald' ? 'text-emerald-500' : 'text-slate-500'}`} />
+        <span className="dark:text-slate-400 font-bold text-[10px] text-slate-500 tracking-wider uppercase">{label}</span>
+        <Icon className={`w-3.5 h-3.5 ${accent === 'emerald' ? 'text-emerald-500' : 'text-slate-500 dark:text-slate-400'}`} />
       </div>
-      <p className={`text-2xl font-bold font-mono ${accent === 'emerald' ? 'text-emerald-400' : 'text-white'}`}>{value}</p>
+      <p className={`text-2xl font-bold font-mono ${accent === 'emerald' ? 'text-emerald-400' : 'text-slate-900 dark:text-white'}`}>{value}</p>
     </div>
   );
 }
 
 function SelectFilter({ label, value, onChange, options }) {
   return (
-    <div className="flex items-center gap-2 bg-slate-950 border border-slate-700 rounded-lg px-3">
-      <span className="text-[8px] font-mono text-slate-600">{label}</span>
-      <select value={value} onChange={e => onChange(e.target.value)} className="bg-transparent text-[10px] text-slate-300 py-2 outline-none cursor-pointer">
+    <div className="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 flex gap-2 items-center px-3 rounded-lg">
+      <span className="dark:text-slate-400 font-mono text-[8px] text-slate-600">{label}</span>
+      <select value={value} onChange={e => onChange(e.target.value)} className="bg-transparent cursor-pointer outline-none py-2 text-[10px] text-slate-800 dark:text-slate-200">
         {options.map(([v, l]) => (
-          <option key={v} value={v} className="bg-[#0a111d]">{l}</option>
+          <option key={v} value={v} className="bg-white dark:bg-slate-950">{l}</option>
         ))}
       </select>
     </div>
